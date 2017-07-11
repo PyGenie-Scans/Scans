@@ -3,8 +3,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-def measure():
-    print("Taking a measurement at theta=%0.2f and two theta=%0.2f" %
+def measure(title, info):
+    print(title.format(**info))
+
+def count():
+    print("Taking a count at theta=%0.2f and two theta=%0.2f" %
         (instrument["theta"], instrument["two_theta"]))
     return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
 
@@ -15,14 +18,20 @@ class Scan(object):
         return ProductScan(self, b)
     def __and__(self, b):
         return ParallelScan(self, b)
-    def plot(self, measurement=measure):
+    def plot(self, measurement=count,
+             save=None):
         results = [(x,measurement())
                    for x in self]
         xs = [x[0] for x in results]
         ys = [x[1] for x in results]
         plt.plot(xs, ys)
-        plt.savefig("plotter.png")
-        # plt.show()
+        if save:
+            plt.savefig(save)
+        else:
+            plt.show()
+    def measure(self, title):
+        for x in self:
+            measure(title.format(**instrument), instrument)
 
 class SimpleScan(Scan):
     def __init__(self, action, values):
@@ -111,6 +120,9 @@ def get_value():
 #
 
 def get_points(d):
+    """This function takes a dictionary of keyword arguments for
+    a scan and returns the points at which the scan should be measured."""
+
     #FIXME:  Ask use for starting position if none is given
     begin = d["begin"]
 

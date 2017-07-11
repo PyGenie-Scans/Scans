@@ -147,6 +147,38 @@ Taking a measurement at theta=2.88 and two theta=0.00
 Taking a measurement at theta=3.60 and two theta=0.00
 #+end_example
 
+
+** Perform Measurement Scan
+
+   To go from a simple counting scan to a full set of measurements,
+   all that needs to change is the method call.
+
+#+BEGIN_SRC python :results output :exports both
+from Motor import scan
+
+scan("theta", begin=0, end=2, stride=0.6).measure("Taking a measurement at theta={theta} and two theta={two_theta}")
+
+print("Scanning two theta")
+
+scan("two_theta", begin=0, end=2, stride=0.6).measure("two theta={two_theta}")
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Taking a measurement at theta=0.0 and two theta=0
+Taking a measurement at theta=0.5 and two theta=0
+Taking a measurement at theta=1.0 and two theta=0
+Taking a measurement at theta=1.5 and two theta=0
+Taking a measurement at theta=2.0 and two theta=0
+Scanning two theta
+two theta=0
+two theta=0
+two theta=0
+two theta=0
+two theta=0
+#+end_example
+
 * Classes
 
 The =Scan= class is the baseline for all measurements, but is also a
