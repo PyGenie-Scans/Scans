@@ -7,7 +7,145 @@
   This is a proposal for an improved system for running scans on the
   instrument.  The idea is to use =Scan= objects to represent the
   parts of the scan.  These scan objects form an algebra, making them
-  easier to compose than using =for= loops.
+  easier to compose than using =for= loops.  These scan objects are
+  mainly intended as tools for the instrument scientists for creating
+  a higher level interface that the users will interact with.
+  
+* Design Goals
+
+  We desire the following traits in the Scanning system
+
+** User simplicity
+
+   The users need to be able to perform simple scans without thinking
+   about object orient programming or algebraic data types.
+   Performing a basic scan should always be a one liner.  Making
+   modified versions of that scan should require learning a
+   modification of that command and not an entirely new structure.
+   Common, sensible user options should be available and sane defaults
+   given.
+
+   The code should also take advantage of Python's built in
+   documentation system to allow for discoverability of all of the
+   functionality of these scripts.
+
+** Composability
+   
+   The code should trivially allow combining smaller scripts into a
+   larger script.  This ensures that, as long as the smaller scripts
+   are bug free, the larger scripts will also be free of bugs by
+   construction.
+   
+** Functionality
+
+   The code should be able to perform all of the tasks that might
+   involve scanning on the beamline, from the common place to the
+   irregular.
+
+  - Plotting :: It should be possible to plot any readback value as a
+                function of any set of motor positions.  Scans of
+                multiple axes should be able to either plot multiple
+                labelled lines or a 2D heatmap
+  - Measuring :: Performing a full series of measurements should only
+                 be a minor modification of the plotting command
+  - Fitting :: The user should be capable of performing fits on curves
+               to extract values of interest.  Common fitting routines
+               should be a simple string while still accepting custom
+               functions for exceptional circumstances
+
+* Examples
+
+  These are examples of some basic scans that the user might perform
+  on the high level interface.  The examples have run on a
+  [[pseudoinstrument]] defined in a later section.
+
+** Plot Motor Scan
+   
+   Our first, simple example is the user plotting a scan of the
+   detector intensity as the motor moves from 0 to 2 inclusively in
+   steps /near/ 0.3.  
+
+#+BEGIN_SRC python :results output :exports both
+from Motor import scan
+
+scan("theta", begin=0, end=2, stride=0.6).plot()
+
+#+END_SRC
+
+#+RESULTS:
+: Taking a measurement at theta=0.00 and two theta=0.00
+: Taking a measurement at theta=0.50 and two theta=0.00
+: Taking a measurement at theta=1.00 and two theta=0.00
+: Taking a measurement at theta=1.50 and two theta=0.00
+: Taking a measurement at theta=2.00 and two theta=0.00
+
+  The =stride= option gives an appoximate step size, but forces
+  ensures that the beginning and final points are measured.  =step=
+  forces the exact spacing, but may not measure the final point.
+  =count= and =gaps= allow the user to specify the number of
+  measurements and the number of gaps, respectively.
+   
+#+BEGIN_SRC python :results output :exports both
+from Motor import scan
+
+print("step")
+scan("theta", begin=0, end=2, step=0.6).plot()
+print("count")
+scan("theta", begin=0, end=2, count=4).plot()
+print("gaps")
+scan("theta", begin=0, end=2, gaps=4).plot()
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+step
+Taking a measurement at theta=0.00 and two theta=0.00
+Taking a measurement at theta=0.60 and two theta=0.00
+Taking a measurement at theta=1.20 and two theta=0.00
+Taking a measurement at theta=1.80 and two theta=0.00
+count
+Taking a measurement at theta=0.00 and two theta=0.00
+Taking a measurement at theta=0.67 and two theta=0.00
+Taking a measurement at theta=1.33 and two theta=0.00
+Taking a measurement at theta=2.00 and two theta=0.00
+spaces
+Taking a measurement at theta=0.00 and two theta=0.00
+Taking a measurement at theta=0.50 and two theta=0.00
+Taking a measurement at theta=1.00 and two theta=0.00
+Taking a measurement at theta=1.50 and two theta=0.00
+Taking a measurement at theta=2.00 and two theta=0.00
+#+end_example
+
+The user also has the option of fixing the steps size and number of
+measurements or gaps while leaving the ending position open.
+
+#+BEGIN_SRC python :results output :exports both
+from Motor import scan
+
+print("count")
+scan("theta", begin=0, step=0.6, count=5).plot()
+print("gaps")
+scan("theta", begin=0, stride=0.6, gaps=5).plot()
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+count
+Taking a measurement at theta=0.00 and two theta=0.00
+Taking a measurement at theta=0.60 and two theta=0.00
+Taking a measurement at theta=1.20 and two theta=0.00
+Taking a measurement at theta=1.80 and two theta=0.00
+Taking a measurement at theta=2.40 and two theta=0.00
+gaps
+Taking a measurement at theta=0.00 and two theta=0.00
+Taking a measurement at theta=0.72 and two theta=0.00
+Taking a measurement at theta=1.44 and two theta=0.00
+Taking a measurement at theta=2.16 and two theta=0.00
+Taking a measurement at theta=2.88 and two theta=0.00
+Taking a measurement at theta=3.60 and two theta=0.00
+#+end_example
 
 * Classes
 
