@@ -190,300 +190,146 @@ two theta=1.5
 two theta=2.0
 #+end_example
 
-* Examples 
+** Perform complex scans
 
-** pseudoinstrument
+   Some uses need more complicated measurements that just a simple
+   scan over a single axis.  These more complicated commands may need
+   some initial coaching from the beamline scientist, but should be
+   simple enough for the user to modify them without assistance.
+   
+   To begin with, a user may want to scan theta and two theta together
+   in lock step.
 
-For our examples, we'll define a basic instrument with two motors:
-~theta~ and ~two_theta~.  We'll also declare that there are four functions
-that we can call on this instrument.
+#+BEGIN_SRC python :results output :exports both
+from Motor import scan
 
-- ~move_theta~ :: Moves the theta motor to the given position
-- ~move_two_theta~ :: Move the ~two_theta~ motor to the given position.
-     The ~two_theta~ motor has some extra actions that it must perform
-     every time it moves.
-- ~measure~ :: Take a measurement with the current instrument setup
-- ~get_value~ :: Returns some figure of merit for the current
-                 instrument setup.
+theta = scan("theta", begin=0, end=1, stride=0.3)
+two_theta = scan("two_theta", begin=0, end=2, stride=0.6)
+(theta & two_theta).measure("theta={theta} and two_theta={two_theta}")
 
-These functions aren't part of the scan system, but will be used in
-our examples.
+#+END_SRC
 
-#+BEGIN_SRC python :results output :session mysession :exports both
+#+RESULTS:
+: theta=0.0 and two_theta=0.0
+: theta=0.25 and two_theta=0.5
+: theta=0.5 and two_theta=1.0
+: theta=0.75 and two_theta=1.5
+: theta=1.0 and two_theta=2.0
+
+  On the other hand, if the user is unsure about the proper sample
+  alignment, they may want to investigate theta and two-theta separately
+
+#+BEGIN_SRC python :results output :exports both
+from Motor import scan
+
+theta = scan("theta", begin=0, end=1, stride=0.5)
+two_theta = scan("two_theta", begin=0, end=3, stride=1.0)
+(theta * two_theta).measure("theta={theta} and two_theta={two_theta}")
+
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+theta=0.0 and two_theta=0.0
+theta=0.0 and two_theta=1.0
+theta=0.0 and two_theta=2.0
+theta=0.0 and two_theta=3.0
+theta=0.5 and two_theta=0.0
+theta=0.5 and two_theta=1.0
+theta=0.5 and two_theta=2.0
+theta=0.5 and two_theta=3.0
+theta=1.0 and two_theta=0.0
+theta=1.0 and two_theta=1.0
+theta=1.0 and two_theta=2.0
+theta=1.0 and two_theta=3.0
+#+end_example
+
+
+* Class setup
+
+  #+Caption:  Class Diagram for the Scan Module
+  [[file:classes.pdf]]
+  
+  The base class for the low level code is the =Scan= class.  This
+  ensures that any functionality added to this class or bugs fixed in
+  its code propagate out to all callers of this library.
+  Unfortunately, Python does not have a concept of interfaces, so we
+  cannot force all children to have a set of defined functions.
+  However, any subclasses of =Scan= must contain the follow member
+  functions:
+
+  - map :: Create a modified version of the scan based on a user
+           supplied function.  The original position of each point is
+           fed as input to the function and the return value of the
+           function is the new position.
+  - reverse :: Create a copy of the scan that runs in the opposite direction
+  - __len__ :: Return the number of elements in the scan
+  - __iter__ :: Return an iterator that steps through the scan one
+                position at a time, yielding the current position at
+                each point.
+		
+  There are four default subclasses of Scan that should handle most of
+  the requirements
+
+** SimpleScan
+
+   =SimpleScan= is the lowest level of the scan system.  It requires a
+   function which performs the desired action on each point, a list of
+   points, and a name for the axis.  At this time, all scans are
+   combinations of simpleScans.
+
+** SumScan
+
+   =SumScan= runs two scans sequentially.  These scans do not need to
+   be on the same axes or even move the same number of axes.
+
+** ProductScan
+
+   =ProductScan= performs every possible combination of positions for
+   two different scans.  This provides an alternative to nested loops.
+
+** ParallelScan
+
+   =ParallelScan= takes to scans and runs their actions together at
+   each step.  For example, if =a= was a scan over theta and =b= was a
+   scan over two theta, then =a && b= would scan each theta angle with
+   its corresponding two theta.
+
+
+   
+* Pseudoinstrument
+
+  For the examples, I've created a virtual instrument so that the
+  scans have something to run on.  The module Instrument.py contains
+  this code.
+  
+#+BEGIN_SRC python :tangle Instrument.py :exports code
+import numpy as np
+
 instrument = {"theta":0, "two_theta":0}
 
+def measure(title, info):
+    """Dummy function to simulate making a measurement"""
+    print(title.format(**info))
+
+def count():
+    """Dummy function to simulate taking a neutron count"""
+    print("Taking a count at theta=%0.2f and two theta=%0.2f" %
+          (instrument["theta"], instrument["two_theta"]))
+    return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
+
 def move_theta(x):
+    """move_theta is a dummy functino to simulate moving the theta motor in the examples"""
     instrument["theta"] = x
 
 def move_two_theta(x):
-    print("Performing extra work for two theta motor")
+    """move_two)theta is a dummy functino to simulate moving the two_theta motor in the examples"""
     instrument["two_theta"] = x
 
-def measure():
-    print("Taking a measurement at theta=%0.2f and two theta=%0.2f" %
-        (instrument["theta"], instrument["two_theta"]))
-
-from math import sin, cos
-
-def get_value():
-    return sin(instrument["theta"])*cos(instrument["two_theta"])
+def cset(**kwargs):
+    """cset is a dummy substitution of the PyGenie cset code used here for demonstration purposes"""
+    if "theta" in kwargs:
+        return move_theta(kwargs["theta"])
+    if "two_theta" in kwargs:
+        return move_two_theta(kwargs["two_theta"])
 #+END_SRC
-
-
-** Create Scans
-
-Basic scans require two components.  The first is a function that
-takes a single value and sets the motor[fn:1] to that value.  The second is
-a list[fn:2] of values to perform the scan at.
-
-
-A standard for loop can then iterate through the scan.  The scan
-object itself will handle all of the motor movement while the body of
-the loop can focus on starting the actual measurement.
-
-#+BEGIN_SRC python :results output :session mysession :exports both
-
-theta = SimpleScan(move_theta, [1, 2, 3])
-twotheta = SimpleScan(move_two_theta, range(2,8,2))
-
-#+END_SRC
-
-#+RESULTS:
-
-Let's try the scans now
-
-
-#+BEGIN_SRC python :results output :session mysession :exports both
-for x in theta:
-    measure()
-#+END_SRC
-#+RESULTS:
-: 
-: ... Taking a measurement at theta=1.00 and two theta=0.00
-: Taking a measurement at theta=2.00 and two theta=0.00
-: Taking a measurement at theta=3.00 and two theta=0.00
-
-#+BEGIN_SRC python :results output :session mysession :exports both
-for x in twotheta:
-    measure()
-#+END_SRC
-
-#+RESULTS:
-: 
-: ... Performing extra work for two theta motor
-: Taking a measurement at theta=3.00 and two theta=2.00
-: Performing extra work for two theta motor
-: Taking a measurement at theta=3.00 and two theta=4.00
-: Performing extra work for two theta motor
-: Taking a measurement at theta=3.00 and two theta=6.00
-
-** Combine Scans
-
-Adding two scans causes the scans to run in order
-
-#+BEGIN_SRC python :results output :session mysession :exports both
-for x in (theta+twotheta):
-    measure()
-#+END_SRC
-
-#+RESULTS:
-: 
-: ... 1
-: 2
-: 3
-: 5
-: 7
-: 11
-: 13
-
-
-Multiplying two scans creates an inner loop for the second scan.
-
-#+BEGIN_SRC python :results output :session mysession :exports both
-for x in (twotheta*theta):
-    measure()
-#+END_SRC
-
-Anding two scans causes them to run in parallel.
-
-#+BEGIN_SRC python :results output :session mysession :exports both
-for x in (theta&twotheta):
-    measure()
-
-#+END_SRC
-
-** Reverse Scans
-
-Reverse causes a scan to be run backward
-
-#+BEGIN_SRC python :results output :session mysession :exports both
-for x in (theta+twotheta).reverse():
-    measure()
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-
->>> >>> >>> Theta
->>> ... ... 1
-2
-3
-Twotheta
->>> ... ... 5
-7
-11
-13
-Theta+Twotheta
->>> ... ... 1
-2
-3
-5
-7
-11
-13
-Reverse Theta+Twotheta
->>> ... 13
-11
-7
-5
-3
-2
-1
-Theta*Twotheta
->>> ... ... (1, 5)
-(1, 7)
-(1, 11)
-(1, 13)
-(2, 5)
-(2, 7)
-(2, 11)
-(2, 13)
-(3, 5)
-(3, 7)
-(3, 11)
-(3, 13)
-Reverse Theta*Twotheta
->>> ... ... (3, 13)
-(3, 11)
-(3, 7)
-(3, 5)
-(2, 13)
-(2, 11)
-(2, 7)
-(2, 5)
-(1, 13)
-(1, 11)
-(1, 7)
-(1, 5)
-Theta & Twotheta
->>> ... ... (1, 5)
-(2, 7)
-(3, 11)
-Reverse Theta & Twotheta
->>> ... ... (3, 13)
-(2, 11)
-(1, 7)
-#+end_example
-
-
-** Adjust Scans
-
-   Mapping allows scans to be manipulated by a function of one argument.
-
-#+BEGIN_SRC python :results output :session mysession :exports both
-for x in (theta+twotheta).map(lambda x: x/10):
-    measure()
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-<bound method SimpleScan.map of <__main__.SimpleScan object at 0x7fe7658730f0>>
-... ... Move Ï to 0.1
-Measure
-Move Ï to 0.2
-Measure
-Move Ï to 0.3
-Measure
-Move 2Ï to 0.2
-Measure
-Move 2Ï to 0.4
-Measure
-Move 2Ï to 0.6
-Measure
-#+end_example
-
-   For more complex mappings, we can mutate over an inner loop.  This
-   is currently the ugliest part of the library, but hopefully should be
-   needed too often.  These exist for the cases where each value of
-   the inner loop depends on the value before it (e.g. mapping an
-   irregularly shaped space).
-
-#+BEGIN_SRC python :results output :session mysession :exports both
-
-scan = ProductScan(theta, twotheta, mutate=lambda x, y: x+y)
-for v in scan:
-    measure()
-
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-
->>> ... ... Move Ï to 1
-Move 2Ï to 2
-Measure
-Move 2Ï to 4
-Measure
-Move 2Ï to 6
-Measure
-Move Ï to 2
-Move 2Ï to 2
-Measure
-Move 2Ï to 4
-Measure
-Move 2Ï to 6
-Measure
-Move Ï to 3
-Move 2Ï to 2
-Measure
-Move 2Ï to 4
-Measure
-Move 2Ï to 6
-Measure
-#+end_example
-
-
-** Scan Statistics
-
-   It's possible to calculate the number of measurements in the scan.
-
-#+BEGIN_SRC python :results output :exports both :session mysession
-print(len(twotheta*(theta+theta.reverse())))
-#+END_SRC
-
-#+RESULTS:
-: 18
-
-
-[fn:1] Or power supply, temperature, pressure, volume, etc.
-[fn:2] Any iterable can be used in place of a list
-
-** Plotting 
-
-The plot member function makes it trivial to screate a plot of a given
-measurement's value over a scan.  Furthermore, this puts all of the
-plotting code in one place, so that changes to the plotting method
-(e.g. allowing for interactivity on the plots) can be made in one
-central place while allowing all plotting scripts to benefit from the updates.
-
-#+BEGIN_SRC python :results file :session mysession 
-
-theta.plot(get_value)
-plt.savefig("temp.png")
-
-#+END_SRC
-
-#+RESULTS:
-
-[[file:temp.png]]
-
