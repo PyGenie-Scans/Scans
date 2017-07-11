@@ -98,11 +98,11 @@ scan("theta", begin=0, end=2, stride=0.6).plot(save="plot_example.png")
 from Motor import scan
 
 print("step")
-scan("theta", begin=0, end=2, step=0.6).plot()
+scan("theta", begin=0, end=2, step=0.6).plot(save="temp.png")
 print("count")
-scan("theta", begin=0, end=2, count=4).plot()
+scan("theta", begin=0, end=2, count=4).plot(save="temp.png")
 print("gaps")
-scan("theta", begin=0, end=2, gaps=4).plot()
+scan("theta", begin=0, end=2, gaps=4).plot(save="temp.png")
 
 #+END_SRC
 
@@ -133,9 +133,9 @@ measurements or gaps while leaving the ending position open.
 from Motor import scan
 
 print("count")
-scan("theta", begin=0, step=0.6, count=5).plot()
+scan("theta", begin=0, step=0.6, count=5).plot(save="temp.png")
 print("gaps")
-scan("theta", begin=0, stride=0.6, gaps=5).plot()
+scan("theta", begin=0, stride=0.6, gaps=5).plot(save="temp.png")
 
 #+END_SRC
 
