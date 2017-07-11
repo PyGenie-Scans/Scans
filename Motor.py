@@ -26,6 +26,7 @@ class Scan(object):
         return ParallelScan(self, b)
     def plot(self, measurement=count,
              save=None):
+        #FIXME: Support multi-processing plots
         results = [(x,measurement())
                    for x in self]
 
