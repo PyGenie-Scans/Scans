@@ -88,9 +88,9 @@ function on all of the original positions to return the new positions.
 
 class SumScan(Scan):
     """The SumScan performs two separate scans sequentially"""
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
+    def __init__(self, first, second):
+        self.a = first
+        self.b = second
     def __iter__(self):
         for x in self.a:
             yield x
@@ -113,14 +113,12 @@ function on all of the original positions to return the new positions.
 class ProductScan(Scan):
     """ProductScan performs every possible combination of the positions of
 its two constituent scans."""
-    def __init__(self, a, b, mutate=lambda x, y: y):
-        self.a = a
-        self.b = b
-        self.mutate = mutate
+    def __init__(self, outer, inner):
+        self.a = outer
+        self.b = inner
     def __iter__(self):
         for x in self.a:
-            curry = lambda y: self.mutate(x, y)
-            for y in self.b.map(curry):
+            for y in self.b:
                 yield merge_dicts(x, y)
     def __len__(self):
         return len(self.a)*len(self.b)
@@ -130,20 +128,18 @@ function on all of the original positions to return the new positions.
 
         """
         return ProductScan(self.a.map(f),
-                           self.b.map(f),
-                           self.mutate)
+                           self.b.map(f))
     def reverse(self):
         """Creates a new scan that runs in the opposite direction of this scan"""
         return ProductScan(self.a.reverse(),
-                           self.b.reverse(),
-                           self.mutate)
+                           self.b.reverse())
 
 class ParallelScan(Scan):
     """ParallelScan runs two scans alongside each other, performing both
 sets of position adjustments before each step of the scan."""
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
+    def __init__(self, first, second):
+        self.a = first
+        self.b = second
     def __iter__(self):
         for x, y in zip(self.a, self.b):
             yield merge_dicts(x, y)
