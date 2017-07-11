@@ -1,14 +1,17 @@
+from math import sin, cos
 import matplotlib
-# matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import numpy as np
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 def measure(title, info):
+    """Dummy function to simulate making a measurement"""
     print(title.format(**info))
 
 def count():
+    """Dummy function to simulate taking a neutron count"""
     print("Taking a count at theta=%0.2f and two theta=%0.2f" %
-        (instrument["theta"], instrument["two_theta"]))
+          (instrument["theta"], instrument["two_theta"]))
     return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
 
 def merge_dicts(x, y):
@@ -18,6 +21,9 @@ def merge_dicts(x, y):
     return z
 
 class Scan(object):
+    """The virtual class that represents all controlled scans.  This class
+should never be instantiated directly, but rather by one of its
+subclasses."""
     def __add__(self, b):
         return SumScan(self, b)
     def __mul__(self, b):
@@ -26,8 +32,12 @@ class Scan(object):
         return ParallelScan(self, b)
     def plot(self, measurement=count,
              save=None):
+        """Run over the scan an perform a simple measurement at each position.
+The measurement parameter can be used to set what type of measurement
+is to be taken.  If the save parameter is set to a file name, then the
+plot will be saved in that file."""
         #FIXME: Support multi-processing plots
-        results = [(x,measurement())
+        results = [(x, measurement())
                    for x in self]
 
         if len(results[0][0].items()) == 1:
@@ -42,19 +52,33 @@ class Scan(object):
         else:
             plt.show()
     def measure(self, title):
+        """Perform a full measurement at each position indicated by the scan.
+        The title parameter gives the run's title and allows for
+        values to be interpolated into it.  For instance, the string
+        "{theta}" will include the current value of the theta motor if
+        it is being iterated over.
+
+        """
         for x in self:
             measure(title.format(**instrument), x)
 
 class SimpleScan(Scan):
+    """The SimpleScan is a scan along a single axis for a fixed set of values"""
     def __init__(self, action, values, name):
         self.action = action
         self.values = values
         self.name = name
     def map(self, f):
+        """The map function returns a modified scan that performs the given
+function on all of the original positions to return the new positions.
+
+        """
         return SimpleScan(self.action,
-                          map(f, self.values))
+                          map(f, self.values),
+                          self.name)
     def reverse(self):
-        return SimpleScan(self.action, self.values[::-1])
+        """Creates a new scan that runs in the opposite direction of this scan"""
+        return SimpleScan(self.action, self.values[::-1], self.name)
     def __iter__(self):
         for v in self.values:
             self.action(v)
@@ -63,6 +87,7 @@ class SimpleScan(Scan):
         return len(self.values)
 
 class SumScan(Scan):
+    """The SumScan performs two separate scans sequentially"""
     def __init__(self, a, b):
         self.a = a
         self.b = b
@@ -74,13 +99,20 @@ class SumScan(Scan):
     def __len__(self):
         return len(self.a) + len(self.b)
     def map(self, f):
+        """The map function returns a modified scan that performs the given
+function on all of the original positions to return the new positions.
+
+        """
         return SumScan(self.a.map(f),
                        self.b.map(f))
     def reverse(self):
+        """Creates a new scan that runs in the opposite direction of this scan"""
         return SumScan(self.b.reverse(),
                        self.a.reverse())
 
 class ProductScan(Scan):
+    """ProductScan performs every possible combination of the positions of
+its two constituent scans."""
     def __init__(self, a, b, mutate=lambda x, y: y):
         self.a = a
         self.b = b
@@ -93,15 +125,22 @@ class ProductScan(Scan):
     def __len__(self):
         return len(self.a)*len(self.b)
     def map(self, f):
+        """The map function returns a modified scan that performs the given
+function on all of the original positions to return the new positions.
+
+        """
         return ProductScan(self.a.map(f),
                            self.b.map(f),
                            self.mutate)
     def reverse(self):
+        """Creates a new scan that runs in the opposite direction of this scan"""
         return ProductScan(self.a.reverse(),
                            self.b.reverse(),
                            self.mutate)
 
 class ParallelScan(Scan):
+    """ParallelScan runs two scans alongside each other, performing both
+sets of position adjustments before each step of the scan."""
     def __init__(self, a, b):
         self.a = a
         self.b = b
@@ -111,31 +150,34 @@ class ParallelScan(Scan):
     def __len__(self):
         return min(len(self.a), len(self.b))
     def map(self, f):
+        """The map function returns a modified scan that performs the given
+function on all of the original positions to return the new positions.
+
+        """
         return ParallelScan(self.a.map(f),
                             self.b.map(f))
     def reverse(self):
+        """Creates a new scan that runs in the opposite direction of this scan"""
         return ParallelScan(self.a.reverse(),
                             self.b.reverse())
 
 instrument = {"theta":0, "two_theta":0}
 
 def cset(**kwargs):
+    """cset is a dummy substitution of the PyGenie cset code used here for demonstration purposes"""
     if "theta" in kwargs:
         return move_theta(kwargs["theta"])
     if "two_theta" in kwargs:
         return move_two_theta(kwargs["two_theta"])
 
 def move_theta(x):
+    """move_theta is a dummy functino to simulate moving the theta motor in the examples"""
     instrument["theta"] = x
 
 def move_two_theta(x):
+    """move_two)theta is a dummy functino to simulate moving the two_theta motor in the examples"""
     instrument["two_theta"] = x
 
-from math import sin, cos
-
-def get_value():
-    return sin(instrument["theta"])*cos(instrument["two_theta"])
-#
 
 def get_points(d):
     """This function takes a dictionary of keyword arguments for
@@ -170,8 +212,13 @@ def get_points(d):
 
 
 def scan(pv, **kwargs):
+    """scan is the primary command that users will call to create scans.
+The pv parameter should be a string containing the name of the motor
+to be moved.  The keyword arguments decide the position spacing."""
     points = get_points(kwargs)
     def motion(x):
+        """motion is a helper function to call the appropriate cset function
+for the user's chosen motor"""
         d = {pv: x}
         cset(**d)
     return SimpleScan(motion, points, pv)
