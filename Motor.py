@@ -11,6 +11,12 @@ def count():
         (instrument["theta"], instrument["two_theta"]))
     return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
 
+def merge_dicts(x, y):
+    """Given two dices, merge them into a new dict as a shallow copy."""
+    z = x.copy()
+    z.update(y)
+    return z
+
 class Scan(object):
     def __add__(self, b):
         return SumScan(self, b)
@@ -22,21 +28,27 @@ class Scan(object):
              save=None):
         results = [(x,measurement())
                    for x in self]
-        xs = [x[0] for x in results]
-        ys = [x[1] for x in results]
-        plt.plot(xs, ys)
+
+        if len(results[0][0].items()) == 1:
+            xs = [next(iter(x[0].items()))[1] for x in results]
+            ys = [x[1] for x in results]
+            plt.plot(xs, ys)
+        else:
+            #FIXME: Handle multidimensional plots
+            return
         if save:
             plt.savefig(save)
         else:
             plt.show()
     def measure(self, title):
         for x in self:
-            measure(title.format(**instrument), instrument)
+            measure(title.format(**instrument), x)
 
 class SimpleScan(Scan):
-    def __init__(self, action, values):
+    def __init__(self, action, values, name):
         self.action = action
         self.values = values
+        self.name = name
     def map(self, f):
         return SimpleScan(self.action,
                           map(f, self.values))
@@ -45,7 +57,7 @@ class SimpleScan(Scan):
     def __iter__(self):
         for v in self.values:
             self.action(v)
-            yield v
+            yield {self.name: v}
     def __len__(self):
         return len(self.values)
 
@@ -76,7 +88,7 @@ class ProductScan(Scan):
         for x in self.a:
             curry = lambda y: self.mutate(x, y)
             for y in self.b.map(curry):
-                yield (x, y)
+                yield merge_dicts(x, y)
     def __len__(self):
         return len(self.a)*len(self.b)
     def map(self, f):
@@ -94,7 +106,7 @@ class ParallelScan(Scan):
         self.b = b
     def __iter__(self):
         for x, y in zip(self.a, self.b):
-            yield (x, y)
+            yield merge_dicts(x, y)
     def __len__(self):
         return min(len(self.a), len(self.b))
     def map(self, f):
@@ -161,4 +173,4 @@ def scan(pv, **kwargs):
     def motion(x):
         d = {pv: x}
         cset(**d)
-    return SimpleScan(motion, points)
+    return SimpleScan(motion, points, pv)

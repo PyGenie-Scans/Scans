@@ -105,21 +105,21 @@ scan("theta", begin=0, end=2, gaps=4).plot()
 #+RESULTS:
 #+begin_example
 step
-Taking a measurement at theta=0.00 and two theta=0.00
-Taking a measurement at theta=0.60 and two theta=0.00
-Taking a measurement at theta=1.20 and two theta=0.00
-Taking a measurement at theta=1.80 and two theta=0.00
+Taking a count at theta=0.00 and two theta=0.00
+Taking a count at theta=0.60 and two theta=0.00
+Taking a count at theta=1.20 and two theta=0.00
+Taking a count at theta=1.80 and two theta=0.00
 count
-Taking a measurement at theta=0.00 and two theta=0.00
-Taking a measurement at theta=0.67 and two theta=0.00
-Taking a measurement at theta=1.33 and two theta=0.00
-Taking a measurement at theta=2.00 and two theta=0.00
-spaces
-Taking a measurement at theta=0.00 and two theta=0.00
-Taking a measurement at theta=0.50 and two theta=0.00
-Taking a measurement at theta=1.00 and two theta=0.00
-Taking a measurement at theta=1.50 and two theta=0.00
-Taking a measurement at theta=2.00 and two theta=0.00
+Taking a count at theta=0.00 and two theta=0.00
+Taking a count at theta=0.67 and two theta=0.00
+Taking a count at theta=1.33 and two theta=0.00
+Taking a count at theta=2.00 and two theta=0.00
+gaps
+Taking a count at theta=0.00 and two theta=0.00
+Taking a count at theta=0.50 and two theta=0.00
+Taking a count at theta=1.00 and two theta=0.00
+Taking a count at theta=1.50 and two theta=0.00
+Taking a count at theta=2.00 and two theta=0.00
 #+end_example
 
 The user also has the option of fixing the steps size and number of
@@ -138,18 +138,18 @@ scan("theta", begin=0, stride=0.6, gaps=5).plot()
 #+RESULTS:
 #+begin_example
 count
-Taking a measurement at theta=0.00 and two theta=0.00
-Taking a measurement at theta=0.60 and two theta=0.00
-Taking a measurement at theta=1.20 and two theta=0.00
-Taking a measurement at theta=1.80 and two theta=0.00
-Taking a measurement at theta=2.40 and two theta=0.00
+Taking a count at theta=0.00 and two theta=0.00
+Taking a count at theta=0.60 and two theta=0.00
+Taking a count at theta=1.20 and two theta=0.00
+Taking a count at theta=1.80 and two theta=0.00
+Taking a count at theta=2.40 and two theta=0.00
 gaps
-Taking a measurement at theta=0.00 and two theta=0.00
-Taking a measurement at theta=0.72 and two theta=0.00
-Taking a measurement at theta=1.44 and two theta=0.00
-Taking a measurement at theta=2.16 and two theta=0.00
-Taking a measurement at theta=2.88 and two theta=0.00
-Taking a measurement at theta=3.60 and two theta=0.00
+Taking a count at theta=0.00 and two theta=0.00
+Taking a count at theta=0.72 and two theta=0.00
+Taking a count at theta=1.44 and two theta=0.00
+Taking a count at theta=2.16 and two theta=0.00
+Taking a count at theta=2.88 and two theta=0.00
+Taking a count at theta=3.60 and two theta=0.00
 #+end_example
 
 
