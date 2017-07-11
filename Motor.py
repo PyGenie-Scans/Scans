@@ -31,6 +31,7 @@ plot will be saved in that file."""
         if len(results[0][0].items()) == 1:
             xs = [next(iter(x[0].items()))[1] for x in results]
             ys = [x[1] for x in results]
+            plt.xlabel(next(iter(results[0][0].items()))[0])
             plt.plot(xs, ys)
         else:
             #FIXME: Handle multidimensional plots
