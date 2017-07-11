@@ -1,6 +1,8 @@
 #+TITLE: Scanning System Proposal
 #+AUTHOR: Adam Washington
 
+#+LATEX_HEADER: \usepackage{listings}
+
 
 * Introduction
 
