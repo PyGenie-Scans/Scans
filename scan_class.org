@@ -178,11 +178,11 @@ scan("two_theta", begin=0, end=2, stride=0.6).measure("two theta={two_theta}")
 
 #+RESULTS:
 #+begin_example
-Taking a measurement at theta=0.0 and two theta=0
-Taking a measurement at theta=0.5 and two theta=0
-Taking a measurement at theta=1.0 and two theta=0
-Taking a measurement at theta=1.5 and two theta=0
-Taking a measurement at theta=2.0 and two theta=0
+Taking a measurement at theta=0.0
+Taking a measurement at theta=0.5
+Taking a measurement at theta=1.0
+Taking a measurement at theta=1.5
+Taking a measurement at theta=2.0
 
 Scanning two theta
 
