@@ -52,6 +52,10 @@
                to extract values of interest.  Common fitting routines
                should be a simple string while still accepting custom
                functions for exceptional circumstances
+  - Spacing :: It should be possible to space points both linearly and
+               logarithmically.
+  - Prediction :: It should be possible to estimate the time needed
+                  for a scan before the scan is performed.
 
 * Examples
 
