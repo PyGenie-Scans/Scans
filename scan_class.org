@@ -61,7 +61,7 @@
 
   These are examples of some basic scans that the user might perform
   on the high level interface.  The examples have run on a
-  [[pseudoinstrument]] defined in a later section.
+  [[Pseudoinstrument]] defined in a later section.
 
 ** Plot Motor Scan
    
