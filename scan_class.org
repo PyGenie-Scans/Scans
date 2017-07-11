@@ -68,16 +68,21 @@
 #+BEGIN_SRC python :results output :exports both
 from Motor import scan
 
-scan("theta", begin=0, end=2, stride=0.6).plot()
+scan("theta", begin=0, end=2, stride=0.6).plot(save="plot_example.png")
 
 #+END_SRC
 
 #+RESULTS:
-: Taking a measurement at theta=0.00 and two theta=0.00
-: Taking a measurement at theta=0.50 and two theta=0.00
-: Taking a measurement at theta=1.00 and two theta=0.00
-: Taking a measurement at theta=1.50 and two theta=0.00
-: Taking a measurement at theta=2.00 and two theta=0.00
+: Taking a count at theta=0.00 and two theta=0.00
+: Taking a count at theta=0.50 and two theta=0.00
+: Taking a count at theta=1.00 and two theta=0.00
+: Taking a count at theta=1.50 and two theta=0.00
+: Taking a count at theta=2.00 and two theta=0.00
+
+  The =save= argument allows the figure to be saved to a file.
+  Otherwise, the screen will show the plot interactively.
+  
+  [[file:plot_example.png]]
 
   The =stride= option gives an appoximate step size, but forces
   ensures that the beginning and final points are measured.  =step=
@@ -158,7 +163,7 @@ from Motor import scan
 
 scan("theta", begin=0, end=2, stride=0.6).measure("Taking a measurement at theta={theta} and two theta={two_theta}")
 
-print("Scanning two theta")
+print("\nScanning two theta\n")
 
 scan("two_theta", begin=0, end=2, stride=0.6).measure("two theta={two_theta}")
 
@@ -171,132 +176,19 @@ Taking a measurement at theta=0.5 and two theta=0
 Taking a measurement at theta=1.0 and two theta=0
 Taking a measurement at theta=1.5 and two theta=0
 Taking a measurement at theta=2.0 and two theta=0
+
 Scanning two theta
-two theta=0
-two theta=0
-two theta=0
-two theta=0
-two theta=0
+
+two theta=0.0
+two theta=0.5
+two theta=1.0
+two theta=1.5
+two theta=2.0
 #+end_example
-
-* Classes
-
-The =Scan= class is the baseline for all measurements, but is also a
-virtual class.  Every object should be a member of a subclass which
-implements the following methods:
-
-  - map :: Should take a function as its only argument.  This
-             function should take the original value of the scan and
-             return the new value.  =map= will return another scan
-             which iterates over the new values.
-  - reverse :: Creates a new scan which runs the scan in the
-                 opposite direction
-  - ~__len__~ :: Returns the number of measurements in the scan.
-  - ~__iter__~ :: Returns a generator that steps through each of the
-                  requested measurements and sets the motors to their
-                  requested positions.
-
-It should be noted that end users should *never* need to implement
-their own subclass.  The goal of this library is that an algebraic
-combination of simple scans will solve all of their needs.
-
-#+BEGIN_SRC python :session mysession :tangle Scan.py
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
-class Scan(object):
-    def __add__(self, b):
-        return SumScan(self, b)
-    def __mul__(self, b):
-        return ProductScan(self, b)
-    def __and__(self, b):
-        return ParallelScan(self, b)
-    def plot(self, measurement):
-        results = [(x,measurement())
-                   for x in self]
-        xs = [x[0] for x in results]
-        ys = [x[1] for x in results]
-        plt.plot(xs, ys)
-
-class SimpleScan(Scan):
-    def __init__(self, action, values):
-        self.action = action
-        self.values = values
-    def map(self, f):
-        return SimpleScan(self.action,
-                          map(f, self.values))
-    def reverse(self):
-        return SimpleScan(self.action, self.values[::-1])
-    def __iter__(self):
-        for v in self.values:
-            self.action(v)
-            yield v
-    def __len__(self):
-        return len(self.values)
-
-class SumScan(Scan):
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
-    def __iter__(self):
-        for x in self.a:
-            yield x
-        for y in self.b:
-            yield y
-    def __len__(self):
-        return len(self.a) + len(self.b)
-    def map(self, f):
-        return SumScan(self.a.map(f),
-                       self.b.map(f))
-    def reverse(self):
-        return SumScan(self.b.reverse(),
-                       self.a.reverse())
-
-class ProductScan(Scan):
-    def __init__(self, a, b, mutate=lambda x, y: y):
-        self.a = a
-        self.b = b
-        self.mutate = mutate
-    def __iter__(self):
-        for x in self.a:
-            curry = lambda y: self.mutate(x, y)
-            for y in self.b.map(curry):
-                yield (x, y)
-    def __len__(self):
-        return len(self.a)*len(self.b)
-    def map(self, f):
-        return ProductScan(self.a.map(f),
-                           self.b.map(f),
-                           self.mutate)
-    def reverse(self):
-        return ProductScan(self.a.reverse(),
-                           self.b.reverse(),
-                           self.mutate)
-
-class ParallelScan(Scan):
-    def __init__(self, a, b):
-        self.a = a
-        self.b = b
-    def __iter__(self):
-        for x, y in zip(self.a, self.b):
-            yield (x, y)
-    def __len__(self):
-        return min(len(self.a), len(self.b))
-    def map(self, f):
-        return ParallelScan(self.a.map(f),
-                            self.b.map(f))
-    def reverse(self):
-        return ParallelScan(self.a.reverse(),
-                            self.b.reverse())
-
-#+END_SRC
-
-#+RESULTS:
 
 * Examples 
 
-** Pseudoinstrument
+** pseudoinstrument
 
 For our examples, we'll define a basic instrument with two motors:
 ~theta~ and ~two_theta~.  We'll also declare that there are four functions

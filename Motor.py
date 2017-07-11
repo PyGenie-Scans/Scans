@@ -106,11 +106,16 @@ class ParallelScan(Scan):
 
 instrument = {"theta":0, "two_theta":0}
 
+def cset(**kwargs):
+    if "theta" in kwargs:
+        return move_theta(kwargs["theta"])
+    if "two_theta" in kwargs:
+        return move_two_theta(kwargs["two_theta"])
+
 def move_theta(x):
     instrument["theta"] = x
 
 def move_two_theta(x):
-    print("Performing extra work for two theta motor")
     instrument["two_theta"] = x
 
 from math import sin, cos
@@ -153,4 +158,7 @@ def get_points(d):
 
 def scan(pv, **kwargs):
     points = get_points(kwargs)
-    return SimpleScan(move_theta, points)
+    def motion(x):
+        d = {pv: x}
+        cset(**d)
+    return SimpleScan(motion, points)
