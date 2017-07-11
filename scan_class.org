@@ -165,7 +165,8 @@ Taking a count at theta=3.60 and two theta=0.00
 #+BEGIN_SRC python :results output :exports both
 from Motor import scan
 
-scan("theta", begin=0, end=2, stride=0.6).measure("Taking a measurement at theta={theta} and two theta={two_theta}")
+title = "Taking a measurement at theta={theta}"
+scan("theta", begin=0, end=2, stride=0.6).measure(title)
 
 print("\nScanning two theta\n")
 
