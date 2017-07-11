@@ -1,7 +1,4 @@
-from math import sin, cos
-import matplotlib
 import numpy as np
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 def measure(title, info):
