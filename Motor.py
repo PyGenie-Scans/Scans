@@ -175,7 +175,7 @@ def get_points(d):
             step = d["stride"]
         else:
             step = d["step"]
-        return np.linspace(begin, begin+(d["gaps"]+1)*step, d["gaps"]+1)
+        return np.linspace(begin, begin+d["gaps"]*step, d["gaps"]+1)
 
 
 def scan(pv, **kwargs):
