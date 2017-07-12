@@ -274,29 +274,45 @@ theta=1.0 and two_theta=3.0
   There are four default subclasses of Scan that should handle most of
   the requirements
 
-** SimpleScan
+  - SimpleScan :: is the lowest level of the scan system.  It requires
+                  a function which performs the desired action on each
+                  point, a list of points, and a name for the axis.
+                  At this time, all scans are combinations of
+                  simpleScans.
 
-   =SimpleScan= is the lowest level of the scan system.  It requires a
-   function which performs the desired action on each point, a list of
-   points, and a name for the axis.  At this time, all scans are
-   combinations of simpleScans.
+  - SumScan :: runs two scans sequentially.  These scans do not need
+               to be on the same axes or even move the same number of
+               axes.
 
-** SumScan
+  - ProductScan :: performs every possible combination of positions
+                   for two different scans.  This provides an
+                   alternative to nested loops.
 
-   =SumScan= runs two scans sequentially.  These scans do not need to
-   be on the same axes or even move the same number of axes.
+  - ParallelScan :: takes to scans and runs their actions together at
+                    each step.  For example, if =a= was a scan over
+                    theta and =b= was a scan over two theta, then 
+                    =a && b= would scan each theta angle with its
+                    corresponding two theta.
+		    
+  The base =Scan= class contains four useful member functions.
 
-** ProductScan
-
-   =ProductScan= performs every possible combination of positions for
-   two different scans.  This provides an alternative to nested loops.
-
-** ParallelScan
-
-   =ParallelScan= takes to scans and runs their actions together at
-   each step.  For example, if =a= was a scan over theta and =b= was a
-   scan over two theta, then =a && b= would scan each theta angle with
-   its corresponding two theta.
+  - plot ::  The =plot= function goes to each position listed in the
+            scan, takes a count, and plots it on an axis.  The user
+            can specify the counting command.
+  - measure :: The =measure= function goes to each position in the
+	       in the scan and records a measurement.  The function is
+               passed a title which can include information about the
+               current position in the scan.
+  - fit :: Like =plot=, this function takes a single count at each
+           position.  It then fits it to the user supplied model and
+           returns the fitted value.  This could be anything from the
+           peak position to the frequency of the curve.
+  - calculate :: This function takes a desired measurement time at
+                 each point and, optionally, an approximated motor
+                 movement time.  It returns an estimated duration for
+                 the scan and time of completion.
+		 
+  /At this time, only =plot= and =measure= have been written./ 
 
 
    
