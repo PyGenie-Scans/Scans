@@ -46,3 +46,24 @@ def make_scan(defaults):
 
         return SimpleScan(motion, points, defaults)
     return scan
+
+
+def make_estimator(flux):
+    def estimate(seconds=None, minutes=None, hours=None,
+                 uamps=None, frames=None, monitor=None,
+                 **kwargs):
+        if seconds or minutes or hours:
+            if not seconds:
+                seconds = 0
+            if not minutes:
+                minutes = 0
+            if not hours:
+                hours = 0
+            return seconds + 60 * minutes + 3600 * hours
+        elif frames:
+            return frames/10.0
+        elif uamps:
+            return 90*uamps
+        elif monitor:
+            return monitor/flux
+    return estimate

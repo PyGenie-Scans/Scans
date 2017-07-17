@@ -1,5 +1,5 @@
 import numpy as np
-from .Util import make_scan
+from .Util import make_scan, make_estimator
 from .Motion import Motion
 
 instrument = {"theta": 0, "two_theta": 0}
@@ -17,10 +17,13 @@ def count():
     return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
 
 
+estimate = make_estimator(1e6)
+
 class Defaults():
     def __init__(self):
         self.measure = measure
         self.detector = count
+        self.time_estimator = estimate
 
 
 def move_theta(x):
