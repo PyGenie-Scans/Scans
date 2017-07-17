@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 import numpy as np
 import matplotlib.pyplot as plt
-from .Instrument import count, measure, cset
 
 
 def merge_dicts(x, y):
@@ -24,14 +23,16 @@ subclasses."""
     def __and__(self, b):
         return ParallelScan(self, b)
 
-    def plot(self, measurement=count,
-             save=None, cont=None):
+    def plot(self, detector=None, save=None, cont=None, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
 The measurement parameter can be used to set what type of measurement
 is to be taken.  If the save parameter is set to a file name, then the
 plot will be saved in that file."""
+        if not detector:
+            detector = self.defaults.detector
+
         # FIXME: Support multi-processing plots
-        results = [(x, measurement())
+        results = [(x, detector(**kwargs))
                    for x in self]
 
         if len(results[0][0].items()) == 1:
@@ -49,7 +50,7 @@ plot will be saved in that file."""
         else:
             plt.show()
 
-    def measure(self, title):
+    def measure(self, title, measure=None, **kwargs):
         """Perform a full measurement at each position indicated by the scan.
         The title parameter gives the run's title and allows for
         values to be interpolated into it.  For instance, the string
@@ -57,8 +58,10 @@ plot will be saved in that file."""
         it is being iterated over.
 
         """
+        if not measure:
+            measure = self.defaults.measure
         for x in self:
-            measure(title, x)
+            measure(title, x, **kwargs)
 
     def fit(self, fit, **kwargs):
         if "save" in kwargs and kwargs["save"]:
@@ -84,10 +87,11 @@ plot will be saved in that file."""
 
 class SimpleScan(Scan):
     """SimpleScan is a scan along a single axis for a fixed set of values"""
-    def __init__(self, action, values, name):
+    def __init__(self, action, values, name, defaults):
         self.action = action
         self.values = values
         self.name = name
+        self.defaults = defaults
 
     def map(self, f):
         """The map function returns a modified scan that performs the given
@@ -116,6 +120,7 @@ class SumScan(Scan):
     def __init__(self, first, second):
         self.a = first
         self.b = second
+        self.defaults = self.a.defaults
 
     def __iter__(self):
         for x in self.a:
@@ -146,6 +151,7 @@ its two constituent scans."""
     def __init__(self, outer, inner):
         self.a = outer
         self.b = inner
+        self.defaults = self.a.defaults
 
     def __iter__(self):
         for x in self.a:
@@ -175,6 +181,7 @@ sets of position adjustments before each step of the scan."""
     def __init__(self, first, second):
         self.a = first
         self.b = second
+        self.defaults = self.a.defaults
 
     def __iter__(self):
         for x, y in zip(self.a, self.b):
@@ -195,49 +202,3 @@ function on all of the original positions to return the new positions.
         """Creates a new scan that runs in the opposite direction"""
         return ParallelScan(self.a.reverse(),
                             self.b.reverse())
-
-
-def get_points(d):
-    """This function takes a dictionary of keyword arguments for
-    a scan and returns the points at which the scan should be measured."""
-
-    # FIXME:  Ask use for starting position if none is given
-    begin = d["begin"]
-
-    if "end" in d:
-        end = d["end"]
-        if "stride" in d:
-            steps = np.ceil((end-begin)/float(d["stride"]))
-            return np.linspace(begin, end, steps+1)
-        elif "count" in d:
-            return np.linspace(begin, end, d["count"])
-        elif "gaps" in d:
-            return np.linspace(begin, end, d["gaps"]+1)
-        elif "step" in d:
-            return np.arange(begin, end, d["step"])
-    elif "count" in d and ("stride" in d or "step" in d):
-        if "stride" in d:
-            step = d["stride"]
-        else:
-            step = d["step"]
-        return np.linspace(begin, begin+(d["count"]-1)*step, d["count"])
-    elif "gaps" in d and ("stride" in d or "step" in d):
-        if "stride" in d:
-            step = d["stride"]
-        else:
-            step = d["step"]
-        return np.linspace(begin, begin+d["gaps"]*step, d["gaps"]+1)
-
-
-def scan(pv, **kwargs):
-    """scan is the primary command that users will call to create scans.
-The pv parameter should be a string containing the name of the motor
-to be moved.  The keyword arguments decide the position spacing."""
-    points = get_points(kwargs)
-
-    def motion(x):
-        """motion is a helper function to call the appropriate cset function
-for the user's chosen motor"""
-        d = {pv: x}
-        cset(**d)
-    return SimpleScan(motion, points, pv)

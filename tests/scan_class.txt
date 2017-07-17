@@ -105,7 +105,7 @@ Table of Contents
   intensity as the motor moves from 0 to 2 inclusively in steps /near/
   0.3.
 
-  >>> from Scans.Scans import scan
+  >>> from Scans.Instrument import scan
   >>> scan("theta", begin=0, end=2, stride=0.6).plot(save="plot_example.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
