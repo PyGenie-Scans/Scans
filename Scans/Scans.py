@@ -64,25 +64,36 @@ plot will be saved in that file."""
             measure(title, x, **kwargs)
 
     def fit(self, fit, **kwargs):
+        from scipy.optimize import curve_fit
         if "save" in kwargs and kwargs["save"]:
             save = kwargs["save"]
             kwargs["save"] = None
         else:
             save = None
+        plt.clf()
         results = self.plot(cont=True, **kwargs)
+        x = [next(iter(i[0].items()))[1] for i in results]
+        y = [i[1] for i in results]
         if fit == "linear":
-            x = [next(iter(i[0].items()))[1] for i in results]
-            y = [i[1] for i in results]
-            # print(x)
-            # print(y)
             pfit = np.polyfit(x, y, 1)
-            plt.plot(x, np.polyval(pfit, x), "m-", label="{} fit".format(fit))
-            plt.legend()
-            if save:
-                plt.savefig(save)
-            else:
-                plt.show()
-            return pfit
+            fity = np.polyval(pfit, x)
+            result = {"slope": pfit[0], "intercept": pfit[1]}
+        elif fit == "gaussian":
+            def model(xs, center, sigma, amplitude, background):
+                return background + amplitude * np.exp(-((xs-center)/sigma)**2)
+            cfit, _ = curve_fit(model, x, y,
+                                [np.mean(x), np.max(x)-np.min(x),
+                                 np.max(y)-np.min(y), np.min(y)])
+            fity = model(x, *cfit)
+            result = {"center": cfit[0], "sigma": cfit[1],
+                      "amplitude": cfit[2], "background": cfit[3]}
+        plt.plot(x, fity, "m-", label="{} fit".format(fit))
+        plt.legend()
+        if save:
+            plt.savefig(save)
+        else:
+            plt.show()
+        return result
 
     def calculate(self, time=False, pad=0, **kwargs):
         """Calculate the expected time needed to perform a scan.
