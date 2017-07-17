@@ -87,10 +87,10 @@ plot will be saved in that file."""
 
 class SimpleScan(Scan):
     """SimpleScan is a scan along a single axis for a fixed set of values"""
-    def __init__(self, action, values, name, defaults):
+    def __init__(self, action, values, defaults):
         self.action = action
         self.values = values
-        self.name = name
+        self.name = action.title
         self.defaults = defaults
 
     def map(self, f):
