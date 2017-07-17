@@ -1,4 +1,6 @@
 import numpy as np
+from .Util import make_scan
+from .Motion import Motion
 
 instrument = {"theta": 0, "two_theta": 0}
 
@@ -13,6 +15,12 @@ def count():
     print("Taking a count at theta=%0.2f and two theta=%0.2f" %
           (instrument["theta"], instrument["two_theta"]))
     return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
+
+
+class Defaults():
+    def __init__(self):
+        self.measure = measure
+        self.detector = count
 
 
 def move_theta(x):
@@ -38,3 +46,18 @@ demonstration purposes"""
         return move_theta(kwargs["theta"])
     if "two_theta" in kwargs:
         return move_two_theta(kwargs["two_theta"])
+
+
+def cget(s):
+    return instrument[s]
+
+
+theta = Motion(lambda: cget("theta"),
+               lambda x: cset(theta=x),
+               "theta")
+
+two_theta = Motion(lambda: cget("two_theta"),
+               lambda x: cset(two_theta=x),
+               "two_theta")
+
+scan = make_scan(Defaults())
