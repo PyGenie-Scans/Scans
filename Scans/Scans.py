@@ -84,10 +84,22 @@ plot will be saved in that file."""
                 plt.show()
             return pfit
 
-    def calculate(self, time=False, **kwargs):
+    def calculate(self, time=False, pad=0, **kwargs):
+        """Calculate the expected time needed to perform a scan.
+        Additionally, print the expected time of completion.
+
+        Beyond accepting the default arguments for setting a
+        measurement time (e.g uamps, minutes, frames), this method
+        accept two other keywords.  The pad argument is an extra time,
+        in seconds, to add to each measurement to account for motor
+        movements, file saving, and other such effects.  The quiet
+        keyword, if set to true, prevents the printing of the expected
+        time of completion.
+
+        """
         from datetime import timedelta, datetime
         est = self.defaults.time_estimator
-        total = len(self) * est(**kwargs)
+        total = len(self) * (pad + est(**kwargs))
         if time:
             dt = timedelta(0, total)
             print("The run would finish at {}".format(dt+datetime.now()))
