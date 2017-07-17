@@ -84,6 +84,15 @@ plot will be saved in that file."""
                 plt.show()
             return pfit
 
+    def calculate(self, time=False, **kwargs):
+        from datetime import timedelta, datetime
+        est = self.defaults.time_estimator
+        total = len(self) * est(**kwargs)
+        if time:
+            dt = timedelta(0, total)
+            print("The run would finish at {}".format(dt+datetime.now()))
+        return total
+
 
 class SimpleScan(Scan):
     """SimpleScan is a scan along a single axis for a fixed set of values"""

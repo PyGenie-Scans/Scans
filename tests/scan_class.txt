@@ -241,6 +241,31 @@ Table of Contents
   theta=1.0 and two_theta=2.0
   theta=1.0 and two_theta=3.0
 
+3.5 Estimate time
+─────────────────────────
+
+  It's not all that uncommon for users to find themselves setting an
+  overnight run to perform while they sleep.  Since they are usually
+  writing these scripts around two in the morning, their arithemtic
+  skills frequently fail.  When the run terminates prematurely, the
+  beam time is wasted.  When the user underestimates the time that
+  they're requesting, they wake up to find that their measurements
+  haven't finished and they must use more beam time to finish their
+  results.
+
+  Having the scan system perform estimates of the time required and
+  the point of completion is a simple convenience to prevent these
+  user headaches.
+
+  >>> needed = scan(theta, begin=0, end=2.0, step=0.6).calculate(hours=1, minutes=30)
+  >>> print(needed)
+  21600
+
+  >>> needed = scan(theta, begin=0, end=2.0, step=0.6).calculate(frames=1000, time=True) #doctest: +SKIP
+  The run would finish at 2017-07-17 20:06:24.600802
+  >>> print(needed) #doctest: +SKIP
+  400.0
+
 4 Class setup
 ═════════════
 
@@ -299,8 +324,6 @@ Table of Contents
              and, optionally, an approximated motor movement time.  It
              returns an estimated duration for the scan and time of
              completion.
-
-  /At this time, `calculate' has not yet been written./ 
 
 
 5 High Level interface
