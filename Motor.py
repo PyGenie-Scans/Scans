@@ -19,7 +19,7 @@ subclasses."""
     def __and__(self, b):
         return ParallelScan(self, b)
     def plot(self, measurement=count,
-             save=None):
+             save=None, cont=None):
         """Run over the scan an perform a simple measurement at each position.
 The measurement parameter can be used to set what type of measurement
 is to be taken.  If the save parameter is set to a file name, then the
@@ -35,9 +35,11 @@ plot will be saved in that file."""
             plt.plot(xs, ys)
         else:
             #FIXME: Handle multidimensional plots
-            return
+            return results
         if save:
             plt.savefig(save)
+        elif cont:
+            return results
         else:
             plt.show()
     def measure(self, title):
@@ -50,6 +52,27 @@ plot will be saved in that file."""
         """
         for x in self:
             measure(title, x)
+    def fit(self, fit, **kwargs):
+        if "save" in kwargs and kwargs["save"]:
+            save = kwargs["save"]
+            kwargs["save"] = None
+        else:
+            save = None
+        results = self.plot(cont=True, **kwargs)
+        if fit=="linear":
+            x = [next(iter(i[0].items()))[1] for i in results]
+            y = [i[1] for i in results]
+            # print(x)
+            # print(y)
+            pfit = np.polyfit(x, y, 1)
+            plt.plot(x, np.polyval(pfit, x), "m-", label="{} fit".format(fit))
+            plt.legend()
+            if save:
+                plt.savefig(save)
+            else:
+                plt.show()
+            return pfit
+
 
 class SimpleScan(Scan):
     """The SimpleScan is a scan along a single axis for a fixed set of values"""

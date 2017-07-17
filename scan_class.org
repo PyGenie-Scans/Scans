@@ -158,6 +158,32 @@ Taking a count at theta=2.88 and two theta=0.00
 Taking a count at theta=3.60 and two theta=0.00
 #+end_example
 
+** Perform Fits
+
+Performing a fit on a measurement is merely a modification of
+performing the plot
+
+#+BEGIN_SRC python :results output :exports both
+from Motor import scan
+
+fit = scan("theta", begin=0, end=2, stride=0.6).fit(fit="linear", save="fitplot.png")
+print(fit)
+
+#+END_SRC
+
+#+RESULTS:
+: Taking a count at theta=0.00 and two theta=0.00
+: Taking a count at theta=0.50 and two theta=0.00
+: Taking a count at theta=1.00 and two theta=0.00
+: Taking a count at theta=1.50 and two theta=0.00
+: Taking a count at theta=2.00 and two theta=0.00
+: [ 0.66921304  0.2       ]
+
+In this instance, the user requested a linear fit.  The result was an
+array with the slope and intercept.  The fit is also plotted over the
+original graph when finished.
+
+[[file:fitplot.png]]
 
 ** Perform Measurement Scan
 
