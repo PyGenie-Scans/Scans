@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 import numpy as np
 import matplotlib.pyplot as plt
-from Scans.Instrument import count, measure, cset
+from .Instrument import count, measure, cset
 
 
 def merge_dicts(x, y):
