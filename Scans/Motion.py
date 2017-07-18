@@ -9,6 +9,7 @@ common to all beamlines.
 
 """
 
+
 class Motion(object):
     """A Motion object largely acts like a function to control and
     interrogate a single axis of motion.  When called without a

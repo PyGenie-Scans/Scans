@@ -25,8 +25,10 @@ class Scan(object):
 should never be instantiated directly, but rather by one of its
 subclasses."""
     defaults = None
+
     def __iter__(self):
         pass
+
     def __add__(self, x):
         return SumScan(self, x)
 
@@ -103,7 +105,8 @@ plot will be saved in that file."""
                 over a base of background.
 
                 """
-                return background + amplitude * np.exp(-((xs-center)/sigma/np.sqrt(2))**2)
+                return background + \
+                    amplitude * np.exp(-((xs-center)/sigma/np.sqrt(2))**2)
             cfit, _ = curve_fit(model, x, y,
                                 [np.mean(x), np.max(x)-np.min(x),
                                  np.max(y)-np.min(y), np.min(y)])
