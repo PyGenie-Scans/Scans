@@ -11,4 +11,6 @@ before_script:
   - "sh -e /etc/init.d/xvfb start"
 script:
   - python -m doctest tests/scan_class.txt
+  - pylint Scans
+  - flake8 Scans
 cache: pip
