@@ -1,27 +1,40 @@
-from __future__ import absolute_import
+"""The Scans module holds the base classes for scan objects.  These
+objects reify the steps an instrument takes in a scan and allow us to
+have single place where all of the various scanning methods can be
+condensed.
+
+The only export of this module that should ever need to be directly
+accessed by other modules is SimpleScan.  Everything else should be
+treated as private.
+
+"""
+from __future__ import absolute_import, print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 def merge_dicts(x, y):
     """Given two dices, merge them into a new dict as a shallow copy."""
-    z = x.copy()
-    z.update(y)
-    return z
+    final = x.copy()
+    final.update(y)
+    return final
 
 
 class Scan(object):
     """The virtual class that represents all controlled scans.  This class
 should never be instantiated directly, but rather by one of its
 subclasses."""
-    def __add__(self, b):
-        return SumScan(self, b)
+    defaults = None
+    def __iter__(self):
+        pass
+    def __add__(self, x):
+        return SumScan(self, x)
 
-    def __mul__(self, b):
-        return ProductScan(self, b)
+    def __mul__(self, x):
+        return ProductScan(self, x)
 
-    def __and__(self, b):
-        return ParallelScan(self, b)
+    def __and__(self, x):
+        return ParallelScan(self, x)
 
     def plot(self, detector=None, save=None, cont=None, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
@@ -64,6 +77,11 @@ plot will be saved in that file."""
             measure(title, x, **kwargs)
 
     def fit(self, fit, **kwargs):
+        """The fit method performs the scan, plotting the points as they are
+        taken.  Once the scan is completed, a fit is then plotted over
+        the scan and the fitting parameters are returned.
+
+        """
         from scipy.optimize import curve_fit
         if "save" in kwargs and kwargs["save"]:
             save = kwargs["save"]
@@ -80,7 +98,12 @@ plot will be saved in that file."""
             result = {"slope": pfit[0], "intercept": pfit[1]}
         elif fit == "gaussian":
             def model(xs, center, sigma, amplitude, background):
-                return background + amplitude * np.exp(-((xs-center)/sigma)**2)
+                """This is the model for a gaussian with the mean at center, a
+                standard deviation of sigma, and a peak of amplitude
+                over a base of background.
+
+                """
+                return background + amplitude * np.exp(-((xs-center)/sigma/np.sqrt(2))**2)
             cfit, _ = curve_fit(model, x, y,
                                 [np.mean(x), np.max(x)-np.min(x),
                                  np.max(y)-np.min(y), np.min(y)])
@@ -112,8 +135,8 @@ plot will be saved in that file."""
         est = self.defaults.time_estimator
         total = len(self) * (pad + est(**kwargs))
         if time:
-            dt = timedelta(0, total)
-            print("The run would finish at {}".format(dt+datetime.now()))
+            delta = timedelta(0, total)
+            print("The run would finish at {}".format(delta+datetime.now()))
         return total
 
 
@@ -125,13 +148,13 @@ class SimpleScan(Scan):
         self.name = action.title
         self.defaults = defaults
 
-    def map(self, f):
+    def map(self, func):
         """The map function returns a modified scan that performs the given
 function on all of the original positions to return the new positions.
 
         """
         return SimpleScan(self.action,
-                          map(f, self.values),
+                          map(func, self.values),
                           self.name)
 
     def reverse(self):
@@ -139,9 +162,9 @@ function on all of the original positions to return the new positions.
         return SimpleScan(self.action, self.values[::-1], self.name)
 
     def __iter__(self):
-        for v in self.values:
-            self.action(v)
-            yield {self.name: v}
+        for i in self.values:
+            self.action(i)
+            yield {self.name: i}
 
     def __len__(self):
         return len(self.values)
@@ -150,87 +173,87 @@ function on all of the original positions to return the new positions.
 class SumScan(Scan):
     """The SumScan performs two separate scans sequentially"""
     def __init__(self, first, second):
-        self.a = first
-        self.b = second
-        self.defaults = self.a.defaults
+        self.first = first
+        self.second = second
+        self.defaults = self.first.defaults
 
     def __iter__(self):
-        for x in self.a:
-            yield x
-        for y in self.b:
-            yield y
+        for i in self.first:
+            yield i
+        for i in self.second:
+            yield i
 
     def __len__(self):
-        return len(self.a) + len(self.b)
+        return len(self.first) + len(self.second)
 
-    def map(self, f):
+    def map(self, func):
         """The map function returns a modified scan that performs the given
 function on all of the original positions to return the new positions.
 
         """
-        return SumScan(self.a.map(f),
-                       self.b.map(f))
+        return SumScan(self.first.map(func),
+                       self.second.map(func))
 
     def reverse(self):
         """Creates a new scan that runs in the opposite direction"""
-        return SumScan(self.b.reverse(),
-                       self.a.reverse())
+        return SumScan(self.second.reverse(),
+                       self.first.reverse())
 
 
 class ProductScan(Scan):
     """ProductScan performs every possible combination of the positions of
 its two constituent scans."""
     def __init__(self, outer, inner):
-        self.a = outer
-        self.b = inner
-        self.defaults = self.a.defaults
+        self.outer = outer
+        self.inner = inner
+        self.defaults = self.outer.defaults
 
     def __iter__(self):
-        for x in self.a:
-            for y in self.b:
-                yield merge_dicts(x, y)
+        for i in self.outer:
+            for j in self.inner:
+                yield merge_dicts(i, j)
 
     def __len__(self):
-        return len(self.a)*len(self.b)
+        return len(self.outer)*len(self.inner)
 
-    def map(self, f):
+    def map(self, func):
         """The map function returns a modified scan that performs the given
 function on all of the original positions to return the new positions.
 
         """
-        return ProductScan(self.a.map(f),
-                           self.b.map(f))
+        return ProductScan(self.outer.map(func),
+                           self.inner.map(func))
 
     def reverse(self):
         """Creates a new scan that runs in the opposite direction"""
-        return ProductScan(self.a.reverse(),
-                           self.b.reverse())
+        return ProductScan(self.outer.reverse(),
+                           self.inner.reverse())
 
 
 class ParallelScan(Scan):
     """ParallelScan runs two scans alongside each other, performing both
 sets of position adjustments before each step of the scan."""
     def __init__(self, first, second):
-        self.a = first
-        self.b = second
-        self.defaults = self.a.defaults
+        self.first = first
+        self.second = second
+        self.defaults = self.first.defaults
 
     def __iter__(self):
-        for x, y in zip(self.a, self.b):
+        for x, y in zip(self.first, self.second):
             yield merge_dicts(x, y)
 
     def __len__(self):
-        return min(len(self.a), len(self.b))
+        return min(len(self.first), len(self.second))
 
-    def map(self, f):
+    def map(self, func):
         """The map function returns a modified scan that performs the given
 function on all of the original positions to return the new positions.
 
         """
-        return ParallelScan(self.a.map(f),
-                            self.b.map(f))
+        return ParallelScan(self.first.map(func),
+                            self.second.map(func))
 
     def reverse(self):
         """Creates a new scan that runs in the opposite direction"""
-        return ParallelScan(self.a.reverse(),
-                            self.b.reverse())
+        return ParallelScan(self.first.reverse(),
+                            self.second.reverse())
