@@ -1,4 +1,6 @@
 #!/usr/bin/python2
+# pylint: skip-file
+# flake8: noqa
 """A demo of proper multiprocessing matplotlib"""
 from __future__ import print_function
 import time

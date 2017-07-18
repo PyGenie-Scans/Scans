@@ -9,6 +9,9 @@ before_script:
   # Start a fake x server so that matplotlib doesn't fail
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
+  - sudo apt-get install python-numpy python-scipy
 script:
   - python -m doctest tests/scan_class.txt
+  - pylint Scans
+  - flake8 Scans
 cache: pip

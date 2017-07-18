@@ -1,2 +1,5 @@
 numpy
 matplotlib
+pylint
+flake8
+scipy

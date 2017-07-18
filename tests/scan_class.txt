@@ -171,8 +171,8 @@ Table of Contents
   Taking a count at theta=1.00 and two theta=0.00
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> print(fit)
-  [ 0.66921304  0.2       ]
+  >>> "{:0.4f}".format(fit["slope"])
+  '0.6692'
 
   In this instance, the user requested a linear fit.  The result was an
   array with the slope and intercept.  The fit is also plotted over the
@@ -180,6 +180,16 @@ Table of Contents
 
   [file:fitplot.png]
 
+  We can also plot the same scan against a gaussian
+
+  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(fit="gaussian", save="gaussian.png")
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.50 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.50 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  >>> "{:0.4f}".format(fit["center"])
+  '2.0612'
 
 3.3 Perform Measurement Scan
 ────────────────────────────
