@@ -9,7 +9,6 @@ treated as private.
 
 """
 from __future__ import absolute_import, print_function
-import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -38,7 +37,8 @@ subclasses."""
     def __and__(self, x):
         return ParallelScan(self, x)
 
-    def plot(self, detector=None, save=None, cont=None, **kwargs):
+    def plot(self, detector=None, save=None, quiet=None,
+             return_values=False, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
 The measurement parameter can be used to set what type of measurement
 is to be taken.  If the save parameter is set to a file name, then the
@@ -57,13 +57,16 @@ plot will be saved in that file."""
             plt.plot(xs, ys)
         else:
             # FIXME: Handle multidimensional plots
+            pass
+
+        if not quiet:
+            if save:
+                plt.savefig(save)
+            else:
+                plt.show()
+        if return_values:
             return results
-        if save:
-            plt.savefig(save)
-        elif cont:
-            return results
-        else:
-            plt.show()
+        return
 
     def measure(self, title, measure=None, **kwargs):
         """Perform a full measurement at each position indicated by the scan.
@@ -78,47 +81,28 @@ plot will be saved in that file."""
         for x in self:
             measure(title, x, **kwargs)
 
-    def fit(self, fit, **kwargs):
+    def fit(self, fit, save=None, quiet=False, **kwargs):
         """The fit method performs the scan, plotting the points as they are
         taken.  Once the scan is completed, a fit is then plotted over
         the scan and the fitting parameters are returned.
 
         """
-        from scipy.optimize import curve_fit
-        if "save" in kwargs and kwargs["save"]:
-            save = kwargs["save"]
-            kwargs["save"] = None
-        else:
-            save = None
         plt.clf()
-        results = self.plot(cont=True, **kwargs)
+        results = self.plot(quiet=quiet, return_values=True, **kwargs)
         x = [next(iter(i[0].items()))[1] for i in results]
         y = [i[1] for i in results]
-        if fit == "linear":
-            pfit = np.polyfit(x, y, 1)
-            fity = np.polyval(pfit, x)
-            result = {"slope": pfit[0], "intercept": pfit[1]}
-        elif fit == "gaussian":
-            def model(xs, center, sigma, amplitude, background):
-                """This is the model for a gaussian with the mean at center, a
-                standard deviation of sigma, and a peak of amplitude
-                over a base of background.
 
-                """
-                return background + \
-                    amplitude * np.exp(-((xs-center)/sigma/np.sqrt(2))**2)
-            cfit, _ = curve_fit(model, x, y,
-                                [np.mean(x), np.max(x)-np.min(x),
-                                 np.max(y)-np.min(y), np.min(y)])
-            fity = model(x, *cfit)
-            result = {"center": cfit[0], "sigma": cfit[1],
-                      "amplitude": cfit[2], "background": cfit[3]}
-        plt.plot(x, fity, "m-", label="{} fit".format(fit))
-        plt.legend()
-        if save:
-            plt.savefig(save)
-        else:
-            plt.show()
+        params = fit.fit(x, y)
+        fity = fit.get_y(x, params)
+        result = fit.readable(params)
+
+        if not quiet:
+            plt.plot(x, fity, "m-", label="{} fit".format(fit))
+            plt.legend()
+            if save:
+                plt.savefig(save)
+            else:
+                plt.show()
         return result
 
     def calculate(self, time=False, pad=0, **kwargs):

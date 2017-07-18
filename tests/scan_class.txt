@@ -165,7 +165,8 @@ Table of Contents
   Performing a fit on a measurement is merely a modification of
   performing the plot
 
-  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(fit="linear", save="fitplot.png")
+  >>> from Scans.Fit import Linear, Gaussian
+  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(Linear, quiet=True)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -182,7 +183,7 @@ Table of Contents
 
   We can also plot the same scan against a gaussian
 
-  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(fit="gaussian", save="gaussian.png")
+  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(Gaussian, quiet=True)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
