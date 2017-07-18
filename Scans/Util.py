@@ -36,7 +36,7 @@ def get_points(
         if stride:
             step = stride
         return np.linspace(begin, begin+(count-1)*step, count)
-    raise RuntimeError("Cannot parse options:\n {} {} {} {} {} {}".format(begin, end, step, stride, count, gaps))
+    raise RuntimeError("Unable to build a scan with that set of options.")
 
 
 def make_scan(defaults):
