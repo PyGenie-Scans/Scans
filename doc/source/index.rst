@@ -11,10 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-.. automodule:: Scans.Scans
-   :members:
-.. automodule:: Scans.Fit
-   :members:
+   tutorial
+   reference
+   issues
+
 
 Indices and tables
 ==================
