@@ -52,9 +52,12 @@ def _gaussian_model(xs, center, sigma, amplitude, background):
     return background + amplitude * np.exp(-((xs-center)/sigma/np.sqrt(2))**2)
 
 
+#: A linear regression
 Linear = Fit(lambda x, y: np.polyfit(x, y, 1),
              np.polyval,
              lambda x: {"slope": x[0], "intercept": x[1]})
+
+#: A gaussian fit
 Gaussian = Fit(lambda x, y: curve_fit(_gaussian_model, x, y,
                                       [np.mean(x), np.max(x)-np.min(x),
                                        np.max(y)-np.min(y), np.min(y)])[0],
