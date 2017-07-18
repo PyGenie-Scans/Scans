@@ -131,6 +131,15 @@ Plot Motor Scan
   Taking a count at theta=2.40 and two theta=0.00
   Taking a count at theta=3.00 and two theta=0.00
 
+  For when relative scans make more sense, it's possible to request
+  them by replacing beign and end with before and after.
+
+  >>> scan(theta, before=-1, after=1, stride=0.6).plot(save="temp.png")
+  Taking a count at theta=2.00 and two theta=0.00
+  Taking a count at theta=2.50 and two theta=0.00
+  Taking a count at theta=3.00 and two theta=0.00
+  Taking a count at theta=3.50 and two theta=0.00
+  Taking a count at theta=4.00 and two theta=0.00
 
 Perform Fits
 ------------
