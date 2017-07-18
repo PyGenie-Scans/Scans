@@ -171,8 +171,8 @@ Table of Contents
   Taking a count at theta=1.00 and two theta=0.00
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> fit["slope"]
-  0.66921304299024642
+  >>> "{:0.4f}".format(fit["slope"])
+  0.6692
 
   In this instance, the user requested a linear fit.  The result was an
   array with the slope and intercept.  The fit is also plotted over the
