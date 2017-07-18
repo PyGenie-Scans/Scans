@@ -7,36 +7,29 @@ import numpy as np
 from .Scans import SimpleScan
 
 
-def get_points(x):
+def get_points(begin=None, end=None,
+               step=None, stride=None,
+               count=None, gaps=None,
+               **_):
     """This function takes a dictionary of keyword arguments for
     a scan and returns the points at which the scan should be measured."""
 
-    # FIXME:  Ask use for starting position if none is given
-    begin = x["begin"]
+    if gaps:
+        count = gaps+1
 
-    if "end" in x:
-        end = x["end"]
-        if "stride" in x:
-            steps = np.ceil((end-begin)/float(x["stride"]))
+    if begin is not None and end is not None:
+        if stride:
+            steps = np.ceil((end-begin)/float(stride))
             return np.linspace(begin, end, steps+1)
-        elif "count" in x:
-            return np.linspace(begin, end, x["count"])
-        elif "gaps" in x:
-            return np.linspace(begin, end, x["gaps"]+1)
-        elif "step" in x:
-            return np.arange(begin, end, x["step"])
-    elif "count" in x and ("stride" in x or "step" in x):
-        if "stride" in x:
-            step = x["stride"]
-        else:
-            step = x["step"]
-        return np.linspace(begin, begin+(x["count"]-1)*step, x["count"])
-    elif "gaps" in x and ("stride" in x or "step" in x):
-        if "stride" in x:
-            step = x["stride"]
-        else:
-            step = x["step"]
-        return np.linspace(begin, begin+x["gaps"]*step, x["gaps"]+1)
+        elif count:
+            return np.linspace(begin, end, count)
+        elif step:
+            return np.arange(begin, end, step)
+    elif begin is not None and count and (stride or step):
+        if stride:
+            step = stride
+        return np.linspace(begin, begin+(count-1)*step, count)
+    raise RuntimeError("Cannot parse options:\n {} {} {} {} {} {}".format(begin, end, step, stride, count, gaps))
 
 
 def make_scan(defaults):
@@ -59,7 +52,7 @@ def make_scan(defaults):
         spacing.
 
         """
-        points = get_points(kwargs)
+        points = get_points(**kwargs)
 
         return SimpleScan(motion, points, defaults)
     return scan
