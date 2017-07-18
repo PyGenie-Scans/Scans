@@ -7,15 +7,22 @@ import numpy as np
 from .Scans import SimpleScan
 
 
-def get_points(begin=None, end=None,
-               step=None, stride=None,
-               count=None, gaps=None,
-               **_):
+def get_points(
+        current,
+        begin=None, end=None,
+        step=None, stride=None,
+        count=None, gaps=None,
+        before=None, after=None,
+        **_):
     """This function takes a dictionary of keyword arguments for
     a scan and returns the points at which the scan should be measured."""
 
     if gaps:
         count = gaps+1
+    if before is not None:
+        begin = current + before
+    if after is not None:
+        end = current + after
 
     if begin is not None and end is not None:
         if stride:
@@ -52,7 +59,7 @@ def make_scan(defaults):
         spacing.
 
         """
-        points = get_points(**kwargs)
+        points = get_points(motion(), **kwargs)
 
         return SimpleScan(motion, points, defaults)
     return scan
