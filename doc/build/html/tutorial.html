@@ -1,0 +1,493 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial &mdash; PyGenie Scans 0.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyGenie Scans 0.0.0 documentation" href="index.html" />
+    <link rel="next" title="Reference" href="reference.html" />
+    <link rel="prev" title="Welcome to PyGenie Scans’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="Reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyGenie Scans’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyGenie Scans 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>This is a proposal for an improved system for running scans on the
+instrument.  The idea is to use <a href="#id1"><span class="problematic" id="id2">`</span></a>Scan&#8217; objects to represent the parts
+of the scan.  These scan objects form an algebra, making them easier
+to compose than using <a href="#id3"><span class="problematic" id="id4">`</span></a>for&#8217; loops.  These scan objects are mainly
+intended as tools for the instrument scientists for creating a higher
+level interface that the users will interact with.</div></blockquote>
+</div>
+<div class="section" id="design-goals">
+<h2>Design Goals<a class="headerlink" href="#design-goals" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>We desire the following traits in the Scanning system</div></blockquote>
+<div class="section" id="user-simplicity">
+<h3>User simplicity<a class="headerlink" href="#user-simplicity" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>The users need to be able to perform simple scans without thinking
+about object orient programming or algebraic data types.  Performing a
+basic scan should always be a one liner.  Making modified versions of
+that scan should require learning a modification of that command and
+not an entirely new structure.  Common, sensible user options should
+be available and sane defaults given.</p>
+<p>The code should also take advantage of Python&#8217;s built in documentation
+system to allow for discoverability of all of the functionality of
+these scripts.</p>
+</div></blockquote>
+</div>
+<div class="section" id="composability">
+<h3>Composability<a class="headerlink" href="#composability" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>The code should trivially allow combining smaller scripts into a
+larger script.  This ensures that, as long as the smaller scripts are
+bug free, the larger scripts will also be free of bugs by
+construction.</div></blockquote>
+</div>
+<div class="section" id="functionality">
+<h3>Functionality<a class="headerlink" href="#functionality" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>The code should be able to perform all of the tasks that might involve
+scanning on the beamline, from the common place to the irregular.</p>
+<dl class="docutils">
+<dt>Plotting: It should be possible to plot any readback value as a function</dt>
+<dd>of any set of motor positions.  Scans of multiple axes should
+be able to either plot multiple labelled lines or a 2D heatmap</dd>
+<dt>Measuring: Performing a full series of measurements should only be a</dt>
+<dd>minor modification of the plotting command</dd>
+<dt>Fitting: The user should be capable of performing fits on curves to</dt>
+<dd>extract values of interest.  Common fitting routines should be
+a simple string while still accepting custom functions for
+exceptional circumstances</dd>
+<dt>Spacing: It should be possible to space points both linearly and</dt>
+<dd>logarithmically.</dd>
+<dt>Prediction: It should be possible to estimate the time needed for a scan</dt>
+<dd>before the scan is performed.</dd>
+</dl>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>These are examples of some basic scans that the user might perform on
+the high level interface.  The examples have run on a 6 defined in a
+later section.</div></blockquote>
+<div class="section" id="plot-motor-scan">
+<h3>Plot Motor Scan<a class="headerlink" href="#plot-motor-scan" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Our first, simple example is the user plotting a scan of the detector
+intensity as the motor moves from 0 to 2 inclusively in steps /near/
+0.3.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">Scans.Instrument</span> <span class="kn">import</span> <span class="n">scan</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">two_theta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="s2">&quot;plot_example.png&quot;</span><span class="p">)</span>
+<span class="go">Taking a count at theta=0.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=0.50 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.50 and two theta=0.00</span>
+<span class="go">Taking a count at theta=2.00 and two theta=0.00</span>
+</pre></div>
+</div>
+<p>The <a href="#id5"><span class="problematic" id="id6">`</span></a>save&#8217; argument allows the figure to be saved to a file.
+Otherwise, the screen will show the plot interactively.</p>
+<p>[<a class="reference external" href="file:plot_example.png">file:plot_example.png</a>]</p>
+<p>The <a href="#id7"><span class="problematic" id="id8">`</span></a>stride&#8217; option gives an appoximate step size, but forces ensures
+that the beginning and final points are measured.  <a href="#id9"><span class="problematic" id="id10">`</span></a>step&#8217; forces the
+exact spacing, but may not measure the final point.  <a href="#id11"><span class="problematic" id="id12">`</span></a>count&#8217; and
+<a href="#id13"><span class="problematic" id="id14">`</span></a>gaps&#8217; allow the user to specify the number of measurements and the
+number of gaps, respectively.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="s2">&quot;temp.png&quot;</span><span class="p">)</span>
+<span class="go">Taking a count at theta=0.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=0.60 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.20 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.80 and two theta=0.00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="s2">&quot;temp.png&quot;</span><span class="p">)</span>
+<span class="go">Taking a count at theta=0.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=0.67 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.33 and two theta=0.00</span>
+<span class="go">Taking a count at theta=2.00 and two theta=0.00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">gaps</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="s2">&quot;temp.png&quot;</span><span class="p">)</span>
+<span class="go">Taking a count at theta=0.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=0.50 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.50 and two theta=0.00</span>
+<span class="go">Taking a count at theta=2.00 and two theta=0.00</span>
+</pre></div>
+</div>
+<p>The user also has the option of fixing the steps size and number of
+measurements or gaps while leaving the ending position open.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="s2">&quot;temp.png&quot;</span><span class="p">)</span>
+<span class="go">Taking a count at theta=0.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=0.60 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.20 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.80 and two theta=0.00</span>
+<span class="go">Taking a count at theta=2.40 and two theta=0.00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">gaps</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="s2">&quot;temp.png&quot;</span><span class="p">)</span>
+<span class="go">Taking a count at theta=0.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=0.60 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.20 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.80 and two theta=0.00</span>
+<span class="go">Taking a count at theta=2.40 and two theta=0.00</span>
+<span class="go">Taking a count at theta=3.00 and two theta=0.00</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="perform-fits">
+<h3>Perform Fits<a class="headerlink" href="#perform-fits" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Performing a fit on a measurement is merely a modification of
+performing the plot</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">Scans.Fit</span> <span class="kn">import</span> <span class="n">Linear</span><span class="p">,</span> <span class="n">Gaussian</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Linear</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="go">Taking a count at theta=0.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=0.50 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.50 and two theta=0.00</span>
+<span class="go">Taking a count at theta=2.00 and two theta=0.00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">&quot;{:0.4f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fit</span><span class="p">[</span><span class="s2">&quot;slope&quot;</span><span class="p">])</span>
+<span class="go">&#39;0.6692&#39;</span>
+</pre></div>
+</div>
+<p>In this instance, the user requested a linear fit.  The result was an
+array with the slope and intercept.  The fit is also plotted over the
+original graph when finished.</p>
+<p>[<a class="reference external" href="file:fitplot.png">file:fitplot.png</a>]</p>
+<p>We can also plot the same scan against a gaussian</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Gaussian</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="go">Taking a count at theta=0.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=0.50 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.00 and two theta=0.00</span>
+<span class="go">Taking a count at theta=1.50 and two theta=0.00</span>
+<span class="go">Taking a count at theta=2.00 and two theta=0.00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">&quot;{:0.4f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fit</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">])</span>
+<span class="go">&#39;2.0612&#39;</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="perform-measurement-scan">
+<h3>Perform Measurement Scan<a class="headerlink" href="#perform-measurement-scan" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>To go from a simple counting scan to a full set of measurements, all
+that needs to change is the method call.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Taking a measurement at theta={theta}&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+<span class="go">Taking a measurement at theta=0.0</span>
+<span class="go">Taking a measurement at theta=0.5</span>
+<span class="go">Taking a measurement at theta=1.0</span>
+<span class="go">Taking a measurement at theta=1.5</span>
+<span class="go">Taking a measurement at theta=2.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span><span class="p">(</span><span class="n">two_theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="s2">&quot;two theta={two_theta}&quot;</span><span class="p">)</span>
+<span class="go">two theta=0.0</span>
+<span class="go">two theta=0.5</span>
+<span class="go">two theta=1.0</span>
+<span class="go">two theta=1.5</span>
+<span class="go">two theta=2.0</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="perform-complex-scans">
+<h3>Perform complex scans<a class="headerlink" href="#perform-complex-scans" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>Some uses need more complicated measurements that just a simple scan
+over a single axis.  These more complicated commands may need some
+initial coaching from the beamline scientist, but should be simple
+enough for the user to modify them without assistance.</p>
+<p>To begin with, a user may want to scan theta and two theta together in
+lock step.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">th</span><span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">two_th</span><span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">two_theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">th</span><span class="o">&amp;</span> <span class="n">two_th</span><span class="p">)</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="s2">&quot;theta={theta} and two_theta={two_theta}&quot;</span><span class="p">)</span>
+<span class="go">theta=0.0 and two_theta=0.0</span>
+<span class="go">theta=0.25 and two_theta=0.5</span>
+<span class="go">theta=0.5 and two_theta=1.0</span>
+<span class="go">theta=0.75 and two_theta=1.5</span>
+<span class="go">theta=1.0 and two_theta=2.0</span>
+</pre></div>
+</div>
+<p>On the other hand, if the user is unsure about the proper sample
+alignment, they may want to investigate theta and two-theta separately</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">th</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">two_th</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">two_theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">th</span> <span class="o">*</span> <span class="n">two_th</span><span class="p">)</span><span class="o">.</span><span class="n">measure</span><span class="p">(</span><span class="s2">&quot;theta={theta} and two_theta={two_theta}&quot;</span><span class="p">)</span>
+<span class="go">theta=0.0 and two_theta=0.0</span>
+<span class="go">theta=0.0 and two_theta=1.0</span>
+<span class="go">theta=0.0 and two_theta=2.0</span>
+<span class="go">theta=0.0 and two_theta=3.0</span>
+<span class="go">theta=0.5 and two_theta=0.0</span>
+<span class="go">theta=0.5 and two_theta=1.0</span>
+<span class="go">theta=0.5 and two_theta=2.0</span>
+<span class="go">theta=0.5 and two_theta=3.0</span>
+<span class="go">theta=1.0 and two_theta=0.0</span>
+<span class="go">theta=1.0 and two_theta=1.0</span>
+<span class="go">theta=1.0 and two_theta=2.0</span>
+<span class="go">theta=1.0 and two_theta=3.0</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="estimate-time">
+<h3>Estimate time<a class="headerlink" href="#estimate-time" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>It&#8217;s not all that uncommon for users to find themselves setting an
+overnight run to perform while they sleep.  Since they are usually
+writing these scripts around two in the morning, their arithemtic
+skills frequently fail.  When the run terminates prematurely, the
+beam time is wasted.  When the user underestimates the time that
+they&#8217;re requesting, they wake up to find that their measurements
+haven&#8217;t finished and they must use more beam time to finish their
+results.</p>
+<p>Having the scan system perform estimates of the time required and
+the point of completion is a simple convenience to prevent these
+user headaches.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">needed</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">needed</span><span class="p">)</span>
+<span class="go">21600</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">needed</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">frames</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> 
+<span class="go">The run would finish at 2017-07-17 20:06:24.600802</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">needed</span><span class="p">)</span> 
+<span class="go">400.0</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="class-setup">
+<h2>Class setup<a class="headerlink" href="#class-setup" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>[<a class="reference external" href="file:classes.pdf">file:classes.pdf</a>]</p>
+<p>The base class for the low level code is the <a href="#id15"><span class="problematic" id="id16">`</span></a>Scan&#8217; class.  This
+ensures that any functionality added to this class or bugs fixed in
+its code propagate out to all callers of this library.  Unfortunately,
+Python does not have a concept of interfaces, so we cannot force all
+children to have a set of defined functions.  However, any subclasses
+of <a href="#id17"><span class="problematic" id="id18">`</span></a>Scan&#8217; must contain the follow member functions:</p>
+<dl class="docutils">
+<dt>map: Create a modified version of the scan based on a user supplied</dt>
+<dd>function.  The original position of each point is fed as input to
+the function and the return value of the function is the new
+position.</dd>
+</dl>
+<p>reverse: Create a copy of the scan that runs in the opposite direction
+__len__: Return the number of elements in the scan
+__iter__: Return an iterator that steps through the scan one position at</p>
+<blockquote>
+<div>a time, yielding the current position at each point.</div></blockquote>
+<p>There are four default subclasses of Scan that should handle most of
+the requirements</p>
+<dl class="docutils">
+<dt>SimpleScan: is the lowest level of the scan system.  It requires a</dt>
+<dd>function which performs the desired action on each point, a
+list of points, and a name for the axis.  At this time, all
+scans are combinations of simpleScans.</dd>
+<dt>SumScan: runs two scans sequentially.  These scans do not need to be on</dt>
+<dd>the same axes or even move the same number of axes.</dd>
+<dt>ProductScan: performs every possible combination of positions for two</dt>
+<dd>different scans.  This provides an alternative to nested
+loops.</dd>
+<dt>ParallelScan: takes to scans and runs their actions together at each</dt>
+<dd>step.  For example, if <a href="#id19"><span class="problematic" id="id20">`</span></a>a&#8217; was a scan over theta and <a href="#id21"><span class="problematic" id="id22">`</span></a>b&#8217;
+was a scan over two theta, then <a href="#id23"><span class="problematic" id="id24">`</span></a>a &amp;&amp; b&#8217; would scan each
+theta angle with its corresponding two theta.</dd>
+</dl>
+<p>The base <a href="#id25"><span class="problematic" id="id26">`</span></a>Scan&#8217; class contains four useful member functions.</p>
+<dl class="docutils">
+<dt>plot: The <a href="#id27"><span class="problematic" id="id28">`</span></a>plot&#8217; function goes to each position listed in the scan,</dt>
+<dd>takes a count, and plots it on an axis.  The user can specify the
+counting command.</dd>
+<dt>measure: The <a href="#id29"><span class="problematic" id="id30">`</span></a>measure&#8217; function goes to each position in the in the scan</dt>
+<dd>and records a measurement.  The function is passed a title
+which can include information about the current position in the
+scan.</dd>
+<dt>fit: Like <a href="#id31"><span class="problematic" id="id32">`</span></a>plot&#8217;, this function takes a single count at each position.</dt>
+<dd>It then fits it to the user supplied model and returns the fitted
+value.  This could be anything from the peak position to the
+frequency of the curve.</dd>
+<dt>calculate: This function takes a desired measurement time at each point</dt>
+<dd>and, optionally, an approximated motor movement time.  It
+returns an estimated duration for the scan and time of
+completion.</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="high-level-interface">
+<h2>High Level interface<a class="headerlink" href="#high-level-interface" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>I&#8217;ve included an example of a possible high level interface in the
+<a href="#id33"><span class="problematic" id="id34">`</span></a>scan&#8217; function.  It takes a motor name followed by a plethora of
+keyword arguments to easily create scans for the users.</div></blockquote>
+<div class="section" id="pv">
+<h3>pv<a class="headerlink" href="#pv" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div>The first parameter for scan is the name of the motor the be scanned.
+This string is passed onto cset for the actual motor movements.  It&#8217;s
+also used as the label for the scan when doing string interpolation
+for the run titles.</div></blockquote>
+</div>
+<div class="section" id="position-commands">
+<h3>Position Commands<a class="headerlink" href="#position-commands" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>The user needs to give three of the following keyword arguments to
+create a scan.</p>
+<dl class="docutils">
+<dt>begin: This is the start position of the scan.  This is currently</dt>
+<dd>mandatory, but we might make it optional in the future for
+creating relative scans.</dd>
+<dt>end: This is the final position of the scan.  The type of step chosen</dt>
+<dd>determines whether or not this final value is guaranteed to be
+included in the final measurement.</dd>
+<dt>count: The total number of measurements to perform.  This parameter</dt>
+<dd>always take precedence over &#8220;gaps&#8221;</dd>
+<dt>gaps: The number steps to take.  The total number of measurements is</dt>
+<dd>always one greater than the number of gaps.</dd>
+<dt>stride: A /requested/, but not /mandatory/, step size.  Users often know</dt>
+<dd>the range over which they wish to scan and their desired
+scanning resolution.  <a href="#id35"><span class="problematic" id="id36">`</span></a>stride&#8217; measured the entire range, but
+may increase the resolution to give equally spaced measurements.
+<a href="#id37"><span class="problematic" id="id38">`</span></a>stride&#8217; always take precedence over =step</dd>
+<dt>step: A mandatory step size.  If the request measurement range is not an</dt>
+<dd>integer number of steps, the measurement will stop before the
+requested end.</dd>
+</dl>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#design-goals">Design Goals</a><ul>
+<li><a class="reference internal" href="#user-simplicity">User simplicity</a></li>
+<li><a class="reference internal" href="#composability">Composability</a></li>
+<li><a class="reference internal" href="#functionality">Functionality</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#plot-motor-scan">Plot Motor Scan</a></li>
+<li><a class="reference internal" href="#perform-fits">Perform Fits</a></li>
+<li><a class="reference internal" href="#perform-measurement-scan">Perform Measurement Scan</a></li>
+<li><a class="reference internal" href="#perform-complex-scans">Perform complex scans</a></li>
+<li><a class="reference internal" href="#estimate-time">Estimate time</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-setup">Class setup</a></li>
+<li><a class="reference internal" href="#high-level-interface">High Level interface</a><ul>
+<li><a class="reference internal" href="#pv">pv</a></li>
+<li><a class="reference internal" href="#position-commands">Position Commands</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to PyGenie Scans&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference.html"
+                        title="next chapter">Reference</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="Reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyGenie Scans’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">PyGenie Scans 0.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2017, Washington et al.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+    </div>
+  </body>
+</html>
