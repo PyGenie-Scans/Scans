@@ -188,8 +188,8 @@ Table of Contents
   Taking a count at theta=1.00 and two theta=0.00
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> fit["center"]
-  2.0612514476281349
+  >>> "{:0.4f}".format(fit["center"])
+  '2.0612'
 
 3.3 Perform Measurement Scan
 ────────────────────────────
