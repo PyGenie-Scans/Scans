@@ -182,7 +182,7 @@ Table of Contents
 
   We can also plot the same scan against a gaussian
 
-  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(fit="gaussian")
+  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(fit="gaussian", save="gaussian.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
