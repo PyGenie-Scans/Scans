@@ -77,14 +77,15 @@ plot will be saved in that file."""
                     line.set_data(xs, ys)
                 # fig.canvas.draw()
                 plt.pause(0.05)
-        finally:
-            if not quiet:
-                plt.ioff()
-            if save:
-                plt.savefig(save)
-            if return_values:
-                return (xs, ys)
-            return
+        except KeyboardInterrupt:
+            pass
+        if not quiet:
+            plt.ioff()
+        if save:
+            plt.savefig(save)
+        if return_values:
+            return (xs, ys)
+        return
 
     def measure(self, title, measure=None, **kwargs):
         """Perform a full measurement at each position indicated by the scan.
