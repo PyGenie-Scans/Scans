@@ -49,7 +49,7 @@ plot will be saved in that file."""
         if not quiet:
             plt.ion()
         fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
+        axis = fig.add_subplot(1, 1, 1)
 
         xs = []
         ys = []
@@ -66,14 +66,14 @@ plot will be saved in that file."""
                 xs.append(position)
                 ys.append(detector(**kwargs))
                 if line is None:
-                    line = ax.plot(xs, ys)[0]
+                    line = axis.plot(xs, ys)[0]
                 else:
                     xdiff = max(xs)-min(xs)
-                    ax.set_xlim(min(xs)-0.05*xdiff,
-                                max(xs)+0.05*xdiff)
+                    axis.set_xlim(min(xs)-0.05*xdiff,
+                                  max(xs)+0.05*xdiff)
                     ydiff = max(ys)-min(ys)
-                    ax.set_ylim(min(ys)-0.05*ydiff,
-                                max(ys)+0.05*ydiff)
+                    axis.set_ylim(min(ys)-0.05*ydiff,
+                                  max(ys)+0.05*ydiff)
                     line.set_data(xs, ys)
                 # fig.canvas.draw()
                 plt.pause(0.05)
