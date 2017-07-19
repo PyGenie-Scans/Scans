@@ -19,6 +19,12 @@ def merge_dicts(x, y):
     return final
 
 
+def _plot_range(array):
+    diff = max(array) - min(array)
+    return (min(array)-0.05*diff,
+            max(array)+0.05*diff)
+
+
 class Scan(object):
     """The virtual class that represents all controlled scans.  This class
 should never be instantiated directly, but rather by one of its
@@ -48,8 +54,7 @@ plot will be saved in that file."""
 
         if not quiet:
             plt.ion()
-        fig = plt.figure()
-        axis = fig.add_subplot(1, 1, 1)
+        axis = plt.figure().add_subplot(1, 1, 1)
 
         xs = []
         ys = []
@@ -68,14 +73,11 @@ plot will be saved in that file."""
                 if line is None:
                     line = axis.plot(xs, ys)[0]
                 else:
-                    xdiff = max(xs)-min(xs)
-                    axis.set_xlim(min(xs)-0.05*xdiff,
-                                  max(xs)+0.05*xdiff)
-                    ydiff = max(ys)-min(ys)
-                    axis.set_ylim(min(ys)-0.05*ydiff,
-                                  max(ys)+0.05*ydiff)
+                    rng = _plot_range(xs)
+                    axis.set_xlim(rng[0], rng[1])
+                    rng = _plot_range(ys)
+                    axis.set_ylim(rng[0], rng[1])
                     line.set_data(xs, ys)
-                # fig.canvas.draw()
                 plt.pause(0.05)
         except KeyboardInterrupt:
             pass
