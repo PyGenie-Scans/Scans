@@ -48,7 +48,6 @@ plot will be saved in that file."""
 
         xs = []
         ys = []
-        results = []
         xlabelled = False
         try:
             for x in self:
@@ -57,7 +56,6 @@ plot will be saved in that file."""
                 if not xlabelled:
                     plt.xlabel(label)
                     xlabelled = True
-                results.append(x)
                 xs.append(position)
                 ys.append(detector(**kwargs))
         finally:
@@ -67,7 +65,7 @@ plot will be saved in that file."""
                 else:
                     plt.show()
             if return_values:
-                return results
+                return (xs, ys)
             return
 
     def measure(self, title, measure=None, **kwargs):
@@ -90,9 +88,7 @@ plot will be saved in that file."""
 
         """
         plt.clf()
-        results = self.plot(quiet=quiet, return_values=True, **kwargs)
-        x = [next(iter(i[0].items()))[1] for i in results]
-        y = [i[1] for i in results]
+        (x, y) = self.plot(quiet=quiet, return_values=True, **kwargs)
 
         params = fit.fit(x, y)
         fity = fit.get_y(x, params)
