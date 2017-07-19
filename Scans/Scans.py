@@ -46,27 +46,29 @@ plot will be saved in that file."""
         if not detector:
             detector = self.defaults.detector
 
-        # FIXME: Support multi-processing plots
-        results = [(x, detector(**kwargs))
-                   for x in self]
-
-        if len(results[0][0].items()) == 1:
-            xs = [next(iter(x[0].items()))[1] for x in results]
-            ys = [x[1] for x in results]
-            plt.xlabel(next(iter(results[0][0].items()))[0])
-            plt.plot(xs, ys)
-        else:
-            # FIXME: Handle multidimensional plots
-            pass
-
-        if not quiet:
-            if save:
-                plt.savefig(save)
-            else:
-                plt.show()
-        if return_values:
-            return results
-        return
+        xs = []
+        ys = []
+        results = []
+        xlabelled = False
+        try:
+            for x in self:
+                # FIXME: Handle multidimensional plots
+                (label, position) = next(iter(x.items()))
+                if not xlabelled:
+                    plt.xlabel(label)
+                    xlabelled = True
+                results.append(x)
+                xs.append(position)
+                ys.append(detector(**kwargs))
+        finally:
+            if not quiet:
+                if save:
+                    plt.savefig(save)
+                else:
+                    plt.show()
+            if return_values:
+                return results
+            return
 
     def measure(self, title, measure=None, **kwargs):
         """Perform a full measurement at each position indicated by the scan.
