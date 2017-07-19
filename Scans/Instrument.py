@@ -22,6 +22,8 @@ def measure(title, info):
 
 def count():
     """Dummy function to simulate taking a neutron count"""
+    from time import sleep
+    sleep(5)
     print("Taking a count at theta=%0.2f and two theta=%0.2f" %
           (instrument["theta"], instrument["two_theta"]))
     return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
