@@ -46,9 +46,14 @@ plot will be saved in that file."""
         if not detector:
             detector = self.defaults.detector
 
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+
         xs = []
         ys = []
         xlabelled = False
+
+        line = ax.plot(xs, ys)[0]
         try:
             for x in self:
                 # FIXME: Handle multidimensional plots
@@ -58,6 +63,8 @@ plot will be saved in that file."""
                     xlabelled = True
                 xs.append(position)
                 ys.append(detector(**kwargs))
+                line.set_data(xs, ys)
+                fig.canvas.draw()
         finally:
             if not quiet:
                 if save:
