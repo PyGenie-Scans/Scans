@@ -9,7 +9,6 @@ treated as private.
 
 """
 from __future__ import absolute_import, print_function
-import matplotlib.pyplot as plt
 
 
 def merge_dicts(x, y):
@@ -17,6 +16,12 @@ def merge_dicts(x, y):
     final = x.copy()
     final.update(y)
     return final
+
+
+def _plot_range(array):
+    diff = max(array) - min(array)
+    return (min(array)-0.05*diff,
+            max(array)+0.05*diff)
 
 
 class Scan(object):
@@ -37,35 +42,52 @@ subclasses."""
     def __and__(self, x):
         return ParallelScan(self, x)
 
-    def plot(self, detector=None, save=None, quiet=None,
-             return_values=False, **kwargs):
+    def plot(self, detector=None, save=None,
+             action=None, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
 The measurement parameter can be used to set what type of measurement
 is to be taken.  If the save parameter is set to a file name, then the
 plot will be saved in that file."""
+        from matplotlib.pyplot import pause, figure
         if not detector:
             detector = self.defaults.detector
 
-        # FIXME: Support multi-processing plots
-        results = [(x, detector(**kwargs))
-                   for x in self]
+        fig = figure()
+        axis = fig.add_subplot(1, 1, 1)
 
-        if len(results[0][0].items()) == 1:
-            xs = [next(iter(x[0].items()))[1] for x in results]
-            ys = [x[1] for x in results]
-            plt.xlabel(next(iter(results[0][0].items()))[0])
-            plt.plot(xs, ys)
-        else:
-            # FIXME: Handle multidimensional plots
+        xs = []
+        ys = []
+        xlabelled = False
+
+        line = None
+        action_remainder = None
+        try:
+            for x in self:
+                # FIXME: Handle multidimensional plots
+                (label, position) = next(iter(x.items()))
+                if not xlabelled:
+                    axis.set_xlabel(label)
+                    xlabelled = True
+                xs.append(position)
+                ys.append(detector(**kwargs))
+                if line is None:
+                    line = axis.plot(xs, ys)[0]
+                else:
+                    rng = _plot_range(xs)
+                    axis.set_xlim(rng[0], rng[1])
+                    rng = _plot_range(ys)
+                    axis.set_ylim(rng[0], rng[1])
+                    line.set_data(xs, ys)
+                if action:
+                    action_remainder = action(xs, ys, fig, action_remainder)
+                pause(0.05)
+        except KeyboardInterrupt:
             pass
+        if save:
+            fig.savefig(save)
 
-        if not quiet:
-            if save:
-                plt.savefig(save)
-            else:
-                plt.show()
-        if return_values:
-            return results
+        if action_remainder:
+            return action_remainder
         return
 
     def measure(self, title, measure=None, **kwargs):
@@ -81,29 +103,52 @@ plot will be saved in that file."""
         for x in self:
             measure(title, x, **kwargs)
 
-    def fit(self, fit, save=None, quiet=False, **kwargs):
+    def fit(self, fit, **kwargs):
         """The fit method performs the scan, plotting the points as they are
         taken.  Once the scan is completed, a fit is then plotted over
         the scan and the fitting parameters are returned.
 
         """
-        plt.clf()
-        results = self.plot(quiet=quiet, return_values=True, **kwargs)
-        x = [next(iter(i[0].items()))[1] for i in results]
-        y = [i[1] for i in results]
+        def action(x, y, fig, remainder):
+            """Fit and plot the data within the plotting loop
 
-        params = fit.fit(x, y)
-        fity = fit.get_y(x, params)
-        result = fit.readable(params)
+            Parameters
+            ----------
+            x : Array of Float
+              The x positions measured thus far
+            y : Array of Float
+              The y positions measured thus fat
+            fig : matplotlib.figure.Figure
+              The figure on which to plot
+            line : None or maplotlib plot
+              If None, the fit hasn't begun plotting yet.  Otherwise, it
+              will be an object representing the last line fit.
 
-        if not quiet:
-            plt.plot(x, fity, "m-", label="{} fit".format(fit))
-            plt.legend()
-            if save:
-                plt.savefig(save)
+            Returns
+            -------
+            line : None or matplotlib plot
+              If nothing has been plotted, simply returns None.  Otherwise,
+              the plotted line is returned
+
+            """
+            if len(x) < fit.degrees:
+                return None
+            params = fit.fit(x, y)
+            fity = fit.get_y(x, params)
+            if not remainder:
+                line = fig.gca().plot(x, fity, "m-",
+                                      label="{} fit".format(fit.title))[0]
+                fig.gca().legend()
             else:
-                plt.show()
-        return result
+                line, _ = remainder
+                line.set_data(x, fity)
+            return (line, params)
+
+        result = self.plot(return_values=True,
+                           action=action,
+                           return_figure=True, **kwargs)
+
+        return fit.readable(result[1])
 
     def calculate(self, time=False, pad=0, **kwargs):
         """Calculate the expected time needed to perform a scan.

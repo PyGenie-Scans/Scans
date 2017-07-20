@@ -14,10 +14,12 @@ class Fit(object):
     extract usable information from those parameters.
     """
 
-    def __init__(self, action, run, fmt):
+    def __init__(self, action, run, fmt, degrees, title):
         self.action = action
         self.run = run
         self.fmt = fmt
+        self.degrees = degrees
+        self.title = title
 
     def fit(self, x, y):
         """The fit function takes arrays of independent and depedentend
@@ -55,7 +57,8 @@ def _gaussian_model(xs, center, sigma, amplitude, background):
 #: A linear regression
 Linear = Fit(lambda x, y: np.polyfit(x, y, 1),
              np.polyval,
-             lambda x: {"slope": x[0], "intercept": x[1]})
+             lambda x: {"slope": x[0], "intercept": x[1]},
+             2, title="Linear")
 
 #: A gaussian fit
 Gaussian = Fit(lambda x, y: curve_fit(_gaussian_model, x, y,
@@ -63,4 +66,5 @@ Gaussian = Fit(lambda x, y: curve_fit(_gaussian_model, x, y,
                                        np.max(y)-np.min(y), np.min(y)])[0],
                lambda cfit, x: _gaussian_model(x, *cfit),
                lambda x: {"center": x[0], "sigma": x[1],
-                          "amplitude": x[2], "background": x[3]})
+                          "amplitude": x[2], "background": x[3]},
+               5, title="Gaussian")
