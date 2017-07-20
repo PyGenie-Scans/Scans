@@ -114,7 +114,7 @@ plot will be saved in that file."""
                            action=fit.fit_plot_action(),
                            return_figure=True, **kwargs)
 
-        return fit.readable(result[1])
+        return fit.readable_remainder(result)
 
     def calculate(self, time=False, pad=0, **kwargs):
         """Calculate the expected time needed to perform a scan.

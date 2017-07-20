@@ -50,6 +50,13 @@ class Fit():
         """
         return lambda i: {}
 
+    def readable_remainder(self, remainder):
+        """
+        Turns the results of the plot action into the
+        dictionary returned by readable.
+        """
+        return self.readable(remainder[1])
+
     def fit_plot_action(self):
         """
         Create a function to be called in a plotting loop
@@ -122,6 +129,12 @@ class ParallelFit(Fit):
                 self.first.readable(fit[0]),
                 self.second.title:
                 self.second.readable(fit[1])}
+
+    def readable_remainder(self, remainder):
+        return {self.first.title:
+                self.first.readable(remainder[0][1]),
+                self.second.title:
+                self.second.readable(remainder[1][1])}
 
     def fit_plot_action(self):
         fst = self.first.fit_plot_action()

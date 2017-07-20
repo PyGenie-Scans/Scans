@@ -193,8 +193,7 @@ Perform Fits
   Taking a count at theta=1.60 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> fit
-  >>> "{:0.4f}".format(fit[["center"])
+  >>> "{:0.4f}".format(fit["Gaussian Fit"]["center"])
   '2.1012'
 
 Perform Measurement Scan
