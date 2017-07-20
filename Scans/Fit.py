@@ -3,46 +3,49 @@ for fitting routines.  It also contains implementations of some common
 fits (i.e. Linear and Gaussian).
 
 """
+from abc import ABCMeta, abstractmethod
 import numpy as np
 from scipy.optimize import curve_fit
 
 
-class Fit(object):
+class Fit():
     """The Fit class combines the common requirements needed for fitting.
     We need to be able to turn a set of data points into a set of
     parameters, get the simulated curve from a set of parameters, and
     extract usable information from those parameters.
     """
 
-    def __init__(self, action, run, fmt, degrees, title):
-        self.action = action
-        self.run = run
-        self.fmt = fmt
-        self.degrees = degrees
+    __metaclass__ = ABCMeta
+
+    def __init__(self, degree, title):
+        self.degree = degree
         self.title = title
 
+    @abstractmethod
     def fit(self, x, y):
         """The fit function takes arrays of independent and depedentend
         variables.  It returns a set of parameters in a format that is
         convenient for this specific object.
 
         """
-        return self.action(x, y)
+        return lambda i, j: None
 
+    @abstractmethod
     def get_y(self, x, fit):
         """get_y takes an array of independent variables and a set of model
         parameters and returns the expected dependent variables for
         those parameters
 
         """
-        return self.run(fit, x)
+        return lambda i, j: None
 
+    @abstractmethod
     def readable(self, fit):
         """Readable turns the implementation specific set of fit parameters
         into a human readable dictionary.
 
         """
-        return self.fmt(fit)
+        return lambda i: {}
 
     def fit_plot_action(self):
         """
@@ -75,7 +78,7 @@ class Fit(object):
               the plotted line is returned
 
             """
-            if len(x) < self.degrees:
+            if len(x) < self.degree:
                 return None
             params = self.fit(x, y)
             fity = self.get_y(x, params)
@@ -90,26 +93,64 @@ class Fit(object):
         return action
 
 
-def _gaussian_model(xs, center, sigma, amplitude, background):
-    """This is the model for a gaussian with the mean at center, a
-       standard deviation of sigma, and a peak of amplitude over a
-       base of background.
-
+class PolyFit(Fit):
     """
-    return background + amplitude * np.exp(-((xs-center)/sigma/np.sqrt(2))**2)
+    A fitting class for polynomials
+    """
+    def __init__(self, degree,
+                 title=None):
+        if title is None:
+            title = "Polynomial fit of degree {}".format(degree)
+        Fit.__init__(self, degree+1, title)
+
+    def fit(self, x, y):
+        return np.polyfit(x, y, self.degree-1)
+
+    def get_y(self, x, fit):
+        return np.polyval(fit, x)
+
+    def readable(self, fit):
+        if self.degree == 2:
+            return {"slope": fit[0], "intercept": fit[1]}
+        orders = np.arange(self.degree, 0, -1)
+        results = {}
+        for key, value in zip(orders, fit):
+            results["^{}".format(key)] = value
+        return results
+
+
+class GaussianFit(Fit):
+    """
+    A fitting class for handling gaussian peaks
+    """
+    def __init__(self):
+        Fit.__init__(self, 4, "Gaussian Fit")
+
+    @staticmethod
+    def _gaussian_model(xs, cen, sigma, amplitude, background):
+        """
+        This is the model for a gaussian with the mean at center, a
+        standard deviation of sigma, and a peak of amplitude over a base of
+        background.
+
+        """
+        return background + amplitude * np.exp(-((xs-cen)/sigma/np.sqrt(2))**2)
+
+    def fit(self, x, y):
+        return curve_fit(self._gaussian_model, x, y,
+                         [np.mean(x), np.max(x)-np.min(x),
+                          np.max(y)-np.min(y), np.min(y)])[0]
+
+    def get_y(self, x, fit):
+        return self._gaussian_model(x, *fit)
+
+    def readable(self, fit):
+        return {"center": fit[0], "sigma": fit[1],
+                "amplitude": fit[2], "background": fit[3]}
 
 
 #: A linear regression
-Linear = Fit(lambda x, y: np.polyfit(x, y, 1),
-             np.polyval,
-             lambda x: {"slope": x[0], "intercept": x[1]},
-             2, title="Linear")
+Linear = PolyFit(1, title="Linear")
 
 #: A gaussian fit
-Gaussian = Fit(lambda x, y: curve_fit(_gaussian_model, x, y,
-                                      [np.mean(x), np.max(x)-np.min(x),
-                                       np.max(y)-np.min(y), np.min(y)])[0],
-               lambda cfit, x: _gaussian_model(x, *cfit),
-               lambda x: {"center": x[0], "sigma": x[1],
-                          "amplitude": x[2], "background": x[3]},
-               5, title="Gaussian")
+Gaussian = GaussianFit()
