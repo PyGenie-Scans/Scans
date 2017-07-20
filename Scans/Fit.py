@@ -44,6 +44,51 @@ class Fit(object):
         """
         return self.fmt(fit)
 
+    def fit_plot_action(self):
+        """
+        Create a function to be called in a plotting loop
+        to live fit the data
+
+        Returns
+        -------
+        A function to call in the plotting loop
+        """
+        def action(x, y, fig, remainder):
+            """Fit and plot the data within the plotting loop
+
+            Parameters
+            ----------
+            x : Array of Float
+              The x positions measured thus far
+            y : Array of Float
+              The y positions measured thus fat
+            fig : matplotlib.figure.Figure
+              The figure on which to plot
+            line : None or maplotlib plot
+              If None, the fit hasn't begun plotting yet.  Otherwise, it
+              will be an object representing the last line fit.
+
+            Returns
+            -------
+            line : None or matplotlib plot
+              If nothing has been plotted, simply returns None.  Otherwise,
+              the plotted line is returned
+
+            """
+            if len(x) < self.degrees:
+                return None
+            params = self.fit(x, y)
+            fity = self.get_y(x, params)
+            if not remainder:
+                line = fig.gca().plot(x, fity, "m-",
+                                      label="{} fit".format(self.title))[0]
+                fig.gca().legend()
+            else:
+                line, _ = remainder
+                line.set_data(x, fity)
+            return (line, params)
+        return action
+
 
 def _gaussian_model(xs, center, sigma, amplitude, background):
     """This is the model for a gaussian with the mean at center, a

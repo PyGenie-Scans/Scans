@@ -109,43 +109,9 @@ plot will be saved in that file."""
         the scan and the fitting parameters are returned.
 
         """
-        def action(x, y, fig, remainder):
-            """Fit and plot the data within the plotting loop
-
-            Parameters
-            ----------
-            x : Array of Float
-              The x positions measured thus far
-            y : Array of Float
-              The y positions measured thus fat
-            fig : matplotlib.figure.Figure
-              The figure on which to plot
-            line : None or maplotlib plot
-              If None, the fit hasn't begun plotting yet.  Otherwise, it
-              will be an object representing the last line fit.
-
-            Returns
-            -------
-            line : None or matplotlib plot
-              If nothing has been plotted, simply returns None.  Otherwise,
-              the plotted line is returned
-
-            """
-            if len(x) < fit.degrees:
-                return None
-            params = fit.fit(x, y)
-            fity = fit.get_y(x, params)
-            if not remainder:
-                line = fig.gca().plot(x, fity, "m-",
-                                      label="{} fit".format(fit.title))[0]
-                fig.gca().legend()
-            else:
-                line, _ = remainder
-                line.set_data(x, fity)
-            return (line, params)
 
         result = self.plot(return_values=True,
-                           action=action,
+                           action=fit.fit_plot_action(),
                            return_figure=True, **kwargs)
 
         return fit.readable(result[1])
