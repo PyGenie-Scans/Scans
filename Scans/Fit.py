@@ -127,9 +127,9 @@ class ParallelFit(Fit):
 
     def readable_remainder(self, remainder):
         return {self.first.title:
-                self.first.readable(remainder[0][1]),
+                self.first.readable(remainder[0]),
                 self.second.title:
-                self.second.readable(remainder[1][1])}
+                self.second.readable(remainder[1])}
 
     def fit_plot_action(self):
         fst = self.first.fit_plot_action()
