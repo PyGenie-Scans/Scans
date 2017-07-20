@@ -71,7 +71,7 @@ plot will be saved in that file."""
                 xs.append(position)
                 ys.append(detector(**kwargs))
                 if line is None:
-                    line = axis.plot(xs, ys)[0]
+                    line = axis.plot(xs, ys, "d")[0]
                 else:
                     rng = _plot_range(xs)
                     axis.set_xlim(rng[0], rng[1])

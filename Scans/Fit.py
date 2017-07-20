@@ -83,7 +83,7 @@ class Fit():
             params = self.fit(x, y)
             fity = self.get_y(x, params)
             if not remainder:
-                line = fig.gca().plot(x, fity, "m-",
+                line = fig.gca().plot(x, fity, "-",
                                       label="{} fit".format(self.title))[0]
                 fig.gca().legend()
             else:
