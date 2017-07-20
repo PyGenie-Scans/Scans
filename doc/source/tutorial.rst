@@ -70,6 +70,14 @@ Examples
   the high level interface.  The examples have run on a 6 defined in a
   later section.
 
+  This documentation also serves as a testing basis to ensure that this
+  the code always matches the functionality declared here.  The lines
+  below are just some adminstative details to ensure that the tests
+  can run on a computer that isn't attached to a beamline
+
+  >>> import matplotlib
+  >>> matplotlib.use("Agg")
+  >>> from Scans.Instrument import scan, theta, two_theta
 
 Plot Motor Scan
 ---------------
@@ -78,7 +86,6 @@ Plot Motor Scan
   intensity as the motor moves from 0 to 2 inclusively in steps /near/
   0.3.
 
-  >>> from Scans.Instrument import scan, theta, two_theta
   >>> scan(theta, begin=0, end=2, stride=0.6).plot(seconds=1)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
