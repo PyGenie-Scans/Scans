@@ -9,7 +9,6 @@ treated as private.
 
 """
 from __future__ import absolute_import, print_function
-import matplotlib.pyplot as plt
 
 
 def merge_dicts(x, y):
@@ -43,18 +42,19 @@ subclasses."""
     def __and__(self, x):
         return ParallelScan(self, x)
 
-    def plot(self, detector=None, save=None, quiet=None,
-             return_values=False, **kwargs):
+    def plot(self, detector=None, save=None,
+             return_values=False, return_figure=False,
+             **kwargs):
         """Run over the scan an perform a simple measurement at each position.
 The measurement parameter can be used to set what type of measurement
 is to be taken.  If the save parameter is set to a file name, then the
 plot will be saved in that file."""
+        from matplotlib.pyplot import pause, figure
         if not detector:
             detector = self.defaults.detector
 
-        if not quiet:
-            plt.ion()
-        axis = plt.figure().add_subplot(1, 1, 1)
+        fig = figure()
+        axis = fig.add_subplot(1, 1, 1)
 
         xs = []
         ys = []
@@ -66,7 +66,7 @@ plot will be saved in that file."""
                 # FIXME: Handle multidimensional plots
                 (label, position) = next(iter(x.items()))
                 if not xlabelled:
-                    plt.xlabel(label)
+                    axis.set_xlabel(label)
                     xlabelled = True
                 xs.append(position)
                 ys.append(detector(**kwargs))
@@ -78,15 +78,20 @@ plot will be saved in that file."""
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
                     line.set_data(xs, ys)
-                plt.pause(0.05)
+                pause(0.05)
         except KeyboardInterrupt:
             pass
-        if not quiet:
-            plt.ioff()
         if save:
-            plt.savefig(save)
+            fig.savefig(save)
+
+        results = {}
         if return_values:
-            return (xs, ys)
+            results["x"] = xs
+            results["y"] = ys
+        if return_figure:
+            results["figure"] = fig
+        if bool(results):
+            return results
         return
 
     def measure(self, title, measure=None, **kwargs):
@@ -108,20 +113,23 @@ plot will be saved in that file."""
         the scan and the fitting parameters are returned.
 
         """
-        plt.clf()
-        (x, y) = self.plot(quiet=quiet, return_values=True, **kwargs)
+        plot = self.plot(quiet=quiet, return_values=True,
+                         return_figure=True, **kwargs)
+        x = plot["x"]
+        y = plot["y"]
+        fig = plot["figure"]
 
         params = fit.fit(x, y)
         fity = fit.get_y(x, params)
         result = fit.readable(params)
 
         if not quiet:
-            plt.plot(x, fity, "m-", label="{} fit".format(fit))
-            plt.legend()
+            fig.gca().plot(x, fity, "m-", label="{} fit".format(fit))
+            fig.gca().legend()
             if save:
-                plt.savefig(save)
+                fig.savefig(save)
             else:
-                plt.show()
+                fig.show()
         return result
 
     def calculate(self, time=False, pad=0, **kwargs):
