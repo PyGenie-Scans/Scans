@@ -32,6 +32,7 @@ class ProcessPlotter(object):
         self.fig = None
         self.axis = None
         self.rehome = rehome
+        self.lines = {}
 
     def poll_draw(self):
         """
@@ -54,6 +55,13 @@ class ProcessPlotter(object):
                 self.axis.set_xlabel(args[0])
             elif cmd == "legend":
                 self.axis.legend()
+            elif cmd == "update_points":
+                xs, ys, title = args
+                if title in self.lines:
+                    self.lines[title].set_data(xs, ys)
+                else:
+                    self.lines[title] = self.axis.plot(xs, ys, "-",
+                                                       label=title)[0]
             elif cmd == "quit":
                 self.pipe.send((self.x, self.y, self.fig))
                 return False
@@ -115,8 +123,8 @@ class NBPlot(object):
     def add_point(self, x, y):
         self("add", x, y)
 
-    def plot_points(self, xs, ys):
-        pass
+    def plot_points(self, xs, ys, title):
+        self("update_points", xs, ys, title)
 
     def legend(self):
         self("legend")

@@ -92,7 +92,7 @@ class Fit():
                 return None
             params = self.fit(x, y)
             fity = self.get_y(x, params)
-            fig.plot_points(x, fity)
+            fig.plot_points(x, fity, self.title)
             fig.legend()
             return params
         return action
