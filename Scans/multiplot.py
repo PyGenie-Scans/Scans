@@ -44,23 +44,23 @@ class ProcessPlotter(object):
                 break
 
             command = self.pipe.recv()
+            cmd, args = command
 
-            if command is None:
+            if cmd == "add":
+                self.x.append(args[0])
+                self.y.append(args[1])
+                self.axis.plot(self.x, self.y, 'ro')
+            elif cmd == "xlabel":
+                self.axis.set_xlabel(args[0])
+            elif cmd == "legend":
+                self.axis.legend()
+            elif cmd == "quit":
                 self.pipe.send((self.x, self.y, self.fig))
                 return False
 
-            else:
-                cmd, args = command
-                if cmd == "add":
-                    self.x.append(args[0])
-                    self.y.append(args[1])
-                    self.axis.plot(self.x, self.y, 'ro')
-                elif cmd == "xlabel":
-                    self.axis.set_xlabel(args)
-
-                if self.rehome:
-                    self.axis.set_xlim(min(self.x), max(self.x))
-                    self.axis.set_ylim(min(self.y), max(self.y))
+            if self.rehome:
+                self.axis.set_xlim(min(self.x), max(self.x))
+                self.axis.set_ylim(min(self.y), max(self.y))
 
         self.fig.canvas.draw()
         self.fig.canvas.show()
@@ -88,15 +88,15 @@ class NBPlot(object):
         # self.plot_process.daemon = True
         self.plot_process.start()
 
-    def __call__(self, *data):
-        self.plot_pipe.send(data)
+    def __call__(self, cmd, *data):
+        self.plot_pipe.send((cmd, data))
 
     def join(self):
         """Close the plot and get the results from it"""
         if not self.plot_process.daemon:
             return
 
-        self.plot_pipe.send(None)
+        self.plot_pipe.send("quit")
         result = self.plot_pipe.recv()
         self.plot_process.join()
         return result
@@ -112,14 +112,14 @@ class NBPlot(object):
         """
         self("xlabel", label)
 
-    def add_point(self, point):
-        self("add", point)
+    def add_point(self, x, y):
+        self("add", x, y)
 
     def plot_points(self, xs, ys):
         pass
 
     def legend(self):
-        pass
+        self("legend")
 
 
 def main():
