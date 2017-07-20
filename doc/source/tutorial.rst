@@ -165,14 +165,20 @@ Perform Fits
 
   We can also plot the same scan against a gaussian
 
-  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(Gaussian, frames=5)
+  >>> fit = scan(theta, begin=0, end=2, count=11).fit(Gaussian, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
-  Taking a count at theta=0.50 and two theta=0.00
+  Taking a count at theta=0.20 and two theta=0.00
+  Taking a count at theta=0.40 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=0.80 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
-  Taking a count at theta=1.50 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
   >>> "{:0.4f}".format(fit["center"])
-  '2.0612'
+  '2.1012'
 
 Perform Measurement Scan
 ------------------------

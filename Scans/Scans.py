@@ -43,8 +43,7 @@ subclasses."""
         return ParallelScan(self, x)
 
     def plot(self, detector=None, save=None,
-             return_values=False, return_figure=False,
-             **kwargs):
+             action=None, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
 The measurement parameter can be used to set what type of measurement
 is to be taken.  If the save parameter is set to a file name, then the
@@ -61,6 +60,7 @@ plot will be saved in that file."""
         xlabelled = False
 
         line = None
+        action_remainder = None
         try:
             for x in self:
                 # FIXME: Handle multidimensional plots
@@ -78,20 +78,16 @@ plot will be saved in that file."""
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
                     line.set_data(xs, ys)
+                if action:
+                    action_remainder = action(xs, ys, fig, action_remainder)
                 pause(0.05)
         except KeyboardInterrupt:
             pass
         if save:
             fig.savefig(save)
 
-        results = {}
-        if return_values:
-            results["x"] = xs
-            results["y"] = ys
-        if return_figure:
-            results["figure"] = fig
-        if bool(results):
-            return results
+        if action_remainder:
+            return action_remainder
         return
 
     def measure(self, title, measure=None, **kwargs):
@@ -107,30 +103,52 @@ plot will be saved in that file."""
         for x in self:
             measure(title, x, **kwargs)
 
-    def fit(self, fit, save=None, quiet=False, **kwargs):
+    def fit(self, fit, **kwargs):
         """The fit method performs the scan, plotting the points as they are
         taken.  Once the scan is completed, a fit is then plotted over
         the scan and the fitting parameters are returned.
 
         """
-        plot = self.plot(quiet=quiet, return_values=True,
-                         return_figure=True, **kwargs)
-        x = plot["x"]
-        y = plot["y"]
-        fig = plot["figure"]
+        def action(x, y, fig, remainder):
+            """Fit and plot the data within the plotting loop
 
-        params = fit.fit(x, y)
-        fity = fit.get_y(x, params)
-        result = fit.readable(params)
+            Parameters
+            ----------
+            x : Array of Float
+              The x positions measured thus far
+            y : Array of Float
+              The y positions measured thus fat
+            fig : matplotlib.figure.Figure
+              The figure on which to plot
+            line : None or maplotlib plot
+              If None, the fit hasn't begun plotting yet.  Otherwise, it
+              will be an object representing the last line fit.
 
-        if not quiet:
-            fig.gca().plot(x, fity, "m-", label="{} fit".format(fit))
-            fig.gca().legend()
-            if save:
-                fig.savefig(save)
+            Returns
+            -------
+            line : None or matplotlib plot
+              If nothing has been plotted, simply returns None.  Otherwise,
+              the plotted line is returned
+
+            """
+            if len(x) < fit.degrees:
+                return None
+            params = fit.fit(x, y)
+            fity = fit.get_y(x, params)
+            if not remainder:
+                line = fig.gca().plot(x, fity, "m-",
+                                      label="{} fit".format(fit.title))[0]
+                fig.gca().legend()
             else:
-                fig.show()
-        return result
+                line, _ = remainder
+                line.set_data(x, fity)
+            return (line, params)
+
+        result = self.plot(return_values=True,
+                           action=action,
+                           return_figure=True, **kwargs)
+
+        return fit.readable(result[1])
 
     def calculate(self, time=False, pad=0, **kwargs):
         """Calculate the expected time needed to perform a scan.
