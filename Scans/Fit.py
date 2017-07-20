@@ -21,6 +21,9 @@ class Fit():
         self.degree = degree
         self.title = title
 
+    def __and__(self, x):
+        return ParallelFit(self, x)
+
     @abstractmethod
     def fit(self, x, y):
         """The fit function takes arrays of independent and depedentend
@@ -90,6 +93,70 @@ class Fit():
                 line, _ = remainder
                 line.set_data(x, fity)
             return (line, params)
+        return action
+
+
+class ParallelFit(Fit):
+    """
+    A class for combining fits
+    """
+    def __init__(self, x, y):
+        degree = max((x.degree, y.degree))
+        title = "Combination of {} and {}".format(x.title, y.title)
+        Fit.__init__(self, degree, title)
+        self.first = x
+        self.second = y
+
+    def fit(self, x, y):
+        xfit = self.first.fit(x, y)
+        yfit = self.second.fit(x, y)
+        return (xfit, yfit)
+
+    def get_y(self, x, fit):
+        afit, bfit = fit
+        return (self.first.get_y(x, afit),
+                self.second.get(x, bfit))
+
+    def readable(self, fit):
+        return {self.first.title:
+                self.first.readable(fit[0]),
+                self.second.title:
+                self.second.readable(fit[1])}
+
+    def fit_plot_action(self):
+        fst = self.first.fit_plot_action()
+        snd = self.second.fit_plot_action()
+
+        def action(x, y, fig, remainder):
+            """Fit and plot the data within the plotting loop
+
+            Parameters
+            ----------
+            x : Array of Float
+              The x positions measured thus far
+            y : Array of Float
+              The y positions measured thus fat
+            fig : matplotlib.figure.Figure
+              The figure on which to plot
+            line : None or maplotlib plot
+              If None, the fit hasn't begun plotting yet.  Otherwise, it
+              will be an object representing the last line fit.
+
+            Returns
+            -------
+            line : None or matplotlib plot
+              If nothing has been plotted, simply returns None.  Otherwise,
+              the plotted line is returned
+
+            """
+            if remainder:
+                i, j = remainder
+            else:
+                i = None
+                j = None
+            i = fst(x, y, fig, i)
+            j = snd(x, y, fig, j)
+            return (i, j)
         return action
 
 

@@ -180,6 +180,23 @@ Perform Fits
   >>> "{:0.4f}".format(fit["center"])
   '2.1012'
 
+  We can even combine the first fit both values at the same time
+  >>> fit = scan(theta, begin=0, end=2, count=11).fit(Linear & Gaussian, frames=5)
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.20 and two theta=0.00
+  Taking a count at theta=0.40 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=0.80 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  >>> fit
+  >>> "{:0.4f}".format(fit[["center"])
+  '2.1012'
+
 Perform Measurement Scan
 ------------------------
 
