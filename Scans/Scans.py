@@ -9,6 +9,7 @@ treated as private.
 
 """
 from __future__ import absolute_import, print_function
+from .multiplot import NBPlot
 
 
 def merge_dicts(x, y):
@@ -48,45 +49,35 @@ subclasses."""
 The measurement parameter can be used to set what type of measurement
 is to be taken.  If the save parameter is set to a file name, then the
 plot will be saved in that file."""
-        from matplotlib.pyplot import pause, figure
         if not detector:
             detector = self.defaults.detector
 
-        fig = figure()
-        axis = fig.add_subplot(1, 1, 1)
+        plot = NBPlot()
 
         xs = []
         ys = []
         xlabelled = False
 
-        line = None
         action_remainder = None
         try:
             for x in self:
                 # FIXME: Handle multidimensional plots
                 (label, position) = next(iter(x.items()))
                 if not xlabelled:
-                    axis.set_xlabel(label)
+                    plot.set_xlabel(label)
                     xlabelled = True
                 xs.append(position)
                 ys.append(detector(**kwargs))
-                if line is None:
-                    line = axis.plot(xs, ys, "d")[0]
-                else:
-                    rng = _plot_range(xs)
-                    axis.set_xlim(rng[0], rng[1])
-                    rng = _plot_range(ys)
-                    axis.set_ylim(rng[0], rng[1])
-                    line.set_data(xs, ys)
-                if action:
-                    action_remainder = action(xs, ys, fig, action_remainder)
-                pause(0.05)
+                plot((xs[-1], ys[-1]))
+                if action is not None:
+                    action_remainder = action(xs, ys, plot, action_remainder)
+                    pass
         except KeyboardInterrupt:
             pass
         if save:
-            fig.savefig(save)
+            plot.savefig(save)
 
-        if action_remainder:
+        if action_remainder is not None:
             return action_remainder
         return
 

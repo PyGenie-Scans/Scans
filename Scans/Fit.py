@@ -55,7 +55,7 @@ class Fit():
         Turns the results of the plot action into the
         dictionary returned by readable.
         """
-        return self.readable(remainder[1])
+        return self.readable(remainder)
 
     def fit_plot_action(self):
         """
@@ -92,14 +92,9 @@ class Fit():
                 return None
             params = self.fit(x, y)
             fity = self.get_y(x, params)
-            if not remainder:
-                line = fig.gca().plot(x, fity, "-",
-                                      label="{} fit".format(self.title))[0]
-                fig.gca().legend()
-            else:
-                line, _ = remainder
-                line.set_data(x, fity)
-            return (line, params)
+            fig.plot_points(x, fity)
+            fig.legend()
+            return params
         return action
 
 

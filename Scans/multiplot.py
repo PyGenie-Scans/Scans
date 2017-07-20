@@ -96,6 +96,23 @@ class NBPlot(object):
         self.plot_process.join()
         return result
 
+    def set_xlabel(self, label):
+        """
+        Set the horizontal axis label on the plot
+
+        Parameters
+        ----------
+        label
+          The new axis label
+        """
+        pass
+
+    def plot_points(self, xs, ys):
+        pass
+
+    def legend(self):
+        pass
+
 
 def main():
     """A simple test function of NBPlot"""
