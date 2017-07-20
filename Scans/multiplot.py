@@ -50,9 +50,14 @@ class ProcessPlotter(object):
                 return False
 
             else:
-                self.x.append(command[0])
-                self.y.append(command[1])
-                self.axis.plot(self.x, self.y, 'ro')
+                cmd, args = command
+                if cmd == "add":
+                    self.x.append(args[0])
+                    self.y.append(args[1])
+                    self.axis.plot(self.x, self.y, 'ro')
+                elif cmd == "xlabel":
+                    self.axis.set_xlabel(args)
+
                 if self.rehome:
                     self.axis.set_xlim(min(self.x), max(self.x))
                     self.axis.set_ylim(min(self.y), max(self.y))
@@ -83,7 +88,7 @@ class NBPlot(object):
         # self.plot_process.daemon = True
         self.plot_process.start()
 
-    def __call__(self, data):
+    def __call__(self, *data):
         self.plot_pipe.send(data)
 
     def join(self):
@@ -105,7 +110,10 @@ class NBPlot(object):
         label
           The new axis label
         """
-        pass
+        self("xlabel", label)
+
+    def add_point(self, point):
+        self("add", point)
 
     def plot_points(self, xs, ys):
         pass

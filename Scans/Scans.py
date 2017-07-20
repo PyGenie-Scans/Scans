@@ -68,7 +68,7 @@ plot will be saved in that file."""
                     xlabelled = True
                 xs.append(position)
                 ys.append(detector(**kwargs))
-                plot((xs[-1], ys[-1]))
+                plot.add_point((xs[-1], ys[-1]))
                 if action is not None:
                     action_remainder = action(xs, ys, plot, action_remainder)
                     pass
