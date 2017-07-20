@@ -9,7 +9,6 @@ treated as private.
 
 """
 from __future__ import absolute_import, print_function
-import matplotlib.pyplot as plt
 
 
 def merge_dicts(x, y):
@@ -17,6 +16,12 @@ def merge_dicts(x, y):
     final = x.copy()
     final.update(y)
     return final
+
+
+def _plot_range(array):
+    diff = max(array) - min(array)
+    return (min(array)-0.05*diff,
+            max(array)+0.05*diff)
 
 
 class Scan(object):
@@ -37,34 +42,55 @@ subclasses."""
     def __and__(self, x):
         return ParallelScan(self, x)
 
-    def plot(self, detector=None, save=None, quiet=None,
-             return_values=False, **kwargs):
+    def plot(self, detector=None, save=None,
+             return_values=False, return_figure=False,
+             **kwargs):
         """Run over the scan an perform a simple measurement at each position.
 The measurement parameter can be used to set what type of measurement
 is to be taken.  If the save parameter is set to a file name, then the
 plot will be saved in that file."""
+        from matplotlib.pyplot import pause, figure
         if not detector:
             detector = self.defaults.detector
 
-        # FIXME: Support multi-processing plots
-        results = [(x, detector(**kwargs))
-                   for x in self]
+        fig = figure()
+        axis = fig.add_subplot(1, 1, 1)
 
-        if len(results[0][0].items()) == 1:
-            xs = [next(iter(x[0].items()))[1] for x in results]
-            ys = [x[1] for x in results]
-            plt.xlabel(next(iter(results[0][0].items()))[0])
-            plt.plot(xs, ys)
-        else:
-            # FIXME: Handle multidimensional plots
+        xs = []
+        ys = []
+        xlabelled = False
+
+        line = None
+        try:
+            for x in self:
+                # FIXME: Handle multidimensional plots
+                (label, position) = next(iter(x.items()))
+                if not xlabelled:
+                    axis.set_xlabel(label)
+                    xlabelled = True
+                xs.append(position)
+                ys.append(detector(**kwargs))
+                if line is None:
+                    line = axis.plot(xs, ys)[0]
+                else:
+                    rng = _plot_range(xs)
+                    axis.set_xlim(rng[0], rng[1])
+                    rng = _plot_range(ys)
+                    axis.set_ylim(rng[0], rng[1])
+                    line.set_data(xs, ys)
+                pause(0.05)
+        except KeyboardInterrupt:
             pass
+        if save:
+            fig.savefig(save)
 
-        if not quiet:
-            if save:
-                plt.savefig(save)
-            else:
-                plt.show()
+        results = {}
         if return_values:
+            results["x"] = xs
+            results["y"] = ys
+        if return_figure:
+            results["figure"] = fig
+        if bool(results):
             return results
         return
 
@@ -87,22 +113,23 @@ plot will be saved in that file."""
         the scan and the fitting parameters are returned.
 
         """
-        plt.clf()
-        results = self.plot(quiet=quiet, return_values=True, **kwargs)
-        x = [next(iter(i[0].items()))[1] for i in results]
-        y = [i[1] for i in results]
+        plot = self.plot(quiet=quiet, return_values=True,
+                         return_figure=True, **kwargs)
+        x = plot["x"]
+        y = plot["y"]
+        fig = plot["figure"]
 
         params = fit.fit(x, y)
         fity = fit.get_y(x, params)
         result = fit.readable(params)
 
         if not quiet:
-            plt.plot(x, fity, "m-", label="{} fit".format(fit))
-            plt.legend()
+            fig.gca().plot(x, fity, "m-", label="{} fit".format(fit))
+            fig.gca().legend()
             if save:
-                plt.savefig(save)
+                fig.savefig(save)
             else:
-                plt.show()
+                fig.show()
         return result
 
     def calculate(self, time=False, pad=0, **kwargs):

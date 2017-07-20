@@ -14,14 +14,18 @@ from .Motion import Motion
 
 instrument = {"theta": 0, "two_theta": 0}
 
+estimator = make_estimator(1e6)
+
 
 def measure(title, info):
     """Dummy function to simulate making a measurement"""
     print(title.format(**info))
 
 
-def count():
+def count(**kwargs):
     """Dummy function to simulate taking a neutron count"""
+    from time import sleep
+    sleep(estimator(**kwargs))
     print("Taking a count at theta=%0.2f and two theta=%0.2f" %
           (instrument["theta"], instrument["two_theta"]))
     return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
@@ -32,7 +36,7 @@ class Defaults(object):
     def __init__(self):
         self.measure = measure
         self.detector = count
-        self.time_estimator = make_estimator(1e6)
+        self.time_estimator = estimator
 
 
 def move_theta(x):
