@@ -39,29 +39,10 @@ class Defaults(object):
         self.time_estimator = estimator
 
 
-def move_theta(x):
-    """move_theta is a dummy functino to simulate moving the theta motor
-in the examples
-
-    """
-    instrument["theta"] = x
-
-
-def move_two_theta(x):
-    """move_two_theta is a dummy functino to simulate moving the two_theta
-motor in the examples
-
-    """
-    instrument["two_theta"] = x
-
-
-def cset(**kwargs):
+def cset(block, position):
     """cset is a dummy substitution of the PyGenie cset code used here for
 demonstration purposes"""
-    if "theta" in kwargs:
-        return move_theta(kwargs["theta"])
-    if "two_theta" in kwargs:
-        return move_two_theta(kwargs["two_theta"])
+    instrument[block] = position
 
 
 def cget(x):
@@ -71,12 +52,15 @@ def cget(x):
     return instrument[x]
 
 
-theta = Motion(lambda: cget("theta"),
-               lambda x: cset(theta=x),
-               "theta")
+class BlockMotion(Motion):
+    def __init__(self, block):
+        Motion.__init__(self,
+                        lambda: cget(block),
+                        lambda x: cset(block, x),
+                        block)
 
-two_theta = Motion(lambda: cget("two_theta"),
-                   lambda x: cset(two_theta=x),
-                   "two_theta")
+
+theta = BlockMotion("theta")
+two_theta = BlockMotion("two_theta")
 
 scan = make_scan(Defaults())
