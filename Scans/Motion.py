@@ -35,3 +35,12 @@ class Motion(object):
         if x is None:
             return self.getter()
         return self.setter(x)
+
+    def __iadd__(self, x):
+        return self(self()+x)
+
+    def __isub__(self, x):
+        return self(self()-x)
+
+    def __imul__(self, x):
+        return self(self()*x)
