@@ -4,6 +4,11 @@ Reference
 This is the auto-generated reference from the doc strings in the
 source code.
 
+Scans.Defaults
+--------------
+.. automodule:: Scans.Defaults
+   :members:
+
 Scans.Fit
 ---------
 .. automodule:: Scans.Fit
