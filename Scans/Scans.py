@@ -9,6 +9,7 @@ treated as private.
 
 """
 from __future__ import absolute_import, print_function
+from abc import ABCMeta, abstractmethod
 
 
 def merge_dicts(x, y):
@@ -26,9 +27,24 @@ def _plot_range(array):
 
 class Scan(object):
     """The virtual class that represents all controlled scans.  This class
-should never be instantiated directly, but rather by one of its
-subclasses."""
+    should never be instantiated directly, but rather by one of its
+    subclasses."""
+
+    __metaclass__ = ABCMeta
+
     defaults = None
+
+    @abstractmethod
+    def map(self, func):
+        """The map function returns a modified scan that performs the given
+        function on all of the original positions to return the new positions.
+        """
+        pass
+
+    @abstractmethod
+    def reverse(self):
+        """Create a new scan that runs in the opposite direction"""
+        pass
 
     def __iter__(self):
         pass
@@ -45,9 +61,9 @@ subclasses."""
     def plot(self, detector=None, save=None,
              action=None, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
-The measurement parameter can be used to set what type of measurement
-is to be taken.  If the save parameter is set to a file name, then the
-plot will be saved in that file."""
+        The measurement parameter can be used to set what type of measurement
+        is to be taken.  If the save parameter is set to a file name, then the
+        plot will be saved in that file."""
         from matplotlib.pyplot import pause, figure
         if not detector:
             detector = self.defaults.detector
@@ -148,7 +164,7 @@ class SimpleScan(Scan):
 
     def map(self, func):
         """The map function returns a modified scan that performs the given
-function on all of the original positions to return the new positions.
+        function on all of the original positions to return the new positions.
 
         """
         return SimpleScan(self.action,
@@ -186,7 +202,7 @@ class SumScan(Scan):
 
     def map(self, func):
         """The map function returns a modified scan that performs the given
-function on all of the original positions to return the new positions.
+        function on all of the original positions to return the new positions.
 
         """
         return SumScan(self.first.map(func),
@@ -200,7 +216,7 @@ function on all of the original positions to return the new positions.
 
 class ProductScan(Scan):
     """ProductScan performs every possible combination of the positions of
-its two constituent scans."""
+    its two constituent scans."""
     def __init__(self, outer, inner):
         self.outer = outer
         self.inner = inner
@@ -216,7 +232,7 @@ its two constituent scans."""
 
     def map(self, func):
         """The map function returns a modified scan that performs the given
-function on all of the original positions to return the new positions.
+        function on all of the original positions to return the new positions.
 
         """
         return ProductScan(self.outer.map(func),
@@ -230,7 +246,7 @@ function on all of the original positions to return the new positions.
 
 class ParallelScan(Scan):
     """ParallelScan runs two scans alongside each other, performing both
-sets of position adjustments before each step of the scan."""
+    sets of position adjustments before each step of the scan."""
     def __init__(self, first, second):
         self.first = first
         self.second = second
@@ -245,7 +261,7 @@ sets of position adjustments before each step of the scan."""
 
     def map(self, func):
         """The map function returns a modified scan that performs the given
-function on all of the original positions to return the new positions.
+        function on all of the original positions to return the new positions.
 
         """
         return ParallelScan(self.first.map(func),
