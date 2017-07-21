@@ -8,7 +8,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 
-class Fit():
+class Fit(object):
     """The Fit class combines the common requirements needed for fitting.
     We need to be able to turn a set of data points into a set of
     parameters, get the simulated curve from a set of parameters, and
