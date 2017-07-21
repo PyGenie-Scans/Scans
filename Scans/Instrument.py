@@ -53,6 +53,17 @@ def cget(x):
 
 
 class BlockMotion(Motion):
+    """
+
+    A helper class for creating motion objects from
+    Ibex blocks
+
+    Parameters
+    ----------
+
+    block
+      A string containing the name of the ibex block to control
+    """
     def __init__(self, block):
         Motion.__init__(self,
                         lambda: cget(block),
