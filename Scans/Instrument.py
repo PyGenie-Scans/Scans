@@ -11,32 +11,32 @@ from __future__ import print_function
 import numpy as np
 from .Util import make_scan, make_estimator
 from .Motion import Motion
+from .Defaults import Defaults
 
 instrument = {"theta": 0, "two_theta": 0}
 
-estimator = make_estimator(1e6)
 
+class MockInstrument(Defaults):
+    """
+    This class represents a fake instrument that can be
+    used for testing purposes.
+    """
 
-def measure(title, info):
-    """Dummy function to simulate making a measurement"""
-    print(title.format(**info))
+    @staticmethod
+    def measure(title, position, **kwargs):
+        print(title.format(**position))
 
+    @staticmethod
+    def detector(**kwargs):
+        from time import sleep
+        sleep(MockInstrument.time_estimator(**kwargs))
+        print("Taking a count at theta=%0.2f and two theta=%0.2f" %
+              (instrument["theta"], instrument["two_theta"]))
+        return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
 
-def count(**kwargs):
-    """Dummy function to simulate taking a neutron count"""
-    from time import sleep
-    sleep(estimator(**kwargs))
-    print("Taking a count at theta=%0.2f and two theta=%0.2f" %
-          (instrument["theta"], instrument["two_theta"]))
-    return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
-
-
-class Defaults(object):
-    """A defaults object to store the correct functions for this instrument"""
-    def __init__(self):
-        self.measure = measure
-        self.detector = count
-        self.time_estimator = estimator
+    @staticmethod
+    def time_estimator(**kwargs):
+        return make_estimator(1e6)(**kwargs)
 
 
 def cset(block, position):
@@ -74,4 +74,4 @@ class BlockMotion(Motion):
 theta = BlockMotion("theta")
 two_theta = BlockMotion("two_theta")
 
-scan = make_scan(Defaults())
+scan = make_scan(MockInstrument())
