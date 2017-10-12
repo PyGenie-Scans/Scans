@@ -44,3 +44,6 @@ class Motion(object):
 
     def __imul__(self, x):
         return self(self()*x)
+
+    def __repr__(self):
+        return "{} is at {}".format(self.title, self())
