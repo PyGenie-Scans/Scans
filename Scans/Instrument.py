@@ -8,6 +8,7 @@ environment.
 
 """
 from __future__ import print_function
+from genie_python import genie as g
 import numpy as np
 from .Util import make_scan, make_estimator
 from .Motion import Motion
@@ -70,6 +71,9 @@ class BlockMotion(Motion):
                         lambda x: cset(block, x),
                         block)
 
+def populate():
+	for i in g.get_blocks():
+		__builtins__[i.upper()] = BlockMotion(i)
 
 theta = BlockMotion("theta")
 two_theta = BlockMotion("two_theta")
