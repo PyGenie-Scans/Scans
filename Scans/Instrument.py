@@ -38,20 +38,9 @@ class MockInstrument(Defaults):
     @staticmethod
     def time_estimator(**kwargs):
         return make_estimator(1e6)(**kwargs)
-
-
-def cset(block, position):
-    """cset is a dummy substitution of the PyGenie cset code used here for
-demonstration purposes"""
-    instrument[block] = position
-
-
-def cget(x):
-    """cget is a dummy substitution of the PyGenie cget code.
-    This has only been encluded for demonstation purposes.
-    """
-    return instrument[x]
-
+        
+    def __repr__(self):
+        return "MockInstrument()"
 
 class BlockMotion(Motion):
     """
@@ -67,8 +56,8 @@ class BlockMotion(Motion):
     """
     def __init__(self, block):
         Motion.__init__(self,
-                        lambda: cget(block),
-                        lambda x: cset(block, x),
+                        lambda: g.cget(block)["value"],
+                        lambda x: g.cset(block, x),
                         block)
 
 def populate():
