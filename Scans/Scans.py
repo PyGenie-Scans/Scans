@@ -183,6 +183,10 @@ class SimpleScan(Scan):
     def __len__(self):
         return len(self.values)
 
+    def __repr__(self):
+        return "SimpleScan({}, {}, {})".format(self.action.title.upper(),
+            repr(self.values), repr(self.defaults))
+
 
 class SumScan(Scan):
     """The SumScan performs two separate scans sequentially"""
@@ -199,6 +203,9 @@ class SumScan(Scan):
 
     def __len__(self):
         return len(self.first) + len(self.second)
+
+    def __repr__(self):
+        return "{} + {}".format(self.first, self.second)
 
     def map(self, func):
         """The map function returns a modified scan that performs the given
@@ -230,6 +237,9 @@ class ProductScan(Scan):
     def __len__(self):
         return len(self.outer)*len(self.inner)
 
+    def __repr__(self):
+        return "{} * {}".format(self.outer, self.inner)
+
     def map(self, func):
         """The map function returns a modified scan that performs the given
         function on all of the original positions to return the new positions.
@@ -255,6 +265,9 @@ class ParallelScan(Scan):
     def __iter__(self):
         for x, y in zip(self.first, self.second):
             yield merge_dicts(x, y)
+
+    def __repr__(self):
+        return "{} & {}".format(self.first, self.second)
 
     def __len__(self):
         return min(len(self.first), len(self.second))
