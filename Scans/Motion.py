@@ -13,7 +13,6 @@ can be controlled by an instrument.  Although it is called Motion,
 it will also handle temperatures, currents, and other physical properties.
 """
 
-from genie_python import genie as g
 
 class Motion(object):
     """A Motion object largely acts like a function to control and
@@ -66,6 +65,7 @@ class BlockMotion(Motion):
       A string containing the name of the ibex block to control
     """
     def __init__(self, block):
+        from genie_python import genie as g
         Motion.__init__(self,
                         lambda: g.cget(block)["value"],
                         lambda x: g.cset(block, x),
