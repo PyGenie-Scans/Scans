@@ -216,15 +216,19 @@ class GaussianFit(Fit):
         return background + amplitude * np.exp(-((xs-cen)/sigma/np.sqrt(2))**2)
 
     def fit(self, x, y):
-        def safe_fit(pipe, f, x, y):
+        def safe_fit(pipe, model, x, y):
+            """A separate process for performing the fitting, since
+            scipy.optimize kills the process when someone hits Ctrl+C"""
+
             from scipy.optimize import curve_fit
-            pipe.send(curve_fit(f, x, y,
+            pipe.send(curve_fit(model, x, y,
                                 [np.mean(x), np.max(x)-np.min(x),
                                  np.max(y)-np.min(y), np.min(y)])[0])
 
         from multiprocessing import Process, Pipe
         parent, child = Pipe()
-        proc = Process(target=safe_fit, args=(child, self._gaussian_model, x, y))
+        proc = Process(target=safe_fit,
+                       args=(child, self._gaussian_model, x, y))
         proc.start()
         proc.join()
         return parent.recv()
