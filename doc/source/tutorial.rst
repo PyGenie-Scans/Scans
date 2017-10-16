@@ -70,6 +70,14 @@ Examples
   the high level interface.  The examples have run on a 6 defined in a
   later section.
 
+  This documentation also serves as a testing basis to ensure that this
+  the code always matches the functionality declared here.  The lines
+  below are just some adminstative details to ensure that the tests
+  can run on a computer that isn't attached to a beamline
+
+  >>> import matplotlib
+  >>> matplotlib.use("Agg")
+  >>> from Scans.Instrument import scan, theta, two_theta
 
 Plot Motor Scan
 ---------------
@@ -78,8 +86,7 @@ Plot Motor Scan
   intensity as the motor moves from 0 to 2 inclusively in steps /near/
   0.3.
 
-  >>> from Scans.Instrument import scan, theta, two_theta
-  >>> scan(theta, begin=0, end=2, stride=0.6).plot(save="plot_example.png")
+  >>> scan(theta, begin=0, end=2, stride=0.6).plot(seconds=1)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -97,17 +104,17 @@ Plot Motor Scan
   `gaps' allow the user to specify the number of measurements and the
   number of gaps, respectively.
 
-  >>> scan(theta, begin=0, end=2, step=0.6).plot(save="temp.png")
+  >>> scan(theta, begin=0, end=2, step=0.6).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
-  >>> scan(theta, begin=0, end=2, count=4).plot(save="temp.png")
+  >>> scan(theta, begin=0, end=2, count=4).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.67 and two theta=0.00
   Taking a count at theta=1.33 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> scan(theta, begin=0, end=2, gaps=4).plot(save="temp.png")
+  >>> scan(theta, begin=0, end=2, gaps=4).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -117,13 +124,13 @@ Plot Motor Scan
   The user also has the option of fixing the steps size and number of
   measurements or gaps while leaving the ending position open.
 
-  >>> scan(theta, begin=0, step=0.6, count=5).plot(save="temp.png")
+  >>> scan(theta, begin=0, step=0.6, count=5).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.40 and two theta=0.00
-  >>> scan(theta, begin=0, stride=0.6, gaps=5).plot(save="temp.png")
+  >>> scan(theta, begin=0, stride=0.6, gaps=5).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
@@ -134,7 +141,7 @@ Plot Motor Scan
   For when relative scans make more sense, it's possible to request
   them by replacing beign and end with before and after.
 
-  >>> scan(theta, before=-1, after=1, stride=0.6).plot(save="temp.png")
+  >>> scan(theta, before=-1, after=1, stride=0.6).plot(frames=5)
   Taking a count at theta=2.00 and two theta=0.00
   Taking a count at theta=2.50 and two theta=0.00
   Taking a count at theta=3.00 and two theta=0.00
@@ -148,7 +155,7 @@ Perform Fits
   performing the plot
 
   >>> from Scans.Fit import Linear, Gaussian
-  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(Linear, quiet=True)
+  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(Linear, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -165,14 +172,36 @@ Perform Fits
 
   We can also plot the same scan against a gaussian
 
-  >>> fit = scan(theta, begin=0, end=2, stride=0.6).fit(Gaussian, quiet=True)
+  >>> fit = scan(theta, begin=0, end=2, count=11).fit(Gaussian, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
-  Taking a count at theta=0.50 and two theta=0.00
+  Taking a count at theta=0.20 and two theta=0.00
+  Taking a count at theta=0.40 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=0.80 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
-  Taking a count at theta=1.50 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
   >>> "{:0.4f}".format(fit["center"])
-  '2.0612'
+  '2.1012'
+
+  We can even combine the first fit both values at the same time
+  >>> fit = scan(theta, begin=0, end=2, count=11).fit(Linear & Gaussian, frames=5)
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.20 and two theta=0.00
+  Taking a count at theta=0.40 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=0.80 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  >>> "{:0.4f}".format(fit["Gaussian Fit"]["center"])
+  '2.1012'
 
 Perform Measurement Scan
 ------------------------

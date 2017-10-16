@@ -414,7 +414,10 @@ max-bool-expr=5
 max-branches=12
 
 # Maximum number of locals for function / method body
-max-locals=15
+# I've increased this from the default of 15 since
+# plotting routines often require a multitude of
+# parameter variables
+max-locals=25
 
 # Maximum number of parents for a class (see R0901).
 max-parents=7

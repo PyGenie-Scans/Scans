@@ -9,7 +9,8 @@ treated as private.
 
 """
 from __future__ import absolute_import, print_function
-import matplotlib.pyplot as plt
+from abc import ABCMeta, abstractmethod
+from genie_python import genie as g
 
 
 def merge_dicts(x, y):
@@ -19,11 +20,32 @@ def merge_dicts(x, y):
     return final
 
 
+def _plot_range(array):
+    diff = max(array) - min(array)
+    return (min(array)-0.05*diff,
+            max(array)+0.05*diff)
+
+
 class Scan(object):
     """The virtual class that represents all controlled scans.  This class
-should never be instantiated directly, but rather by one of its
-subclasses."""
+    should never be instantiated directly, but rather by one of its
+    subclasses."""
+
+    __metaclass__ = ABCMeta
+
     defaults = None
+
+    @abstractmethod
+    def map(self, func):
+        """The map function returns a modified scan that performs the given
+        function on all of the original positions to return the new positions.
+        """
+        pass
+
+    @abstractmethod
+    def reverse(self):
+        """Create a new scan that runs in the opposite direction"""
+        pass
 
     def __iter__(self):
         pass
@@ -37,35 +59,55 @@ subclasses."""
     def __and__(self, x):
         return ParallelScan(self, x)
 
-    def plot(self, detector=None, save=None, quiet=None,
-             return_values=False, **kwargs):
+    def plot(self, detector=None, save=None,
+             action=None, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
-The measurement parameter can be used to set what type of measurement
-is to be taken.  If the save parameter is set to a file name, then the
-plot will be saved in that file."""
+        The measurement parameter can be used to set what type of measurement
+        is to be taken.  If the save parameter is set to a file name, then the
+        plot will be saved in that file."""
+        if g.get_runstate()!="SETUP":
+            raise RuntimeError("Cannot start scan while already in a run!")
+
+        from matplotlib.pyplot import pause, figure
         if not detector:
             detector = self.defaults.detector
 
-        # FIXME: Support multi-processing plots
-        results = [(x, detector(**kwargs))
-                   for x in self]
+        fig = figure()
+        axis = fig.add_subplot(1, 1, 1)
 
-        if len(results[0][0].items()) == 1:
-            xs = [next(iter(x[0].items()))[1] for x in results]
-            ys = [x[1] for x in results]
-            plt.xlabel(next(iter(results[0][0].items()))[0])
-            plt.plot(xs, ys)
-        else:
-            # FIXME: Handle multidimensional plots
+        xs = []
+        ys = []
+        xlabelled = False
+
+        line = None
+        action_remainder = None
+        try:
+            for x in self:
+                # FIXME: Handle multidimensional plots
+                (label, position) = next(iter(x.items()))
+                if not xlabelled:
+                    axis.set_xlabel(label)
+                    xlabelled = True
+                xs.append(position)
+                ys.append(detector(**kwargs))
+                if line is None:
+                    line = axis.plot(xs, ys, "d")[0]
+                else:
+                    rng = _plot_range(xs)
+                    axis.set_xlim(rng[0], rng[1])
+                    rng = _plot_range(ys)
+                    axis.set_ylim(rng[0], rng[1])
+                    line.set_data(xs, ys)
+                if action:
+                    action_remainder = action(xs, ys, fig, action_remainder)
+                pause(0.05)
+        except KeyboardInterrupt:
             pass
+        if save:
+            fig.savefig(save)
 
-        if not quiet:
-            if save:
-                plt.savefig(save)
-            else:
-                plt.show()
-        if return_values:
-            return results
+        if action_remainder:
+            return action_remainder
         return
 
     def measure(self, title, measure=None, **kwargs):
@@ -81,29 +123,18 @@ plot will be saved in that file."""
         for x in self:
             measure(title, x, **kwargs)
 
-    def fit(self, fit, save=None, quiet=False, **kwargs):
+    def fit(self, fit, **kwargs):
         """The fit method performs the scan, plotting the points as they are
         taken.  Once the scan is completed, a fit is then plotted over
         the scan and the fitting parameters are returned.
 
         """
-        plt.clf()
-        results = self.plot(quiet=quiet, return_values=True, **kwargs)
-        x = [next(iter(i[0].items()))[1] for i in results]
-        y = [i[1] for i in results]
 
-        params = fit.fit(x, y)
-        fity = fit.get_y(x, params)
-        result = fit.readable(params)
+        result = self.plot(return_values=True,
+                           action=fit.fit_plot_action(),
+                           return_figure=True, **kwargs)
 
-        if not quiet:
-            plt.plot(x, fity, "m-", label="{} fit".format(fit))
-            plt.legend()
-            if save:
-                plt.savefig(save)
-            else:
-                plt.show()
-        return result
+        return fit.readable_remainder(result)
 
     def calculate(self, time=False, pad=0, **kwargs):
         """Calculate the expected time needed to perform a scan.
@@ -137,7 +168,7 @@ class SimpleScan(Scan):
 
     def map(self, func):
         """The map function returns a modified scan that performs the given
-function on all of the original positions to return the new positions.
+        function on all of the original positions to return the new positions.
 
         """
         return SimpleScan(self.action,
@@ -156,6 +187,10 @@ function on all of the original positions to return the new positions.
     def __len__(self):
         return len(self.values)
 
+    def __repr__(self):
+        return "SimpleScan({}, {}, {})".format(self.action.title.upper(),
+            repr(self.values), repr(self.defaults))
+
 
 class SumScan(Scan):
     """The SumScan performs two separate scans sequentially"""
@@ -173,9 +208,12 @@ class SumScan(Scan):
     def __len__(self):
         return len(self.first) + len(self.second)
 
+    def __repr__(self):
+        return "{} + {}".format(self.first, self.second)
+
     def map(self, func):
         """The map function returns a modified scan that performs the given
-function on all of the original positions to return the new positions.
+        function on all of the original positions to return the new positions.
 
         """
         return SumScan(self.first.map(func),
@@ -189,7 +227,7 @@ function on all of the original positions to return the new positions.
 
 class ProductScan(Scan):
     """ProductScan performs every possible combination of the positions of
-its two constituent scans."""
+    its two constituent scans."""
     def __init__(self, outer, inner):
         self.outer = outer
         self.inner = inner
@@ -203,9 +241,12 @@ its two constituent scans."""
     def __len__(self):
         return len(self.outer)*len(self.inner)
 
+    def __repr__(self):
+        return "{} * {}".format(self.outer, self.inner)
+
     def map(self, func):
         """The map function returns a modified scan that performs the given
-function on all of the original positions to return the new positions.
+        function on all of the original positions to return the new positions.
 
         """
         return ProductScan(self.outer.map(func),
@@ -219,7 +260,7 @@ function on all of the original positions to return the new positions.
 
 class ParallelScan(Scan):
     """ParallelScan runs two scans alongside each other, performing both
-sets of position adjustments before each step of the scan."""
+    sets of position adjustments before each step of the scan."""
     def __init__(self, first, second):
         self.first = first
         self.second = second
@@ -229,12 +270,15 @@ sets of position adjustments before each step of the scan."""
         for x, y in zip(self.first, self.second):
             yield merge_dicts(x, y)
 
+    def __repr__(self):
+        return "{} & {}".format(self.first, self.second)
+
     def __len__(self):
         return min(len(self.first), len(self.second))
 
     def map(self, func):
         """The map function returns a modified scan that performs the given
-function on all of the original positions to return the new positions.
+        function on all of the original positions to return the new positions.
 
         """
         return ParallelScan(self.first.map(func),

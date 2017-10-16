@@ -8,71 +8,63 @@ environment.
 
 """
 from __future__ import print_function
+from genie_python import genie as g
 import numpy as np
 from .Util import make_scan, make_estimator
 from .Motion import Motion
+from .Defaults import Defaults
 
 instrument = {"theta": 0, "two_theta": 0}
 
 
-def measure(title, info):
-    """Dummy function to simulate making a measurement"""
-    print(title.format(**info))
-
-
-def count():
-    """Dummy function to simulate taking a neutron count"""
-    print("Taking a count at theta=%0.2f and two theta=%0.2f" %
-          (instrument["theta"], instrument["two_theta"]))
-    return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
-
-
-class Defaults(object):
-    """A defaults object to store the correct functions for this instrument"""
-    def __init__(self):
-        self.measure = measure
-        self.detector = count
-        self.time_estimator = make_estimator(1e6)
-
-
-def move_theta(x):
-    """move_theta is a dummy functino to simulate moving the theta motor
-in the examples
-
+class MockInstrument(Defaults):
     """
-    instrument["theta"] = x
-
-
-def move_two_theta(x):
-    """move_two_theta is a dummy functino to simulate moving the two_theta
-motor in the examples
-
+    This class represents a fake instrument that can be
+    used for testing purposes.
     """
-    instrument["two_theta"] = x
 
+    @staticmethod
+    def measure(title, position, **kwargs):
+        print(title.format(**position))
 
-def cset(**kwargs):
-    """cset is a dummy substitution of the PyGenie cset code used here for
-demonstration purposes"""
-    if "theta" in kwargs:
-        return move_theta(kwargs["theta"])
-    if "two_theta" in kwargs:
-        return move_two_theta(kwargs["two_theta"])
+    @staticmethod
+    def detector(**kwargs):
+        from time import sleep
+        sleep(MockInstrument.time_estimator(**kwargs))
+        print("Taking a count at theta=%0.2f and two theta=%0.2f" %
+              (instrument["theta"], instrument["two_theta"]))
+        return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
 
+    @staticmethod
+    def time_estimator(**kwargs):
+        return make_estimator(1e6)(**kwargs)
+        
+    def __repr__(self):
+        return "MockInstrument()"
 
-def cget(x):
-    """cget is a dummy substitution of the PyGenie cget code.
-    This has only been encluded for demonstation purposes.
+class BlockMotion(Motion):
     """
-    return instrument[x]
 
+    A helper class for creating motion objects from
+    Ibex blocks
 
-theta = Motion(lambda: cget("theta"),
-               lambda x: cset(theta=x),
-               "theta")
+    Parameters
+    ----------
 
-two_theta = Motion(lambda: cget("two_theta"),
-                   lambda x: cset(two_theta=x),
-                   "two_theta")
+    block
+      A string containing the name of the ibex block to control
+    """
+    def __init__(self, block):
+        Motion.__init__(self,
+                        lambda: g.cget(block)["value"],
+                        lambda x: g.cset(block, x),
+                        block)
 
-scan = make_scan(Defaults())
+def populate():
+	for i in g.get_blocks():
+		__builtins__[i.upper()] = BlockMotion(i)
+
+theta = BlockMotion("theta")
+two_theta = BlockMotion("two_theta")
+
+scan = make_scan(MockInstrument())
