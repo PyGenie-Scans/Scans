@@ -37,17 +37,25 @@ class MockInstrument(Defaults):
     @staticmethod
     def time_estimator(**kwargs):
         return make_estimator(1e6)(**kwargs)
-        
+
     def __repr__(self):
         return "MockInstrument()"
 
+
 def set_motion(name):
+    """Create a function to update the dictionary of the mock instrument
+
+    Python won't let you update a dict in a lambda."""
     def inner(x):
-        instrument[name]=x
+        """Actually update the dictionary"""
+        instrument[name] = x
     return inner
 
+
 def mock_motion(name):
-    return Motion(lambda:instrument[name],set_motion(name),name)
+    """Create a motion object for the mcok instrument"""
+    return Motion(lambda: instrument[name], set_motion(name), name)
+
 
 theta = mock_motion("theta")
 two_theta = mock_motion("two_theta")

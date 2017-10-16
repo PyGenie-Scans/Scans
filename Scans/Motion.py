@@ -52,6 +52,7 @@ class Motion(object):
     def __repr__(self):
         return "{} is at {}".format(self.title, self())
 
+
 class BlockMotion(Motion):
     """
 
@@ -71,6 +72,10 @@ class BlockMotion(Motion):
                         lambda x: g.cset(block, x),
                         block)
 
+
 def populate():
-        for i in g.get_blocks():
-                __builtins__[i.upper()] = BlockMotion(i)
+    """Create Motion objects in the GLOBAL namespace for each
+    block registered with IBEX."""
+    from genie_python import genie as g
+    for i in g.get_blocks():
+        __builtins__[i.upper()] = BlockMotion(i)
