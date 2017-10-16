@@ -224,7 +224,7 @@ class GaussianFit(Fit):
 
         from multiprocessing import Process, Pipe
         parent, child = Pipe()
-        proc = Process(safe_fit, args=(child, self._gaussian_model, x, y))
+        proc = Process(target=safe_fit, args=(child, self._gaussian_model, x, y))
         proc.start()
         proc.join()
         return parent.recv()
