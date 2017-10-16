@@ -45,11 +45,22 @@ class Defaults(object):
         pass
 
     @staticmethod
-    @abstractmethod
-    def time_estimator(**kwargs):
+    def time_estimator(seconds=None, minutes=None, hours=None,
+                       uamps=None, frames=None,
+                       **_):
+        """Estimate takes a measurement specification and predicts how long
+        the measurement will take in seconds.
+
         """
-        The default function for estimating the number of seconds
-        needed by a time settings (e.g. seconds, frames, uamps) as
-        keyword arguments.
-        """
-        pass
+        if seconds or minutes or hours:
+            if not seconds:
+                seconds = 0
+            if not minutes:
+                minutes = 0
+            if not hours:
+                hours = 0
+            return seconds + 60 * minutes + 3600 * hours
+        elif frames:
+            return frames/10.0
+        elif uamps:
+            return 90*uamps

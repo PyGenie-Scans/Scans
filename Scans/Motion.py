@@ -1,12 +1,16 @@
-"""This module holds a single class: Motion.  The Motion class is used
-to reify the getters and setters of the various parts of the
-instrument.  The theory is that the instrument scientist will create
-motion objects for each degree of freedom that the instrument
-possesses and that the user can then run scans over these objects.
+"""This module contains helper classes for controlling motions on the beamline
 
-This module may eventually hold a set of motion objects that are
-common to all beamlines.
+There's three levels of depth to this module.  At the simplest level, merely
+import and call populate().  This create motion object for every block
+currently registered on the instrument.
 
+The next level down is the BlockMotion class, which allows for creating
+single objects that correspond to single IBEX blocks.
+
+Finally, at the bottom, BlockMotion derives from the Motion object,
+which gives a simple framework for all physical parameters that
+can be controlled by an instrument.  Although it is called Motion,
+it will also handle temperatures, currents, and other physical properties.
 """
 
 
@@ -47,3 +51,31 @@ class Motion(object):
 
     def __repr__(self):
         return "{} is at {}".format(self.title, self())
+
+
+class BlockMotion(Motion):
+    """
+
+    A helper class for creating motion objects from
+    Ibex blocks
+
+    Parameters
+    ----------
+
+    block
+      A string containing the name of the ibex block to control
+    """
+    def __init__(self, block):
+        from genie_python import genie as g
+        Motion.__init__(self,
+                        lambda: g.cget(block)["value"],
+                        lambda x: g.cset(block, x),
+                        block)
+
+
+def populate():
+    """Create Motion objects in the GLOBAL namespace for each
+    block registered with IBEX."""
+    from genie_python import genie as g
+    for i in g.get_blocks():
+        __builtins__[i.upper()] = BlockMotion(i)
