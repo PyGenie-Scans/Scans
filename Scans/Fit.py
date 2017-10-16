@@ -73,7 +73,7 @@ class Fit(object):
             x : Array of Float
               The x positions measured thus far
             y : Array of Float
-              The y positions measured thus fat
+              The y positions measured thus far
             fig : matplotlib.figure.Figure
               The figure on which to plot
             line : None or maplotlib plot
@@ -198,15 +198,72 @@ class PolyFit(Fit):
         return results
 
 
-class GaussianFit(Fit):
+class CurveFit(Fit):
+    """
+    A class for handling the bugs with scipy.optimize.curve_fitplot
+
+    This is a special subclass of fit written to handle the fact that
+    scipy.optimize breaks proper Ctrl+C handling in python.  To
+    get around this bus, we spawn a separate process, load scipy into
+    that process, and let the fitting on on there.  This is terribly
+    inefficient, but at least it doesn't crash.  Additionally, if a
+    better solution is found in the future, we now have a single place
+    to implement the fix."""
+
+    __metaclass__ = ABCMeta
+
+    @staticmethod
+    @abstractmethod
+    def model(xs, **params):
+        """
+        This is the mathemtical equation to fit.  Non-virtual subclasses
+        will need to implement this for themselves. Note that this is a
+        staticmethod.
+        """
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def guess(xs, ys):
+        """
+        This function takes the x and y values and makes a rough guess
+        as to the correct values for the model components.  This is mostly
+        so that the fitting routine can have an idea of where to start.
+        Non-virtual subclassse will need to implement this for themselves.
+        Note that this is a static method.
+        """
+        pass
+
+    def fit(self, x, y):
+        def safe_fit(pipe, model, x, y, guess):
+            """A separate process for performing the fitting, since
+            scipy.optimize kills the process when someone hits Ctrl+C"""
+
+            from scipy.optimize import curve_fit
+            pipe.send(curve_fit(model, x, y, guess)[0])
+
+        from multiprocessing import Process, Pipe
+        parent, child = Pipe()
+        guess = self.guess(x, y)
+        proc = Process(target=safe_fit,
+                       args=(child, self.model, x, y, guess))
+        proc.start()
+        proc.join()
+        return parent.recv()
+
+    def get_y(self, x, fit):
+        return self.model(x, *fit)
+
+
+class GaussianFit(CurveFit):
     """
     A fitting class for handling gaussian peaks
     """
     def __init__(self):
-        Fit.__init__(self, 4, "Gaussian Fit")
+        CurveFit.__init__(self, 4, "Gaussian Fit")
 
     @staticmethod
-    def _gaussian_model(xs, cen, sigma, amplitude, background):
+    def model(xs, cen, sigma, amplitude, background):
         """
         This is the model for a gaussian with the mean at center, a
         standard deviation of sigma, and a peak of amplitude over a base of
@@ -215,30 +272,50 @@ class GaussianFit(Fit):
         """
         return background + amplitude * np.exp(-((xs-cen)/sigma/np.sqrt(2))**2)
 
-    def fit(self, x, y):
-        def safe_fit(pipe, model, x, y):
-            """A separate process for performing the fitting, since
-            scipy.optimize kills the process when someone hits Ctrl+C"""
-
-            from scipy.optimize import curve_fit
-            pipe.send(curve_fit(model, x, y,
-                                [np.mean(x), np.max(x)-np.min(x),
-                                 np.max(y)-np.min(y), np.min(y)])[0])
-
-        from multiprocessing import Process, Pipe
-        parent, child = Pipe()
-        proc = Process(target=safe_fit,
-                       args=(child, self._gaussian_model, x, y))
-        proc.start()
-        proc.join()
-        return parent.recv()
-
-    def get_y(self, x, fit):
-        return self._gaussian_model(x, *fit)
+    @staticmethod
+    def guess(xs, ys):
+        return [np.mean(xs), np.max(xs)-np.min(xs),
+                np.max(ys)-np.min(ys), np.min(ys)]
 
     def readable(self, fit):
         return {"center": fit[0], "sigma": fit[1],
                 "amplitude": fit[2], "background": fit[3]}
+
+
+class TrapezoidFit(CurveFit):
+    """
+    A fitting class for handling trapezoid peaks
+    """
+    def __init__(self):
+        CurveFit.__init__(self, 4, "Trapezoid Fit")
+
+    @staticmethod
+    def model(xs, cen, inner, outer, top, bottom):
+        """
+        This is the model for a trapezoid with the mean at center, a
+        standard deviation of sigma, and a peak of amplitude over a base of
+        background.
+
+        """
+        diffs = np.abs(xs - cen)
+        inner_mask = diffs < inner
+        outer_mask = diffs > outer
+        diffs /= (outer-inner)
+        ys = bottom * diffs + top * (1-diffs)
+        ys[inner_mask] = top
+        ys[outer_mask] = bottom
+        return ys
+
+    @staticmethod
+    def guess(xs, ys):
+        return [np.mean(xs), (np.max(xs)-np.min(xs))/3.0,
+                2*(np.max(xs)-np.min(xs))/3.0,
+                np.max(ys), np.min(ys)]
+
+    def readable(self, fit):
+        return {"center": fit[0], "top width": 2*fit[1],
+                "bottom width": 2*fit[2], "height": fit[4]-fit[5],
+                "background": fit[5]}
 
 
 #: A linear regression
@@ -246,3 +323,5 @@ Linear = PolyFit(1, title="Linear")
 
 #: A gaussian fit
 Gaussian = GaussianFit()
+
+Trapezoid = TrapezoidFit()
