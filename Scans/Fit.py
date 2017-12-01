@@ -110,7 +110,7 @@ class PolyFit(Fit):
 
     def readable(self, fit):
         if self.degree == 2:
-            return {"slope": fit[1], "intercept": fit[0]}
+            return {"slope": fit[0], "intercept": fit[1]}
         orders = np.arange(self.degree, 0, -1)
         results = {}
         for key, value in zip(orders, fit):
