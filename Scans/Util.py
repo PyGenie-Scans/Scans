@@ -74,7 +74,7 @@ def get_points(
     if gaps:
         count = gaps+1
     if before is not None:
-        begin = current + before
+        start = current + before
     if after is not None:
         stop = current + after
 
