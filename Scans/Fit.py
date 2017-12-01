@@ -5,6 +5,7 @@ fits (i.e. Linear and Gaussian).
 """
 from abc import ABCMeta, abstractmethod
 import numpy as np
+from scipy.optimize import curve_fit
 
 
 class Fit(object):
@@ -18,10 +19,7 @@ class Fit(object):
 
     def __init__(self, degree, title):
         self.degree = degree
-        self.title = title
-
-    def __and__(self, x):
-        return ParallelFit(self, x)
+        self._title = title
 
     @abstractmethod
     def fit(self, x, y):
@@ -55,6 +53,9 @@ class Fit(object):
         dictionary returned by readable.
         """
         return self.readable(remainder[1])
+
+    def title(self, *args):
+        return self._title
 
     def fit_plot_action(self):
         """
@@ -93,7 +94,7 @@ class Fit(object):
             fity = self.get_y(x, params)
             if not remainder:
                 line = fig.gca().plot(x, fity, "-",
-                                      label="{} fit".format(self.title))[0]
+                                      label="{} fit".format(self.title(x, y)))[0]
                 fig.gca().legend()
             else:
                 line, _ = remainder
@@ -120,80 +121,33 @@ class PolyFit(Fit):
 
     def readable(self, fit):
         if self.degree == 2:
-            return {"slope": fit[0], "intercept": fit[1]}
+            return {"slope": fit[1], "intercept": fit[0]}
         orders = np.arange(self.degree, 0, -1)
         results = {}
         for key, value in zip(orders, fit):
             results["^{}".format(key)] = value
         return results
 
-
-class CurveFit(Fit):
-    """
-    A class for handling the bugs with scipy.optimize.curve_fitplot
-
-    This is a special subclass of fit written to handle the fact that
-    scipy.optimize breaks proper Ctrl+C handling in python.  To
-    get around this bus, we spawn a separate process, load scipy into
-    that process, and let the fitting on on there.  This is terribly
-    inefficient, but at least it doesn't crash.  Additionally, if a
-    better solution is found in the future, we now have a single place
-    to implement the fix."""
-
-    __metaclass__ = ABCMeta
-
-    @staticmethod
-    @abstractmethod
-    def model(xs, **params):
-        """
-        This is the mathemtical equation to fit.  Non-virtual subclasses
-        will need to implement this for themselves. Note that this is a
-        staticmethod.
-        """
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def guess(xs, ys):
-        """
-        This function takes the x and y values and makes a rough guess
-        as to the correct values for the model components.  This is mostly
-        so that the fitting routine can have an idea of where to start.
-        Non-virtual subclassse will need to implement this for themselves.
-        Note that this is a static method.
-        """
-        pass
-
-    def fit(self, x, y):
-        def safe_fit(pipe, model, x, y, guess):
-            """A separate process for performing the fitting, since
-            scipy.optimize kills the process when someone hits Ctrl+C"""
-
-            from scipy.optimize import curve_fit
-            pipe.send(curve_fit(model, x, y, guess)[0])
-
-        from multiprocessing import Process, Pipe
-        parent, child = Pipe()
-        guess = self.guess(x, y)
-        proc = Process(target=safe_fit,
-                       args=(child, self.model, x, y, guess))
-        proc.start()
-        proc.join()
-        return parent.recv()
-
-    def get_y(self, x, fit):
-        return self.model(x, *fit)
+    def title(self, x, y):
+        if len(y) < self.degree:
+            return self._title
+        result = self.fit(x, y)
+        xs = ["x^{}".format(i) for i in range(1, len(result))]
+        xs = ([""] + xs)[::-1]
+        terms = ["{:0.3g}".format(t)+x for x, t in zip(xs, result)]
+        return self._title+ ": $y = " + " + ".join(terms) + "$"
 
 
-class GaussianFit(CurveFit):
+
+class GaussianFit(Fit):
     """
     A fitting class for handling gaussian peaks
     """
     def __init__(self):
-        CurveFit.__init__(self, 4, "Gaussian Fit")
+        Fit.__init__(self, 4, "Gaussian Fit")
 
     @staticmethod
-    def model(xs, cen, sigma, amplitude, background):
+    def _gaussian_model(xs, cen, sigma, amplitude, background):
         """
         This is the model for a gaussian with the mean at center, a
         standard deviation of sigma, and a peak of amplitude over a base of
@@ -202,14 +156,21 @@ class GaussianFit(CurveFit):
         """
         return background + amplitude * np.exp(-((xs-cen)/sigma/np.sqrt(2))**2)
 
-    @staticmethod
-    def guess(xs, ys):
-        return [np.mean(xs), np.max(xs)-np.min(xs),
-                np.max(ys)-np.min(ys), np.min(ys)]
+    def fit(self, x, y):
+        return curve_fit(self._gaussian_model, x, y,
+                         [np.mean(x), np.max(x)-np.min(x),
+                          np.max(y)-np.min(y), np.min(y)])[0]
+
+    def get_y(self, x, fit):
+        return self._gaussian_model(x, *fit)
 
     def readable(self, fit):
         return {"center": fit[0], "sigma": fit[1],
                 "amplitude": fit[2], "background": fit[3]}
+
+    def title(self, x, y):
+        result = self.readable(self.fit(x, y))
+        return self._title+ ": " + "$y={amplitude:0.2g}*\exp((x-{center:0.2g})^2/{sigma:0.2g})+{background:0.2g}".format(**result)
 
 
 #: A linear regression
