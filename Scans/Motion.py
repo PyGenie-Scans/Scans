@@ -66,6 +66,7 @@ class BlockMotion(Motion):
       A string containing the name of the ibex block to control
     """
     def __init__(self, block):
+        # pylint: disable=import-error
         from genie_python import genie as g
         Motion.__init__(self,
                         lambda: g.cget(block)["value"],
@@ -76,6 +77,7 @@ class BlockMotion(Motion):
 def populate():
     """Create Motion objects in the GLOBAL namespace for each
     block registered with IBEX."""
+    # pylint: disable=import-error
     from genie_python import genie as g
     for i in g.get_blocks():
         __builtins__[i.upper()] = BlockMotion(i)

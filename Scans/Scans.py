@@ -11,9 +11,10 @@ treated as private.
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
 try:
+    # pylint: disable=import-error
     from genie_python import genie as g
-except:
-    #We must be in a test environment
+except ImportError:
+    # We must be in a test environment
     g = None
 
 
@@ -193,7 +194,8 @@ class SimpleScan(Scan):
 
     def __repr__(self):
         return "SimpleScan({}, {}, {})".format(self.action.title.upper(),
-            repr(self.values), repr(self.defaults))
+                                               repr(self.values),
+                                               repr(self.defaults))
 
 
 class SumScan(Scan):
