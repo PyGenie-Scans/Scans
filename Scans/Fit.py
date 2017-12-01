@@ -162,8 +162,8 @@ class GaussianFit(Fit):
         # pylint: disable=arguments-differ
         result = self.readable(self.fit(x, y))
         return (self._title + ": " +
-                "$y={amplitude:0.2g}*\\exp((x-{center:0.2g})^2" +
-                "/{sigma:0.2g})+{background:0.2g}").format(**result)
+                "y={amplitude:.3g}*exp((x-{center:.3g})$^2$" +
+                "/{sigma:.3g})+{background:.1g}").format(**result)
 
 
 #: A linear regression
