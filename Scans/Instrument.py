@@ -8,7 +8,6 @@ environment.
 
 """
 from __future__ import print_function
-from genie_python import genie as g
 import numpy as np
 from .Util import make_scan, make_estimator
 from .Motion import Motion
@@ -42,29 +41,23 @@ class MockInstrument(Defaults):
     def __repr__(self):
         return "MockInstrument()"
 
-class BlockMotion(Motion):
-    """
 
-    A helper class for creating motion objects from
-    Ibex blocks
+def set_motion(name):
+    """Create a function to update the dictionary of the mock instrument
 
-    Parameters
-    ----------
+    Python won't let you update a dict in a lambda."""
+    def inner(x):
+        """Actually update the dictionary"""
+        instrument[name] = x
+    return inner
 
-    block
-      A string containing the name of the ibex block to control
-    """
-    def __init__(self, block):
-        Motion.__init__(self,
-                        lambda: g.cget(block)["value"],
-                        lambda x: g.cset(block, x),
-                        block)
 
-def populate():
-	for i in g.get_blocks():
-		__builtins__[i.upper()] = BlockMotion(i)
+def mock_motion(name):
+    """Create a motion object for the mcok instrument"""
+    return Motion(lambda: instrument[name], set_motion(name), name)
 
-theta = BlockMotion("theta")
-two_theta = BlockMotion("two_theta")
+
+theta = mock_motion("theta")
+two_theta = mock_motion("two_theta")
 
 scan = make_scan(MockInstrument())

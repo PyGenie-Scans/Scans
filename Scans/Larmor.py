@@ -47,29 +47,4 @@ class Larmor(Defaults):
     def __repr__(self):
         return "Larmor()"
 
-class BlockMotion(Motion):
-    """
-
-    A helper class for creating motion objects from
-    Ibex blocks
-
-    Parameters
-    ----------
-
-    block
-      A string containing the name of the ibex block to control
-    """
-    def __init__(self, block):
-        Motion.__init__(self,
-                        lambda: g.cget(block)["value"],
-                        lambda x: g.cset(block, x),
-                        block)
-
-def populate():
-	for i in g.get_blocks():
-		__builtins__[i.upper()] = BlockMotion(i)
-
-#theta = BlockMotion("theta")
-#two_theta = BlockMotion("two_theta")
-
 scan = make_scan(Larmor())
