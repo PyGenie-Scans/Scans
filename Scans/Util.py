@@ -9,7 +9,7 @@ from .Scans import SimpleScan
 
 def get_points(
         current,
-        begin=None, end=None,
+        start=None, stop=None,
         step=None, stride=None,
         count=None, gaps=None,
         before=None, after=None,
@@ -28,9 +28,9 @@ def get_points(
     ----------
     current : float
       The present position of the motor.  This is needed to relative scans.
-    begin : float
+    start : float
       The absolute first position in the scan.  This is a valid start point.
-    end : float
+    stop : float
       The absolute final position in the scan.  This is a valid stop point.
     before : float
       The relative first position in the scan.  If the motor is currently
@@ -46,7 +46,7 @@ def get_points(
       then the end point will not be included.  This is a valid spacing.
     stride : float
       The approximate distance between points.  In order to ensure that
-      the ``begin`` and ``end`` points are included in the scan, a finer
+      the ``start`` and ``stop`` points are included in the scan, a finer
       resolution scan will be called for if the stride is not an exact
       multiple of the distance. This is a valid spacing.
     count : float
@@ -76,20 +76,20 @@ def get_points(
     if before is not None:
         begin = current + before
     if after is not None:
-        end = current + after
+        stop = current + after
 
-    if begin is not None and end is not None:
+    if start is not None and stop is not None:
         if stride:
-            steps = np.ceil((end-begin)/float(stride))
-            return np.linspace(begin, end, steps+1)
+            steps = np.ceil((stop-start)/float(stride))
+            return np.linspace(start, stop, steps+1)
         elif count:
-            return np.linspace(begin, end, count)
+            return np.linspace(start, stop, count)
         elif step:
-            return np.arange(begin, end, step)
-    elif begin is not None and count and (stride or step):
+            return np.arange(start, stop, step)
+    elif start is not None and count and (stride or step):
         if stride:
             step = stride
-        return np.linspace(begin, begin+(count-1)*step, count)
+        return np.linspace(start, start+(count-1)*step, count)
     raise RuntimeError("Unable to build a scan with that set of options.")
 
 
