@@ -10,7 +10,11 @@ treated as private.
 """
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
-from genie_python import genie as g
+try:
+    from genie_python import genie as g
+except:
+    #We must be in a test environment
+    g = None
 
 
 def merge_dicts(x, y):
@@ -65,7 +69,7 @@ class Scan(object):
         The measurement parameter can be used to set what type of measurement
         is to be taken.  If the save parameter is set to a file name, then the
         plot will be saved in that file."""
-        if g.get_runstate() != "SETUP":
+        if g and g.get_runstate() != "SETUP":
             raise RuntimeError("Cannot start scan while already in a run!")
 
         from matplotlib.pyplot import pause, figure
