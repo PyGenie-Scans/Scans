@@ -9,7 +9,7 @@ environment.
 """
 from __future__ import print_function
 import numpy as np
-from .Util import make_scan
+from .Util import make_scan, make_estimator
 from .Motion import Motion
 from .Defaults import Defaults
 
@@ -33,6 +33,10 @@ class MockInstrument(Defaults):
         print("Taking a count at theta=%0.2f and two theta=%0.2f" %
               (instrument["theta"], instrument["two_theta"]))
         return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
+
+    @staticmethod
+    def time_estimator(**kwargs):
+        return make_estimator(1e6)(**kwargs)
 
     def __repr__(self):
         return "MockInstrument()"

@@ -117,3 +117,36 @@ def make_scan(defaults):
 
         return SimpleScan(motion, points, defaults)
     return scan
+
+
+def make_estimator(flux):
+    """One of the values in the Defaults class is an estimator that turns
+    measurement time requests into seconds.  This can be handled
+    automatically for most requests, but the relationship between
+    monitor count and time will be different for each instrument.
+    This function takes the expected neutron flux per second on the
+    monitor and returns a full estimator function.
+
+    """
+    def estimate(seconds=None, minutes=None, hours=None,
+                 uamps=None, frames=None, monitor=None,
+                 **_):
+        """Estimate takes a measurement specification and predicts how long
+        the measurement will take in seconds.
+
+        """
+        if seconds or minutes or hours:
+            if not seconds:
+                seconds = 0
+            if not minutes:
+                minutes = 0
+            if not hours:
+                hours = 0
+            return seconds + 60 * minutes + 3600 * hours
+        elif frames:
+            return frames/10.0
+        elif uamps:
+            return 90*uamps
+        elif monitor:
+            return monitor/flux
+    return estimate
