@@ -282,46 +282,8 @@ class GaussianFit(CurveFit):
                 "amplitude": fit[2], "background": fit[3]}
 
 
-class TrapezoidFit(CurveFit):
-    """
-    A fitting class for handling trapezoid peaks
-    """
-    def __init__(self):
-        CurveFit.__init__(self, 4, "Trapezoid Fit")
-
-    @staticmethod
-    def model(xs, cen, inner, outer, top, bottom):
-        """
-        This is the model for a trapezoid with the mean at center, a
-        standard deviation of sigma, and a peak of amplitude over a base of
-        background.
-
-        """
-        diffs = np.abs(xs - cen)
-        inner_mask = diffs < inner
-        outer_mask = diffs > outer
-        diffs /= (outer-inner)
-        ys = bottom * diffs + top * (1-diffs)
-        ys[inner_mask] = top
-        ys[outer_mask] = bottom
-        return ys
-
-    @staticmethod
-    def guess(xs, ys):
-        return [np.mean(xs), (np.max(xs)-np.min(xs))/3.0,
-                2*(np.max(xs)-np.min(xs))/3.0,
-                np.max(ys), np.min(ys)]
-
-    def readable(self, fit):
-        return {"center": fit[0], "top width": 2*fit[1],
-                "bottom width": 2*fit[2], "height": fit[4]-fit[5],
-                "background": fit[5]}
-
-
 #: A linear regression
 Linear = PolyFit(1, title="Linear")
 
 #: A gaussian fit
 Gaussian = GaussianFit()
-
-Trapezoid = TrapezoidFit()
