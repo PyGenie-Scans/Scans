@@ -8,10 +8,12 @@ environment.
 
 """
 from __future__ import print_function
-from genie_python import genie as g
-import numpy as np
+try:
+    # pylint: disable=import-error
+    from genie_python import genie as g
+except ImportError:
+    g = None
 from .Util import make_scan, make_estimator
-from .Motion import Motion
 from .Defaults import Defaults
 
 instrument = {"theta": 0, "two_theta": 0}

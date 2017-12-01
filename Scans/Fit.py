@@ -54,6 +54,10 @@ class Fit(object):
         return self.readable(remainder[1])
 
     def title(self, *args):
+        """
+        Give the title of the fit.
+        """
+        # pylint: disable=unused-argument
         return self._title
 
     def fit_plot_action(self):
@@ -128,6 +132,7 @@ class PolyFit(Fit):
         return results
 
     def title(self, x, y):
+        # pylint: disable=arguments-differ
         if len(y) < self.degree:
             return self._title
         result = self.fit(x, y)
@@ -169,8 +174,11 @@ class GaussianFit(Fit):
                 "amplitude": fit[2], "background": fit[3]}
 
     def title(self, x, y):
+        # pylint: disable=arguments-differ
         result = self.readable(self.fit(x, y))
-        return self._title+ ": " + "$y={amplitude:0.2g}*\exp((x-{center:0.2g})^2/{sigma:0.2g})+{background:0.2g}".format(**result)
+        return (self._title + ": " +
+                "$y={amplitude:0.2g}*\\exp((x-{center:0.2g})^2" +
+                "/{sigma:0.2g})+{background:0.2g}").format(**result)
 
 
 #: A linear regression
