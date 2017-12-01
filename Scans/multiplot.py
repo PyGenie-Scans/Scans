@@ -48,14 +48,14 @@ class ProcessPlotter(object):
             if command is None:
                 self.pipe.send((self.x, self.y, self.fig))
                 return False
-
-            else:
-                self.x.append(command[0])
-                self.y.append(command[1])
-                self.axis.plot(self.x, self.y, 'ro')
-                if self.rehome:
-                    self.axis.set_xlim(min(self.x), max(self.x))
-                    self.axis.set_ylim(min(self.y), max(self.y))
+            elif isinstance(command, tuple):
+                if command[0] == "clf":
+                    self.axis.cla()
+                    continue
+                if hasattr(self.axis, command[0]):
+                    getattr(self.axis, command[0])(*command[1], **command[2])
+                elif hasattr(self.fig, command[0]):
+                    getattr(self.fig, command[0])(*command[1], **command[2])
 
         self.fig.canvas.draw()
         self.fig.canvas.show()
@@ -96,15 +96,33 @@ class NBPlot(object):
         self.plot_process.join()
         return result
 
+    def __getattr__(self, name):
+        def wrapper(*args, **kwargs):
+            """
+            Send the appropriate command to the separate matplotlib process
+            """
+            self.plot_pipe.send((name, args, kwargs))
+        return wrapper
+
 
 def main():
     """A simple test function of NBPlot"""
     plot = NBPlot(rehome=False)
-    boondoggle = np.arange(0, 2e6, dtype=np.int64)
+    boondoggle = np.arange(0, 5e6, dtype=np.int64)
+    xs = []
+    ys = []
     for i in range(10):
-        plot([i, i**2])
+        xs.append(i)
+        ys.append(i**2)
+        plot.clear()
+        plot.set_xlim(0, 10)
+        plot.plot(xs, ys)
+        plot.errorbar(xs, [y+3 for y in ys],
+                      [4 for y in ys], fmt="rd")
+        print(i)
         for _ in range(30):
             boondoggle = np.sin(boondoggle**2)
+    plot.savefig("meta_test.png")
     return plot.join()
 
 

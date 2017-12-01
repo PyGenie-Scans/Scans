@@ -46,13 +46,6 @@ class Fit(object):
         """
         return lambda i: {}
 
-    def readable_remainder(self, remainder):
-        """
-        Turns the results of the plot action into the
-        dictionary returned by readable.
-        """
-        return self.readable(remainder[1])
-
     def title(self, *args):
         """
         Give the title of the fit.
@@ -69,7 +62,7 @@ class Fit(object):
         -------
         A function to call in the plotting loop
         """
-        def action(x, y, fig, remainder):
+        def action(x, y, fig):
             """Fit and plot the data within the plotting loop
 
             Parameters
@@ -80,9 +73,6 @@ class Fit(object):
               The y positions measured thus far
             fig : matplotlib.figure.Figure
               The figure on which to plot
-            line : None or maplotlib plot
-              If None, the fit hasn't begun plotting yet.  Otherwise, it
-              will be an object representing the last line fit.
 
             Returns
             -------
@@ -95,14 +85,10 @@ class Fit(object):
                 return None
             params = self.fit(x, y)
             fity = self.get_y(x, params)
-            if not remainder:
-                line = fig.gca().plot(x, fity, "-",
-                                      label="{} fit".format(self.title(x, y)))[0]
-                fig.gca().legend()
-            else:
-                line, _ = remainder
-                line.set_data(x, fity)
-            return (line, params)
+            fig.plot(x, fity, "-",
+                     label="{} fit".format(self.title(x, y)))
+            fig.legend()
+            return params
         return action
 
 
@@ -138,9 +124,8 @@ class PolyFit(Fit):
         result = self.fit(x, y)
         xs = ["x^{}".format(i) for i in range(1, len(result))]
         xs = ([""] + xs)[::-1]
-        terms = ["{:0.3g}".format(t)+x for x, t in zip(xs, result)]
-        return self._title+ ": $y = " + " + ".join(terms) + "$"
-
+        terms = ["{:0.3g}".format(t)+i for i, t in zip(xs, result)]
+        return self._title + ": $y = " + " + ".join(terms) + "$"
 
 
 class GaussianFit(Fit):

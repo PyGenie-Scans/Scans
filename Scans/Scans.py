@@ -16,6 +16,7 @@ try:
 except ImportError:
     # We must be in a test environment
     g = None
+from .multiplot import NBPlot
 
 
 def merge_dicts(x, y):
@@ -73,18 +74,14 @@ class Scan(object):
         if g and g.get_runstate() != "SETUP":
             raise RuntimeError("Cannot start scan while already in a run!")
 
-        from matplotlib.pyplot import pause, figure
         if not detector:
             detector = self.defaults.detector
-
-        fig = figure()
-        axis = fig.add_subplot(1, 1, 1)
+        axis = NBPlot()
 
         xs = []
         ys = []
         xlabelled = False
 
-        line = None
         action_remainder = None
         try:
             for x in self:
@@ -95,23 +92,20 @@ class Scan(object):
                     xlabelled = True
                 xs.append(position)
                 ys.append(detector(**kwargs))
-                if line is None:
-                    line = axis.plot(xs, ys, "d")[0]
-                else:
-                    rng = _plot_range(xs)
-                    axis.set_xlim(rng[0], rng[1])
-                    rng = _plot_range(ys)
-                    axis.set_ylim(rng[0], rng[1])
-                    line.set_data(xs, ys)
+                axis.clear()
+                rng = _plot_range(xs)
+                axis.set_xlim(rng[0], rng[1])
+                rng = _plot_range(ys)
+                axis.set_ylim(rng[0], rng[1])
+                axis.plot(xs, ys)
                 if action:
-                    action_remainder = action(xs, ys, fig, action_remainder)
-                pause(0.05)
+                    action_remainder = action(xs, ys, axis)
         except KeyboardInterrupt:
             pass
         if save:
-            fig.savefig(save)
+            axis.savefig(save)
 
-        if action_remainder:
+        if action_remainder is not None:
             return action_remainder
         return
 
@@ -139,7 +133,7 @@ class Scan(object):
                            action=fit.fit_plot_action(),
                            return_figure=True, **kwargs)
 
-        return fit.readable_remainder(result)
+        return fit.readable(result)
 
     def calculate(self, time=False, pad=0, **kwargs):
         """Calculate the expected time needed to perform a scan.
