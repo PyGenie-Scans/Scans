@@ -5,7 +5,6 @@ fits (i.e. Linear and Gaussian).
 """
 from abc import ABCMeta, abstractmethod
 import numpy as np
-from scipy.optimize import curve_fit
 
 
 class Fit(object):
@@ -157,6 +156,7 @@ class GaussianFit(Fit):
         return background + amplitude * np.exp(-((xs-cen)/sigma/np.sqrt(2))**2)
 
     def fit(self, x, y):
+        from scipy.optimize import curve_fit
         return curve_fit(self._gaussian_model, x, y,
                          [np.mean(x), np.max(x)-np.min(x),
                           np.max(y)-np.min(y), np.min(y)])[0]
