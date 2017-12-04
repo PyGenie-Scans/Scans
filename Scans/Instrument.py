@@ -40,8 +40,6 @@ class MockInstrument(Defaults):
 
     @staticmethod
     def log_file():
-        from datetime import datetime
-        now = datetime.now()
         return "mock_scan.dat"
 
     def __repr__(self):
