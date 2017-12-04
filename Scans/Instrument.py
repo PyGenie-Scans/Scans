@@ -36,7 +36,7 @@ class MockInstrument(Defaults):
 
     @staticmethod
     def time_estimator(**kwargs):
-        return make_estimator(1e6)(**kwargs)
+        return make_estimator(1e7)(**kwargs)
 
     @staticmethod
     def log_file():
