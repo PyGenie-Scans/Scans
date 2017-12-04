@@ -50,4 +50,17 @@ class Larmor(Defaults):
         return "Larmor()"
 
 
+def pol_measure(title, position, **kwargs):
+    """
+    Get a single polarisation measurement
+    """
+    g.change_title(title.format(**position))
+    flipper1(1)
+    # pylint: disable=invalid-name
+    up = Larmor.measure(title, position, **kwargs)
+    flipper1(0)
+    down = Larmor.measure(title, position, **kwargs)
+
+    return float(up-down)/(up+down)
+
 scan = make_scan(Larmor())
