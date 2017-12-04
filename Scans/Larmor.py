@@ -50,7 +50,7 @@ class Larmor(Defaults):
     def log_file():
         from datetime import datetime
         now = datetime.now()
-        return "/tmp/larmor_scan_{}_{}_{}_{}_{}_{}.dat".format(
+        return "U:/larmor_scan_{}_{}_{}_{}_{}_{}.dat".format(
             now.year, now.month, now.day, now.hour, now.minute, now.second)
 
     def __repr__(self):
