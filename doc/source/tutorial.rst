@@ -76,7 +76,7 @@ Examples
   can run on a computer that isn't attached to a beamline
 
   >>> import matplotlib
-  >>> matplotlib.use("Agg")
+  >>> # matplotlib.use("Agg")
   >>> from Scans.Instrument import scan, theta, two_theta
 
 Plot Motor Scan
@@ -263,6 +263,23 @@ Perform complex scans
   theta=1.0 and two_theta=1.0
   theta=1.0 and two_theta=2.0
   theta=1.0 and two_theta=3.0
+
+  Two scans can also be run one after the other.  If there are any
+  overlapping points, then the measurement at that location will be
+  performed twice and the results combined.  This can allow for
+  iterative scanning to improve statistics.
+
+  >>> th = scan(theta, start=0, stop=1, stride=0.5)
+  >>> (th + th + th).plot(frames=5)
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
 
 Estimate time
 -------------

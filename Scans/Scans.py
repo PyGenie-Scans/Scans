@@ -27,9 +27,12 @@ def merge_dicts(x, y):
 
 
 def _plot_range(array):
+    if not array:
+        return (-0.05, 0.05)
+    array = [float(x) for x in array]
     diff = max(array) - min(array)
-    return (min(array)-0.05*diff,
-            max(array)+0.05*diff)
+    return (min(array) - 0.05 * diff,
+            max(array) + 0.05 * diff)
 
 
 class Scan(object):
@@ -91,15 +94,19 @@ class Scan(object):
                     if not xlabelled:
                         axis.set_xlabel(label)
                         xlabelled = True
-                    xs.append(position)
-                    ys.append(detector(**kwargs))
+                    value = detector(**kwargs)
+                    if position in xs:
+                        ys[xs.index(position)] += value
+                    else:
+                        xs.append(position)
+                        ys.append(value)
                     logfile.write("{}\t{}\n".format(xs[-1], ys[-1]))
                     axis.clear()
                     rng = _plot_range(xs)
                     axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
-                    axis.plot(xs, ys)
+                    axis.plot(xs, [float(y) for y in ys])
                     if action:
                         action_remainder = action(xs, ys, axis)
         except KeyboardInterrupt:
@@ -155,7 +162,7 @@ class Scan(object):
         total = len(self) * (pad + est(**kwargs))
         if time:
             delta = timedelta(0, total)
-            print("The run would finish at {}".format(delta+datetime.now()))
+            print("The run would finish at {}".format(delta + datetime.now()))
         return total
 
 
@@ -241,7 +248,7 @@ class ProductScan(Scan):
                 yield merge_dicts(i, j)
 
     def __len__(self):
-        return len(self.outer)*len(self.inner)
+        return len(self.outer) * len(self.inner)
 
     def __repr__(self):
         return "{} * {}".format(self.outer, self.inner)
