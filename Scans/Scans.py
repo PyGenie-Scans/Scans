@@ -84,22 +84,24 @@ class Scan(object):
 
         action_remainder = None
         try:
-            for x in self:
-                # FIXME: Handle multidimensional plots
-                (label, position) = next(iter(x.items()))
-                if not xlabelled:
-                    axis.set_xlabel(label)
-                    xlabelled = True
-                xs.append(position)
-                ys.append(detector(**kwargs))
-                axis.clear()
-                rng = _plot_range(xs)
-                axis.set_xlim(rng[0], rng[1])
-                rng = _plot_range(ys)
-                axis.set_ylim(rng[0], rng[1])
-                axis.plot(xs, ys)
-                if action:
-                    action_remainder = action(xs, ys, axis)
+            with open(self.defaults.log_file(), "w") as logfile:
+                for x in self:
+                    # FIXME: Handle multidimensional plots
+                    (label, position) = next(iter(x.items()))
+                    if not xlabelled:
+                        axis.set_xlabel(label)
+                        xlabelled = True
+                    xs.append(position)
+                    ys.append(detector(**kwargs))
+                    logfile.write("{}\t{}\n".format(xs[-1], ys[-1]))
+                    axis.clear()
+                    rng = _plot_range(xs)
+                    axis.set_xlim(rng[0], rng[1])
+                    rng = _plot_range(ys)
+                    axis.set_ylim(rng[0], rng[1])
+                    axis.plot(xs, ys)
+                    if action:
+                        action_remainder = action(xs, ys, axis)
         except KeyboardInterrupt:
             pass
         if save:

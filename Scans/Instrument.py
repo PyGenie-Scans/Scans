@@ -38,6 +38,12 @@ class MockInstrument(Defaults):
     def time_estimator(**kwargs):
         return make_estimator(1e6)(**kwargs)
 
+    @staticmethod
+    def log_file():
+        from datetime import datetime
+        now = datetime.now()
+        return "mock_scan.dat"
+
     def __repr__(self):
         return "MockInstrument()"
 

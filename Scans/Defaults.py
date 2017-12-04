@@ -11,9 +11,10 @@ in the middle of a user run when a missing method is called.
 """
 
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
 
-class Defaults(object):
+class Defaults(with_metaclass(ABCMeta, object)):
     """A defaults object to store the correct functions for this instrument"""
 
     __metaclass__ = ABCMeta
@@ -51,5 +52,13 @@ class Defaults(object):
         The default function for estimating the number of seconds
         needed by a time settings (e.g. seconds, frames, uamps) as
         keyword arguments.
+        """
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def log_file():
+        """
+        Returns the name of a unique log file where the scan data can be saved.
         """
         pass

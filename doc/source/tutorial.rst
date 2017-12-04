@@ -98,6 +98,23 @@ Plot Motor Scan
 
   [file:plot_example.png]
 
+  The results of all scans are saved to a log file.  The location of
+  the log is set by the instrument scientist.  In the case of the
+  example instrument being used in this example, the log is always
+  "mock_scan.dat".  On an actual instrument, the file name will change
+  for each scan, to ensure that all of the data is saved.
+
+  >>> infile = open("mock_scan.dat", "r")
+  >>> lines = infile.readlines()
+  >>> infile.close()
+  >>> for line in lines: print(line.split("\t")[0])
+  0.0
+  0.5
+  1.0
+  1.5
+  2.0
+
+
   The `stride' option gives an appoximate step size, but forces ensures
   that the beginning and final points are measured.  `step' forces the
   exact spacing, but may not measure the final point.  `count' and

@@ -46,6 +46,13 @@ class Larmor(Defaults):
     def time_estimator(**kwargs):
         return make_estimator(1e6)(**kwargs)
 
+    @staticmethod
+    def log_file():
+        from datetime import datetime
+        now = datetime.now()
+        return "/tmp/larmor_scan_{}_{}_{}_{}_{}_{}.dat".format(
+            now.year, now.month, now.day, now.hour, now.minute, now.second)
+
     def __repr__(self):
         return "Larmor()"
 
