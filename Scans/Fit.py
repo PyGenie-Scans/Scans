@@ -5,7 +5,6 @@ fits (i.e. Linear and Gaussian).
 """
 from abc import ABCMeta, abstractmethod
 import numpy as np
-from scipy.optimize import curve_fit
 
 
 class Fit(object):
@@ -19,10 +18,7 @@ class Fit(object):
 
     def __init__(self, degree, title):
         self.degree = degree
-        self.title = title
-
-    def __and__(self, x):
-        return ParallelFit(self, x)
+        self._title = title
 
     @abstractmethod
     def fit(self, x, y):
@@ -50,12 +46,12 @@ class Fit(object):
         """
         return lambda i: {}
 
-    def readable_remainder(self, remainder):
+    def title(self, *args):
         """
-        Turns the results of the plot action into the
-        dictionary returned by readable.
+        Give the title of the fit.
         """
-        return self.readable(remainder[1])
+        # pylint: disable=unused-argument
+        return self._title
 
     def fit_plot_action(self):
         """
@@ -66,7 +62,7 @@ class Fit(object):
         -------
         A function to call in the plotting loop
         """
-        def action(x, y, fig, remainder):
+        def action(x, y, fig):
             """Fit and plot the data within the plotting loop
 
             Parameters
@@ -74,12 +70,9 @@ class Fit(object):
             x : Array of Float
               The x positions measured thus far
             y : Array of Float
-              The y positions measured thus fat
+              The y positions measured thus far
             fig : matplotlib.figure.Figure
               The figure on which to plot
-            line : None or maplotlib plot
-              If None, the fit hasn't begun plotting yet.  Otherwise, it
-              will be an object representing the last line fit.
 
             Returns
             -------
@@ -92,84 +85,10 @@ class Fit(object):
                 return None
             params = self.fit(x, y)
             fity = self.get_y(x, params)
-            if not remainder:
-                line = fig.gca().plot(x, fity, "-",
-                                      label="{} fit".format(self.title))[0]
-                fig.gca().legend()
-            else:
-                line, _ = remainder
-                line.set_data(x, fity)
-            return (line, params)
-        return action
-
-
-class ParallelFit(Fit):
-    """
-    A class for combining fits
-    """
-    def __init__(self, x, y):
-        degree = max((x.degree, y.degree))
-        title = "Combination of {} and {}".format(x.title, y.title)
-        Fit.__init__(self, degree, title)
-        self.first = x
-        self.second = y
-
-    def fit(self, x, y):
-        xfit = self.first.fit(x, y)
-        yfit = self.second.fit(x, y)
-        return (xfit, yfit)
-
-    def get_y(self, x, fit):
-        afit, bfit = fit
-        return (self.first.get_y(x, afit),
-                self.second.get(x, bfit))
-
-    def readable(self, fit):
-        return {self.first.title:
-                self.first.readable(fit[0]),
-                self.second.title:
-                self.second.readable(fit[1])}
-
-    def readable_remainder(self, remainder):
-        return {self.first.title:
-                self.first.readable(remainder[0][1]),
-                self.second.title:
-                self.second.readable(remainder[1][1])}
-
-    def fit_plot_action(self):
-        fst = self.first.fit_plot_action()
-        snd = self.second.fit_plot_action()
-
-        def action(x, y, fig, remainder):
-            """Fit and plot the data within the plotting loop
-
-            Parameters
-            ----------
-            x : Array of Float
-              The x positions measured thus far
-            y : Array of Float
-              The y positions measured thus fat
-            fig : matplotlib.figure.Figure
-              The figure on which to plot
-            line : None or maplotlib plot
-              If None, the fit hasn't begun plotting yet.  Otherwise, it
-              will be an object representing the last line fit.
-
-            Returns
-            -------
-            line : None or matplotlib plot
-              If nothing has been plotted, simply returns None.  Otherwise,
-              the plotted line is returned
-
-            """
-            if remainder:
-                i, j = remainder
-            else:
-                i = None
-                j = None
-            i = fst(x, y, fig, i)
-            j = snd(x, y, fig, j)
-            return (i, j)
+            fig.plot(x, fity, "-",
+                     label="{} fit".format(self.title(x, y)))
+            fig.legend()
+            return params
         return action
 
 
@@ -198,6 +117,16 @@ class PolyFit(Fit):
             results["^{}".format(key)] = value
         return results
 
+    def title(self, x, y):
+        # pylint: disable=arguments-differ
+        if len(y) < self.degree:
+            return self._title
+        result = self.fit(x, y)
+        xs = ["x^{}".format(i) for i in range(1, len(result))]
+        xs = ([""] + xs)[::-1]
+        terms = ["{:0.3g}".format(t)+i for i, t in zip(xs, result)]
+        return self._title + ": $y = " + " + ".join(terms) + "$"
+
 
 class GaussianFit(Fit):
     """
@@ -217,6 +146,7 @@ class GaussianFit(Fit):
         return background + amplitude * np.exp(-((xs-cen)/sigma/np.sqrt(2))**2)
 
     def fit(self, x, y):
+        from scipy.optimize import curve_fit
         return curve_fit(self._gaussian_model, x, y,
                          [np.mean(x), np.max(x)-np.min(x),
                           np.max(y)-np.min(y), np.min(y)])[0]
@@ -227,6 +157,13 @@ class GaussianFit(Fit):
     def readable(self, fit):
         return {"center": fit[0], "sigma": fit[1],
                 "amplitude": fit[2], "background": fit[3]}
+
+    def title(self, x, y):
+        # pylint: disable=arguments-differ
+        result = self.readable(self.fit(x, y))
+        return (self._title + ": " +
+                "y={amplitude:.3g}*exp((x-{center:.3g})$^2$" +
+                "/{sigma:.3g})+{background:.1g}").format(**result)
 
 
 #: A linear regression

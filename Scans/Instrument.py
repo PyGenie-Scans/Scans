@@ -36,42 +36,32 @@ class MockInstrument(Defaults):
 
     @staticmethod
     def time_estimator(**kwargs):
-        return make_estimator(1e6)(**kwargs)
+        return make_estimator(1e7)(**kwargs)
+
+    @staticmethod
+    def log_file():
+        return "mock_scan.dat"
+
+    def __repr__(self):
+        return "MockInstrument()"
 
 
-def cset(block, position):
-    """cset is a dummy substitution of the PyGenie cset code used here for
-demonstration purposes"""
-    instrument[block] = position
+def set_motion(name):
+    """Create a function to update the dictionary of the mock instrument
+
+    Python won't let you update a dict in a lambda."""
+    def inner(x):
+        """Actually update the dictionary"""
+        instrument[name] = x
+    return inner
 
 
-def cget(x):
-    """cget is a dummy substitution of the PyGenie cget code.
-    This has only been encluded for demonstation purposes.
-    """
-    return instrument[x]
+def mock_motion(name):
+    """Create a motion object for the mcok instrument"""
+    return Motion(lambda: instrument[name], set_motion(name), name)
 
 
-class BlockMotion(Motion):
-    """
-
-    A helper class for creating motion objects from
-    Ibex blocks
-
-    Parameters
-    ----------
-
-    block
-      A string containing the name of the ibex block to control
-    """
-    def __init__(self, block):
-        Motion.__init__(self,
-                        lambda: cget(block),
-                        lambda x: cset(block, x),
-                        block)
-
-
-theta = BlockMotion("theta")
-two_theta = BlockMotion("two_theta")
+theta = mock_motion("theta")
+two_theta = mock_motion("two_theta")
 
 scan = make_scan(MockInstrument())
