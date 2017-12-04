@@ -17,6 +17,7 @@ except ImportError:
     # We must be in a test environment
     g = None
 from .multiplot import NBPlot
+from .Monoid import Average
 
 
 def merge_dicts(x, y):
@@ -95,6 +96,8 @@ class Scan(object):
                         axis.set_xlabel(label)
                         xlabelled = True
                     value = detector(**kwargs)
+                    if isinstance(value, float):
+                        value = Average(value)
                     if position in xs:
                         ys[xs.index(position)] += value
                     else:
@@ -108,7 +111,8 @@ class Scan(object):
                     axis.set_ylim(rng[0], rng[1])
                     axis.plot(xs, [float(y) for y in ys])
                     if action:
-                        action_remainder = action(xs, ys, axis)
+                        action_remainder = action(xs, [float(y) for y in ys],
+                                                  axis)
         except KeyboardInterrupt:
             pass
         if save:
