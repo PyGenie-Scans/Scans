@@ -72,7 +72,7 @@ def get_points(
     """
 
     if gaps:
-        count = gaps+1
+        count = gaps + 1
     if before is not None:
         start = current + before
     if after is not None:
@@ -80,8 +80,8 @@ def get_points(
 
     if start is not None and stop is not None:
         if stride:
-            steps = np.ceil((stop-start)/float(stride))
-            return np.linspace(start, stop, steps+1)
+            steps = np.ceil((stop - start) / float(stride))
+            return np.linspace(start, stop, steps + 1)
         elif count:
             return np.linspace(start, stop, count)
         elif step:
@@ -89,7 +89,7 @@ def get_points(
     elif start is not None and count and (stride or step):
         if stride:
             step = stride
-        return np.linspace(start, start+(count-1)*step, count)
+        return np.linspace(start, start + (count - 1) * step, count)
     raise RuntimeError("Unable to build a scan with that set of options.")
 
 
@@ -144,9 +144,9 @@ def make_estimator(flux):
                 hours = 0
             return seconds + 60 * minutes + 3600 * hours
         elif frames:
-            return frames/10.0
+            return frames / 10.0
         elif uamps:
-            return 90*uamps
+            return 90 * uamps
         elif monitor:
-            return monitor/flux
+            return monitor / flux
     return estimate

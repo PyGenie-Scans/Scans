@@ -32,7 +32,8 @@ class MockInstrument(Defaults):
         sleep(MockInstrument.time_estimator(**kwargs))
         print("Taking a count at theta=%0.2f and two theta=%0.2f" %
               (instrument["theta"], instrument["two_theta"]))
-        return np.sqrt(instrument["theta"])+instrument["two_theta"]**2+0.05*np.random.rand()
+        return np.sqrt(instrument["theta"]) + instrument["two_theta"] ** 2 \
+            + 0.05 * np.random.rand()
 
     @staticmethod
     def time_estimator(**kwargs):

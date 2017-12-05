@@ -41,13 +41,13 @@ class Motion(object):
         return self.setter(x)
 
     def __iadd__(self, x):
-        return self(self()+x)
+        return self(self() + x)
 
     def __isub__(self, x):
-        return self(self()-x)
+        return self(self() - x)
 
     def __imul__(self, x):
-        return self(self()*x)
+        return self(self() * x)
 
     def __repr__(self):
         return "{} is at {}".format(self.title, self())

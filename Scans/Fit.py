@@ -103,10 +103,10 @@ class PolyFit(Fit):
                  title=None):
         if title is None:
             title = "Polynomial fit of degree {}".format(degree)
-        Fit.__init__(self, degree+1, title)
+        Fit.__init__(self, degree + 1, title)
 
     def fit(self, x, y):
-        return np.polyfit(x, y, self.degree-1)
+        return np.polyfit(x, y, self.degree - 1)
 
     def get_y(self, x, fit):
         return np.polyval(fit, x)
@@ -127,7 +127,7 @@ class PolyFit(Fit):
         result = self.fit(x, y)
         xs = ["x^{}".format(i) for i in range(1, len(result))]
         xs = ([""] + xs)[::-1]
-        terms = ["{:0.3g}".format(t)+i for i, t in zip(xs, result)]
+        terms = ["{:0.3g}".format(t) + i for i, t in zip(xs, result)]
         return self._title + ": $y = " + " + ".join(terms) + "$"
 
 
@@ -146,13 +146,14 @@ class GaussianFit(Fit):
         background.
 
         """
-        return background + amplitude * np.exp(-((xs-cen)/sigma/np.sqrt(2))**2)
+        return background + amplitude * np.exp(-((xs - cen) / sigma /
+                                                 np.sqrt(2)) ** 2)
 
     def fit(self, x, y):
         from scipy.optimize import curve_fit
         return curve_fit(self._gaussian_model, x, y,
-                         [np.mean(x), np.max(x)-np.min(x),
-                          np.max(y)-np.min(y), np.min(y)])[0]
+                         [np.mean(x), np.max(x) - np.min(x),
+                          np.max(y) - np.min(y), np.min(y)])[0]
 
     def get_y(self, x, fit):
         return self._gaussian_model(x, *fit)
