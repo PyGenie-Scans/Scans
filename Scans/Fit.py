@@ -83,7 +83,10 @@ class Fit(object):
             """
             if len(x) < self.degree:
                 return None
-            params = self.fit(x, y)
+            try:
+                params = self.fit(x, y)
+            except RuntimeError:
+                return None
             fity = self.get_y(x, params)
             fig.plot(x, fity, "-",
                      label="{} fit".format(self.title(x, y)))

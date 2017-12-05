@@ -178,8 +178,8 @@ Perform Fits
   Taking a count at theta=1.00 and two theta=0.00
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> "{:0.4f}".format(fit["slope"])
-  '0.6692'
+  >>> abs(fit["slope"] - 0.67) < 0.01
+  True
 
   In this instance, the user requested a linear fit.  The result was an
   array with the slope and intercept.  The fit is also plotted over the
@@ -201,8 +201,8 @@ Perform Fits
   Taking a count at theta=1.60 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> "{:0.4f}".format(fit["center"])
-  '2.1012'
+  >>> abs(fit["center"] - 2.1) < 0.2
+  True
 
 Perform Measurement Scan
 ------------------------
@@ -280,6 +280,11 @@ Perform complex scans
   Taking a count at theta=0.00 and two theta=3.00
   Taking a count at theta=0.50 and two theta=3.00
   Taking a count at theta=1.00 and two theta=3.00
+
+  For a more interactive experience, a scan be set to cycle forever,
+  improving the statistics until the use manually kills the scan.
+
+  >>> scan(THETA, start=0, stop=1, stride=0.5).forever().plot(Gaussian, frames=5) #doctest: +SKIP
 
 Estimate time
 -------------
