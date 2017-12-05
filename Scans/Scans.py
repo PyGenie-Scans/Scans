@@ -317,6 +317,7 @@ class ForeverScan(Scan):
     """
     def __init__(self, scan):
         self.scan = scan
+        self.defaults = scan.defaults
 
     def __iter__(self):
         while True:
