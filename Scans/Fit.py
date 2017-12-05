@@ -76,9 +76,9 @@ class Fit(object):
 
             Returns
             -------
-            line : None or matplotlib plot
-              If nothing has been plotted, simply returns None.  Otherwise,
-              the plotted line is returned
+            line : None or dict
+                Either None if the fit is not possible or a dict of the fit
+                parameters if the fit was performed
 
             """
             if len(x) < self.degree:
