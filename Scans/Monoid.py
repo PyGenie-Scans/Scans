@@ -9,8 +9,35 @@ Putting the incoming data into amonoid makes it easier to get the
 information out of a combined measuremnts.
 """
 
+from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
-class Average(object):
+
+class Monoid(with_metaclass(ABCMeta, object)):
+    """
+    The Monoid base class enforces the two laws: There must be a zero
+    operation and a combining function (add).
+    """
+    @staticmethod
+    @abstractmethod
+    def zero():
+        """
+        The zero element of the monoid.  This element obeys the law that
+
+        x + x.zero() == x
+        """
+        pass
+
+    @abstractmethod
+    def __add__(self, x):
+        pass
+
+    @abstractmethod
+    def __iadd__(self, x):
+        pass
+
+
+class Average(Monoid):
     """
     This monoid calculates the average of its values.
     """
@@ -31,8 +58,12 @@ class Average(object):
         self.count += y.count
         return self
 
+    @staticmethod
+    def zero():
+        Average(0, 0)
 
-class Sum(object):
+
+class Sum(Monoid):
     """
     This monoid calculates the sum total of the values presented
     """
@@ -49,8 +80,12 @@ class Sum(object):
     def __add__(self, y):
         return Sum(self.total + y.total)
 
+    @staticmethod
+    def zero():
+        return Sum(0)
 
-class Polarisation(object):
+
+class Polarisation(Monoid):
     """
     This monoid calculates the polarisation from the total of all of
     the up and down counts.
@@ -71,3 +106,7 @@ class Polarisation(object):
         return Polarisation(
             self.ups + y.ups,
             self.downs + y.downs)
+
+    @staticmethod
+    def zero():
+        Polarisation(0, 0)
