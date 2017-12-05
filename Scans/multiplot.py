@@ -117,7 +117,7 @@ def main():
         plot.clear()
         plot.set_xlim(0, 10)
         plot.plot(xs, ys)
-        plot.errorbar(xs, [y+3 for y in ys],
+        plot.errorbar(xs, [y + 3 for y in ys],
                       [4 for y in ys], fmt="rd")
         print(i)
         for _ in range(30):

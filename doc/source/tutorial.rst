@@ -77,7 +77,7 @@ Examples
 
   >>> import matplotlib
   >>> matplotlib.use("Agg")
-  >>> from Scans.Instrument import scan, theta, two_theta
+  >>> from Scans.Instrument import scan, THETA, TWO_THETA
 
 Plot Motor Scan
 ---------------
@@ -86,7 +86,7 @@ Plot Motor Scan
   intensity as the motor moves from 0 to 2 inclusively in steps /near/
   0.3.
 
-  >>> scan(theta, start=0, stop=2, stride=0.6).plot(seconds=1)
+  >>> scan(THETA, start=0, stop=2, stride=0.6).plot(seconds=1)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -121,17 +121,17 @@ Plot Motor Scan
   `gaps' allow the user to specify the number of measurements and the
   number of gaps, respectively.
 
-  >>> scan(theta, start=0, stop=2, step=0.6).plot(frames=5)
+  >>> scan(THETA, start=0, stop=2, step=0.6).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
-  >>> scan(theta, start=0, stop=2, count=4).plot(frames=5)
+  >>> scan(THETA, start=0, stop=2, count=4).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.67 and two theta=0.00
   Taking a count at theta=1.33 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> scan(theta, start=0, stop=2, gaps=4).plot(frames=5)
+  >>> scan(THETA, start=0, stop=2, gaps=4).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -141,13 +141,13 @@ Plot Motor Scan
   The user also has the option of fixing the steps size and number of
   measurements or gaps while leaving the ending position open.
 
-  >>> scan(theta, start=0, step=0.6, count=5).plot(frames=5)
+  >>> scan(THETA, start=0, step=0.6, count=5).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.40 and two theta=0.00
-  >>> scan(theta, start=0, stride=0.6, gaps=5).plot(frames=5)
+  >>> scan(THETA, start=0, stride=0.6, gaps=5).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
@@ -158,7 +158,7 @@ Plot Motor Scan
   For when relative scans make more sense, it's possible to request
   them by replacing beign and end with before and after.
 
-  >>> scan(theta, before=-1, after=1, stride=0.6).plot(frames=5)
+  >>> scan(THETA, before=-1, after=1, stride=0.6).plot(frames=5)
   Taking a count at theta=2.00 and two theta=0.00
   Taking a count at theta=2.50 and two theta=0.00
   Taking a count at theta=3.00 and two theta=0.00
@@ -172,14 +172,14 @@ Perform Fits
   performing the plot
 
   >>> from Scans.Fit import Linear, Gaussian
-  >>> fit = scan(theta, start=0, stop=2, stride=0.6).fit(Linear, frames=5)
+  >>> fit = scan(THETA, start=0, stop=2, stride=0.6).fit(Linear, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> "{:0.4f}".format(fit["slope"])
-  '0.6692'
+  >>> abs(fit["slope"] - 0.67) < 0.01
+  True
 
   In this instance, the user requested a linear fit.  The result was an
   array with the slope and intercept.  The fit is also plotted over the
@@ -189,7 +189,7 @@ Perform Fits
 
   We can also plot the same scan against a gaussian
 
-  >>> fit = scan(theta, start=0, stop=2, count=11).fit(Gaussian, frames=5)
+  >>> fit = scan(THETA, start=0, stop=2, count=11).fit(Gaussian, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.20 and two theta=0.00
   Taking a count at theta=0.40 and two theta=0.00
@@ -201,8 +201,8 @@ Perform Fits
   Taking a count at theta=1.60 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> "{:0.4f}".format(fit["center"])
-  '2.1012'
+  >>> abs(fit["center"] - 2.1) < 0.2
+  True
 
 Perform Measurement Scan
 ------------------------
@@ -211,13 +211,13 @@ Perform Measurement Scan
   that needs to change is the method call.
 
   >>> title = "Taking a measurement at theta={theta}"
-  >>> scan(theta, start=0, stop=2, stride=0.6).measure(title)
+  >>> scan(THETA, start=0, stop=2, stride=0.6).measure(title)
   Taking a measurement at theta=0.0
   Taking a measurement at theta=0.5
   Taking a measurement at theta=1.0
   Taking a measurement at theta=1.5
   Taking a measurement at theta=2.0
-  >>> scan(two_theta, start=0, stop=2, stride=0.6).measure("two theta={two_theta}")
+  >>> scan(TWO_THETA, start=0, stop=2, stride=0.6).measure("two theta={two_theta}")
   two theta=0.0
   two theta=0.5
   two theta=1.0
@@ -236,8 +236,8 @@ Perform complex scans
   To start with, a user may want to scan theta and two theta together in
   lock step.
 
-  >>> th= scan(theta, start=0, stop=1, stride=0.3)
-  >>> two_th= scan(two_theta, start=0, stop=2, stride=0.6)
+  >>> th= scan(THETA, start=0, stop=1, stride=0.3)
+  >>> two_th= scan(TWO_THETA, start=0, stop=2, stride=0.6)
   >>> (th& two_th).measure("theta={theta} and two_theta={two_theta}")
   theta=0.0 and two_theta=0.0
   theta=0.25 and two_theta=0.5
@@ -248,8 +248,8 @@ Perform complex scans
   On the other hand, if the user is unsure about the proper sample
   alignment, they may want to investigate theta and two-theta separately
 
-  >>> th = scan(theta, start=0, stop=1, stride=0.5)
-  >>> two_th = scan(two_theta, start=0, stop=3, stride=1.0)
+  >>> th = scan(THETA, start=0, stop=1, stride=0.5)
+  >>> two_th = scan(TWO_THETA, start=0, stop=3, stride=1.0)
   >>> (th * two_th).measure("theta={theta} and two_theta={two_theta}")
   theta=0.0 and two_theta=0.0
   theta=0.0 and two_theta=1.0
@@ -263,6 +263,28 @@ Perform complex scans
   theta=1.0 and two_theta=1.0
   theta=1.0 and two_theta=2.0
   theta=1.0 and two_theta=3.0
+
+  Two scans can also be run one after the other.  If there are any
+  overlapping points, then the measurement at that location will be
+  performed twice and the results combined.  This can allow for
+  iterative scanning to improve statistics.
+
+  >>> th = scan(THETA, start=0, stop=1, stride=0.5)
+  >>> (th + th + th).plot(frames=5)
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+
+  For a more interactive experience, a scan be set to cycle forever,
+  improving the statistics until the use manually kills the scan.
+
+  >>> scan(THETA, start=0, stop=1, stride=0.5).forever().plot(Gaussian, frames=5) #doctest: +SKIP
 
 Estimate time
 -------------
@@ -280,11 +302,11 @@ Estimate time
   the point of completion is a simple convenience to prevent these
   user headaches.
 
-  >>> needed = scan(theta, start=0, stop=2.0, step=0.6).calculate(hours=1, minutes=30)
+  >>> needed = scan(THETA, start=0, stop=2.0, step=0.6).calculate(hours=1, minutes=30)
   >>> print(needed)
   21600
 
-  >>> needed = scan(theta, start=0, stop=2.0, step=0.6).calculate(frames=1000, time=True) #doctest: +SKIP
+  >>> needed = scan(THETA, start=0, stop=2.0, step=0.6).calculate(frames=1000, time=True) #doctest: +SKIP
   The run would finish at 2017-07-17 20:06:24.600802
   >>> print(needed) #doctest: +SKIP
   400.0
@@ -301,52 +323,56 @@ Class setup
   children to have a set of defined functions.  However, any subclasses
   of `Scan' must contain the follow member functions:
 
-  map: Create a modified version of the scan based on a user supplied
+  :map: Create a modified version of the scan based on a user supplied
        function.  The original position of each point is fed as input to
        the function and the return value of the function is the new
        position.
-  reverse: Create a copy of the scan that runs in the opposite direction
-  __len__: Return the number of elements in the scan
-  __iter__: Return an iterator that steps through the scan one position at
+  :reverse: Create a copy of the scan that runs in the opposite direction
+  :__len__: Return the number of elements in the scan
+  :__iter__: Return an iterator that steps through the scan one position at
 	    a time, yielding the current position at each point.
 
   There are four default subclasses of Scan that should handle most of
   the requirements
 
-  SimpleScan: is the lowest level of the scan system.  It requires a
-	      function which performs the desired action on each point, a
-	      list of points, and a name for the axis.  At this time, all
-	      scans are combinations of simpleScans.
+  SimpleScan
+	     is the lowest level of the scan system.  It requires a
+	     function which performs the desired action on each point, a
+	     list of points, and a name for the axis.  At this time, all
+	     scans are combinations of simpleScans.
 
-  SumScan: runs two scans sequentially.  These scans do not need to be on
-	   the same axes or even move the same number of axes.
+  SumScan
+     runs two scans sequentially.  These scans do not need to be on
+     the same axes or even move the same number of axes.
 
-  ProductScan: performs every possible combination of positions for two
-	       different scans.  This provides an alternative to nested
-	       loops.
+  ProductScan
+	     performs every possible combination of positions for two
+	     different scans.  This provides an alternative to nested
+	     loops.
 
-  ParallelScan: takes to scans and runs their actions together at each
-		step.  For example, if `a' was a scan over theta and `b'
-		was a scan over two theta, then `a && b' would scan each
-		theta angle with its corresponding two theta.
+  ParallelScan
+	     takes to scans and runs their actions together at each
+	     step.  For example, if `a' was a scan over theta and `b'
+	     was a scan over two theta, then `a && b' would scan each
+	     theta angle with its corresponding two theta.
 
   The base `Scan' class contains four useful member functions.
 
-  plot: The `plot' function goes to each position listed in the scan,
-	takes a count, and plots it on an axis.  The user can specify the
-	counting command.
-  measure: The `measure' function goes to each position in the in the scan
-	   and records a measurement.  The function is passed a title
-	   which can include information about the current position in the
-	   scan.
-  fit: Like `plot', this function takes a single count at each position.
-       It then fits it to the user supplied model and returns the fitted
-       value.  This could be anything from the peak position to the
-       frequency of the curve.
-  calculate: This function takes a desired measurement time at each point
-	     and, optionally, an approximated motor movement time.  It
-	     returns an estimated duration for the scan and time of
-	     completion.
+  :plot: The `plot' function goes to each position listed in the scan,
+	 takes a count, and plots it on an axis.  The user can specify the
+	 counting command.
+  :measure: The `measure' function goes to each position in the in the scan
+	    and records a measurement.  The function is passed a title
+	    which can include information about the current position in the
+	    scan.
+  :fit: Like `plot', this function takes a single count at each position.
+	It then fits it to the user supplied model and returns the fitted
+	value.  This could be anything from the peak position to the
+	frequency of the curve.
+  :calculate: This function takes a desired measurement time at each point
+	      and, optionally, an approximated motor movement time.  It
+	      returns an estimated duration for the scan and time of
+	      completion.
 
 
 High Level interface
@@ -372,21 +398,23 @@ Position Commands
   The user needs to give three of the following keyword arguments to
   create a scan.
 
-  start: This is the start position of the scan.  This is currently
-	 mandatory, but we might make it optional in the future for
-	 creating relative scans.
-  stop: This is the final position of the scan.  The type of step chosen
-       determines whether or not this final value is guaranteed to be
-       included in the final measurement.
-  count: The total number of measurements to perform.  This parameter
-	 always take precedence over "gaps"
-  gaps: The number steps to take.  The total number of measurements is
-	always one greater than the number of gaps.
-  stride: A /requested/, but not /mandatory/, step size.  Users often know
-	  the range over which they wish to scan and their desired
-	  scanning resolution.  `stride' measured the entire range, but
-	  may increase the resolution to give equally spaced measurements.
-	  `stride' always take precedence over =step
-  step: A mandatory step size.  If the request measurement range is not an
-	integer number of steps, the measurement will stop before the
-	requested end.
+  :start: This is the initial position of the scan. Fnord
+  :stop: This is the final position of the scan.  The type of step
+	 chosen determines whether or not this final value is guaranteed
+	 to be included in the final measurement.
+  :before: This sets the initial position relative to the current position.
+  :after: This sets the final position relative to the current position.
+  :count: The total number of measurements to perform.  This parameter
+	  always take precedence over "gaps"
+  :gaps: The number steps to take.  The total number of measurements is
+	 always one greater than the number of gaps.
+  :stride: A /requested/, but not /mandatory/, step size.  Users often know
+	   the range over which they wish to scan and their desired
+	   scanning resolution.  `stride' measured the entire range, but
+	   may increase the resolution to give equally spaced measurements.
+	   `stride' always take precedence over `step`
+  :step: A mandatory step size.  If the request measurement range is not an
+	 integer number of steps, the measurement will stop before the
+	 requested end.
+
+  See the :py:func:`Scans.Util.get_points` function for more informatoin on the parameters.

@@ -11,13 +11,12 @@ in the middle of a user run when a missing method is called.
 """
 
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
+from six import add_metaclass
 
 
-class Defaults(with_metaclass(ABCMeta, object)):
+@add_metaclass(ABCMeta)
+class Defaults(object):
     """A defaults object to store the correct functions for this instrument"""
-
-    __metaclass__ = ABCMeta
 
     @staticmethod
     @abstractmethod

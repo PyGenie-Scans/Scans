@@ -16,13 +16,10 @@ except ImportError:
 from .Util import make_scan, make_estimator
 from .Defaults import Defaults
 
-instrument = {"theta": 0, "two_theta": 0}
-
 
 class Larmor(Defaults):
     """
-    This class represents a fake instrument that can be
-    used for testing purposes.
+    This class represents the default functions for the Larmor instrument.
     """
 
     @staticmethod
