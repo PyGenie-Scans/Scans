@@ -111,3 +111,25 @@ class Polarisation(Monoid):
     @staticmethod
     def zero():
         Polarisation(0, 0)
+
+
+class MonoidList(Monoid):
+    """
+    This class turns a collection of Monoids into its own Monoid.
+    """
+    def __init__(self, values):
+        self.values = values
+
+    def __float__(self):
+        return [float(x) for x in self.values]
+
+    def zero(self):
+        return [x.zero() for x in self.values]
+
+    def __add__(self, y):
+        return MonoidList([a + b for a, b in zip(self.values, y)])
+
+    def __iadd__(self, y):
+        for value, update in zip(self.values, y):
+            value += update
+        return self
