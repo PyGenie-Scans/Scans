@@ -61,7 +61,7 @@ def mock_motion(name):
     return Motion(lambda: instrument[name], set_motion(name), name)
 
 
-theta = mock_motion("theta")
-two_theta = mock_motion("two_theta")
+THETA = mock_motion("theta")
+TWO_THETA = mock_motion("two_theta")
 
 scan = make_scan(MockInstrument())

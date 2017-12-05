@@ -77,7 +77,7 @@ Examples
 
   >>> import matplotlib
   >>> # matplotlib.use("Agg")
-  >>> from Scans.Instrument import scan, theta, two_theta
+  >>> from Scans.Instrument import scan, THETA, TWO_THETA
 
 Plot Motor Scan
 ---------------
@@ -86,7 +86,7 @@ Plot Motor Scan
   intensity as the motor moves from 0 to 2 inclusively in steps /near/
   0.3.
 
-  >>> scan(theta, start=0, stop=2, stride=0.6).plot(seconds=1)
+  >>> scan(THETA, start=0, stop=2, stride=0.6).plot(seconds=1)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -121,17 +121,17 @@ Plot Motor Scan
   `gaps' allow the user to specify the number of measurements and the
   number of gaps, respectively.
 
-  >>> scan(theta, start=0, stop=2, step=0.6).plot(frames=5)
+  >>> scan(THETA, start=0, stop=2, step=0.6).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
-  >>> scan(theta, start=0, stop=2, count=4).plot(frames=5)
+  >>> scan(THETA, start=0, stop=2, count=4).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.67 and two theta=0.00
   Taking a count at theta=1.33 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> scan(theta, start=0, stop=2, gaps=4).plot(frames=5)
+  >>> scan(THETA, start=0, stop=2, gaps=4).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -141,13 +141,13 @@ Plot Motor Scan
   The user also has the option of fixing the steps size and number of
   measurements or gaps while leaving the ending position open.
 
-  >>> scan(theta, start=0, step=0.6, count=5).plot(frames=5)
+  >>> scan(THETA, start=0, step=0.6, count=5).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.40 and two theta=0.00
-  >>> scan(theta, start=0, stride=0.6, gaps=5).plot(frames=5)
+  >>> scan(THETA, start=0, stride=0.6, gaps=5).plot(frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
@@ -158,7 +158,7 @@ Plot Motor Scan
   For when relative scans make more sense, it's possible to request
   them by replacing beign and end with before and after.
 
-  >>> scan(theta, before=-1, after=1, stride=0.6).plot(frames=5)
+  >>> scan(THETA, before=-1, after=1, stride=0.6).plot(frames=5)
   Taking a count at theta=2.00 and two theta=0.00
   Taking a count at theta=2.50 and two theta=0.00
   Taking a count at theta=3.00 and two theta=0.00
@@ -172,7 +172,7 @@ Perform Fits
   performing the plot
 
   >>> from Scans.Fit import Linear, Gaussian
-  >>> fit = scan(theta, start=0, stop=2, stride=0.6).fit(Linear, frames=5)
+  >>> fit = scan(THETA, start=0, stop=2, stride=0.6).fit(Linear, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -189,7 +189,7 @@ Perform Fits
 
   We can also plot the same scan against a gaussian
 
-  >>> fit = scan(theta, start=0, stop=2, count=11).fit(Gaussian, frames=5)
+  >>> fit = scan(THETA, start=0, stop=2, count=11).fit(Gaussian, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.20 and two theta=0.00
   Taking a count at theta=0.40 and two theta=0.00
@@ -211,13 +211,13 @@ Perform Measurement Scan
   that needs to change is the method call.
 
   >>> title = "Taking a measurement at theta={theta}"
-  >>> scan(theta, start=0, stop=2, stride=0.6).measure(title)
+  >>> scan(THETA, start=0, stop=2, stride=0.6).measure(title)
   Taking a measurement at theta=0.0
   Taking a measurement at theta=0.5
   Taking a measurement at theta=1.0
   Taking a measurement at theta=1.5
   Taking a measurement at theta=2.0
-  >>> scan(two_theta, start=0, stop=2, stride=0.6).measure("two theta={two_theta}")
+  >>> scan(TWO_THETA, start=0, stop=2, stride=0.6).measure("two theta={two_theta}")
   two theta=0.0
   two theta=0.5
   two theta=1.0
@@ -236,8 +236,8 @@ Perform complex scans
   To start with, a user may want to scan theta and two theta together in
   lock step.
 
-  >>> th= scan(theta, start=0, stop=1, stride=0.3)
-  >>> two_th= scan(two_theta, start=0, stop=2, stride=0.6)
+  >>> th= scan(THETA, start=0, stop=1, stride=0.3)
+  >>> two_th= scan(TWO_THETA, start=0, stop=2, stride=0.6)
   >>> (th& two_th).measure("theta={theta} and two_theta={two_theta}")
   theta=0.0 and two_theta=0.0
   theta=0.25 and two_theta=0.5
@@ -248,8 +248,8 @@ Perform complex scans
   On the other hand, if the user is unsure about the proper sample
   alignment, they may want to investigate theta and two-theta separately
 
-  >>> th = scan(theta, start=0, stop=1, stride=0.5)
-  >>> two_th = scan(two_theta, start=0, stop=3, stride=1.0)
+  >>> th = scan(THETA, start=0, stop=1, stride=0.5)
+  >>> two_th = scan(TWO_THETA, start=0, stop=3, stride=1.0)
   >>> (th * two_th).measure("theta={theta} and two_theta={two_theta}")
   theta=0.0 and two_theta=0.0
   theta=0.0 and two_theta=1.0
@@ -269,7 +269,7 @@ Perform complex scans
   performed twice and the results combined.  This can allow for
   iterative scanning to improve statistics.
 
-  >>> th = scan(theta, start=0, stop=1, stride=0.5)
+  >>> th = scan(THETA, start=0, stop=1, stride=0.5)
   >>> (th + th + th).plot(frames=5)
   Taking a count at theta=0.00 and two theta=3.00
   Taking a count at theta=0.50 and two theta=3.00
@@ -297,11 +297,11 @@ Estimate time
   the point of completion is a simple convenience to prevent these
   user headaches.
 
-  >>> needed = scan(theta, start=0, stop=2.0, step=0.6).calculate(hours=1, minutes=30)
+  >>> needed = scan(THETA, start=0, stop=2.0, step=0.6).calculate(hours=1, minutes=30)
   >>> print(needed)
   21600
 
-  >>> needed = scan(theta, start=0, stop=2.0, step=0.6).calculate(frames=1000, time=True) #doctest: +SKIP
+  >>> needed = scan(THETA, start=0, stop=2.0, step=0.6).calculate(frames=1000, time=True) #doctest: +SKIP
   The run would finish at 2017-07-17 20:06:24.600802
   >>> print(needed) #doctest: +SKIP
   400.0
