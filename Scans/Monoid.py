@@ -10,10 +10,11 @@ information out of a combined measuremnts.
 """
 
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
+from six import add_metaclass
 
 
-class Monoid(with_metaclass(ABCMeta, object)):
+@add_metaclass(ABCMeta)
+class Monoid(object):
     """
     The Monoid base class enforces the two laws: There must be a zero
     operation and a combining function (add).
