@@ -389,12 +389,12 @@ Position Commands
   The user needs to give three of the following keyword arguments to
   create a scan.
 
-  start: This is the start position of the scan.  This is currently
-	 mandatory, but we might make it optional in the future for
-	 creating relative scans.
+  start: This is the initial position of the scan.
   stop: This is the final position of the scan.  The type of step chosen
        determines whether or not this final value is guaranteed to be
        included in the final measurement.
+  before: This sets the initial position relative to the current position.
+  after: This sets the final position relative to the current position.
   count: The total number of measurements to perform.  This parameter
 	 always take precedence over "gaps"
   gaps: The number steps to take.  The total number of measurements is
@@ -407,3 +407,5 @@ Position Commands
   step: A mandatory step size.  If the request measurement range is not an
 	integer number of steps, the measurement will stop before the
 	requested end.
+
+  See the :meth:`get_points` function for more informatoin on the parameters.
