@@ -318,52 +318,56 @@ Class setup
   children to have a set of defined functions.  However, any subclasses
   of `Scan' must contain the follow member functions:
 
-  map: Create a modified version of the scan based on a user supplied
+  :map: Create a modified version of the scan based on a user supplied
        function.  The original position of each point is fed as input to
        the function and the return value of the function is the new
        position.
-  reverse: Create a copy of the scan that runs in the opposite direction
-  __len__: Return the number of elements in the scan
-  __iter__: Return an iterator that steps through the scan one position at
+  :reverse: Create a copy of the scan that runs in the opposite direction
+  :__len__: Return the number of elements in the scan
+  :__iter__: Return an iterator that steps through the scan one position at
 	    a time, yielding the current position at each point.
 
   There are four default subclasses of Scan that should handle most of
   the requirements
 
-  SimpleScan: is the lowest level of the scan system.  It requires a
-	      function which performs the desired action on each point, a
-	      list of points, and a name for the axis.  At this time, all
-	      scans are combinations of simpleScans.
+  SimpleScan
+	     is the lowest level of the scan system.  It requires a
+	     function which performs the desired action on each point, a
+	     list of points, and a name for the axis.  At this time, all
+	     scans are combinations of simpleScans.
 
-  SumScan: runs two scans sequentially.  These scans do not need to be on
-	   the same axes or even move the same number of axes.
+  SumScan
+     runs two scans sequentially.  These scans do not need to be on
+     the same axes or even move the same number of axes.
 
-  ProductScan: performs every possible combination of positions for two
-	       different scans.  This provides an alternative to nested
-	       loops.
+  ProductScan
+	     performs every possible combination of positions for two
+	     different scans.  This provides an alternative to nested
+	     loops.
 
-  ParallelScan: takes to scans and runs their actions together at each
-		step.  For example, if `a' was a scan over theta and `b'
-		was a scan over two theta, then `a && b' would scan each
-		theta angle with its corresponding two theta.
+  ParallelScan
+	     takes to scans and runs their actions together at each
+	     step.  For example, if `a' was a scan over theta and `b'
+	     was a scan over two theta, then `a && b' would scan each
+	     theta angle with its corresponding two theta.
 
   The base `Scan' class contains four useful member functions.
 
-  plot: The `plot' function goes to each position listed in the scan,
-	takes a count, and plots it on an axis.  The user can specify the
-	counting command.
-  measure: The `measure' function goes to each position in the in the scan
-	   and records a measurement.  The function is passed a title
-	   which can include information about the current position in the
-	   scan.
-  fit: Like `plot', this function takes a single count at each position.
-       It then fits it to the user supplied model and returns the fitted
-       value.  This could be anything from the peak position to the
-       frequency of the curve.
-  calculate: This function takes a desired measurement time at each point
-	     and, optionally, an approximated motor movement time.  It
-	     returns an estimated duration for the scan and time of
-	     completion.
+  :plot: The `plot' function goes to each position listed in the scan,
+	 takes a count, and plots it on an axis.  The user can specify the
+	 counting command.
+  :measure: The `measure' function goes to each position in the in the scan
+	    and records a measurement.  The function is passed a title
+	    which can include information about the current position in the
+	    scan.
+  :fit: Like `plot', this function takes a single count at each position.
+	It then fits it to the user supplied model and returns the fitted
+	value.  This could be anything from the peak position to the
+	frequency of the curve.
+  :calculate: This function takes a desired measurement time at each point
+	      and, optionally, an approximated motor movement time.  It
+	      returns an estimated duration for the scan and time of
+	      completion.
 
 
 High Level interface
@@ -389,23 +393,23 @@ Position Commands
   The user needs to give three of the following keyword arguments to
   create a scan.
 
-  start: This is the initial position of the scan.
-  stop: This is the final position of the scan.  The type of step chosen
-       determines whether or not this final value is guaranteed to be
-       included in the final measurement.
-  before: This sets the initial position relative to the current position.
-  after: This sets the final position relative to the current position.
-  count: The total number of measurements to perform.  This parameter
-	 always take precedence over "gaps"
-  gaps: The number steps to take.  The total number of measurements is
-	always one greater than the number of gaps.
-  stride: A /requested/, but not /mandatory/, step size.  Users often know
-	  the range over which they wish to scan and their desired
-	  scanning resolution.  `stride' measured the entire range, but
-	  may increase the resolution to give equally spaced measurements.
-	  `stride' always take precedence over =step
-  step: A mandatory step size.  If the request measurement range is not an
-	integer number of steps, the measurement will stop before the
-	requested end.
+  :start: This is the initial position of the scan. Fnord
+  :stop: This is the final position of the scan.  The type of step
+	 chosen determines whether or not this final value is guaranteed
+	 to be included in the final measurement.
+  :before: This sets the initial position relative to the current position.
+  :after: This sets the final position relative to the current position.
+  :count: The total number of measurements to perform.  This parameter
+	  always take precedence over "gaps"
+  :gaps: The number steps to take.  The total number of measurements is
+	 always one greater than the number of gaps.
+  :stride: A /requested/, but not /mandatory/, step size.  Users often know
+	   the range over which they wish to scan and their desired
+	   scanning resolution.  `stride' measured the entire range, but
+	   may increase the resolution to give equally spaced measurements.
+	   `stride' always take precedence over `step`
+  :step: A mandatory step size.  If the request measurement range is not an
+	 integer number of steps, the measurement will stop before the
+	 requested end.
 
-  See the :meth:`get_points` function for more informatoin on the parameters.
+  See the :py:func:`Scans.Util.get_points` function for more informatoin on the parameters.
