@@ -10,6 +10,8 @@ treated as private.
 """
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
+from six import add_metaclass
+
 try:
     # pylint: disable=import-error
     from genie_python import genie as g
@@ -36,12 +38,11 @@ def _plot_range(array):
             max(array) + 0.05 * diff)
 
 
+@add_metaclass(ABCMeta)
 class Scan(object):
     """The virtual class that represents all controlled scans.  This class
     should never be instantiated directly, but rather by one of its
     subclasses."""
-
-    __metaclass__ = ABCMeta
 
     defaults = None
 
@@ -68,6 +69,12 @@ class Scan(object):
 
     def __and__(self, x):
         return ParallelScan(self, x)
+
+    def forever(self):
+        """
+        Create a scan that will cycle until stopped by the user.
+        """
+        return ForeverScan(self)
 
     def plot(self, detector=None, save=None,
              action=None, **kwargs):
@@ -301,3 +308,29 @@ class ParallelScan(Scan):
         """Creates a new scan that runs in the opposite direction"""
         return ParallelScan(self.first.reverse(),
                             self.second.reverse())
+
+
+class ForeverScan(Scan):
+    """
+    ForeverScan repeats the same scan over and over again to improve
+    the statistics until the user manually halts the scan.
+    """
+    def __init__(self, scan):
+        self.scan = scan
+
+    def __iter__(self):
+        while True:
+            for x in self.scan:
+                yield x
+
+    def __repr__(self):
+        return "ForeverScan(" + repr(self.scan) + ")"
+
+    def __len__(self):
+        raise RuntimeError("Attempted to get the length of an infinite list")
+
+    def map(self, func):
+        return ForeverScan(self.scan.map(func))
+
+    def reverse(self):
+        return ForeverScan(self.scan.reverse())
