@@ -76,7 +76,7 @@ Examples
   can run on a computer that isn't attached to a beamline
 
   >>> import matplotlib
-  >>> # matplotlib.use("Agg")
+  >>> matplotlib.use("Agg")
   >>> from Scans.Instrument import scan, THETA, TWO_THETA
 
 Plot Motor Scan
