@@ -110,7 +110,7 @@ class Scan(object):
                     else:
                         xs.append(position)
                         ys.append(value)
-                    logfile.write("{}\t{}\n".format(xs[-1], ys[-1]))
+                    logfile.write("{}\t{}\n".format(xs[-1], float(ys[-1])))
                     axis.clear()
                     rng = _plot_range(xs)
                     axis.set_xlim(rng[0], rng[1])
