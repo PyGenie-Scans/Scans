@@ -1,8 +1,14 @@
-import genie_python.genie as gen
-import LSS.SANSroutines as lm
+if __name__ == '__main__' and __package__ is None:
+    from os import sys, path
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+# import genie_python.genie as gen
+# import LSS.SANSroutines as lm
 # from ..Scans.Larmor import pol_measure
 # from ..Scans.Fit import DampedOscillator
-from ..Scans import Larmor, Fit
+from Scans import Larmor, Fit
+from Scans.Instrument import scan, THETA, pol_measure
+from Scans.Fit import DampedOscillator
 
 
 def echoscan_axis(scan, rtitle, frames=100, save=False):
@@ -21,10 +27,13 @@ def echoscan_axis(scan, rtitle, frames=100, save=False):
     save:
       If True, save the scan in the log.
     """
-    gen.abort()
-    gen.change(title=rtitle)
-    lm.setuplarmor_echoscan()
-    result = scan.fit(Fit.DampedOscillator, frames=frames,
-                      detector=Larmor.pol_measure)
-    print("The center is {:center}".format(result))
+    # gen.abort()
+    # gen.change(title=rtitle)
+    # lm.setuplarmor_echoscan()
+    result = scan.fit(DampedOscillator, frames=frames,
+                      detector=pol_measure)
+    print("The center is {center}".format(**result))
     return result["center"]
+
+th = scan(THETA, start=-8, stop=5, stride=0.1)
+echoscan_axis(th.forever() , "Test")
