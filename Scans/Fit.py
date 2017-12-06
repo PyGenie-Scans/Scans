@@ -131,15 +131,49 @@ class PolyFit(Fit):
         return self._title + ": $y = " + " + ".join(terms) + "$"
 
 
-class GaussianFit(Fit):
+@add_metaclass(ABCMeta)
+class CurveFit(Fit):
+    """
+    A class for fitting models based on the scipy curve_fit optimizer
+    """
+    def __init__(self, degree, title):
+        Fit.__init__(self, degree, title)
+
+    @staticmethod
+    @abstractmethod
+    def _model(xs, *args):
+        """
+        This is the mathematical model to be fit by the subclass
+        """
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def guess(x, y):
+        """
+        Given a set of x and y values, make a guess as to the initial
+        parameters of the fit.
+        """
+        pass
+
+    def fit(self, x, y):
+        from scipy.optimize import curve_fit
+        return curve_fit(self._model, x, y, self.guess(x, y))[0]
+
+    def get_y(self, x, fit):
+        return self._model(x, *fit)
+
+
+class GaussianFit(CurveFit):
     """
     A fitting class for handling gaussian peaks
     """
     def __init__(self):
-        Fit.__init__(self, 4, "Gaussian Fit")
+        CurveFit.__init__(self, 4, "Gaussian Fit")
 
     @staticmethod
-    def _gaussian_model(xs, cen, sigma, amplitude, background):
+    # pylint: disable=arguments-differ
+    def _model(xs, cen, sigma, amplitude, background):
         """
         This is the model for a gaussian with the mean at center, a
         standard deviation of sigma, and a peak of amplitude over a base of
@@ -149,14 +183,10 @@ class GaussianFit(Fit):
         return background + amplitude * np.exp(-((xs - cen) / sigma /
                                                  np.sqrt(2)) ** 2)
 
-    def fit(self, x, y):
-        from scipy.optimize import curve_fit
-        return curve_fit(self._gaussian_model, x, y,
-                         [np.mean(x), np.max(x) - np.min(x),
-                          np.max(y) - np.min(y), np.min(y)])[0]
-
-    def get_y(self, x, fit):
-        return self._gaussian_model(x, *fit)
+    @staticmethod
+    def guess(x, y):
+        return [np.mean(x), np.max(x)-np.min(x),
+                np.max(y) - np.min(y), np.min(y)]
 
     def readable(self, fit):
         return {"center": fit[0], "sigma": fit[1],
@@ -170,15 +200,16 @@ class GaussianFit(Fit):
                 "/{sigma:.3g})+{background:.1g}").format(**result)
 
 
-class DampedOscillatorFit(Fit):
+class DampedOscillatorFit(CurveFit):
     """
     A class for fitting decaying cosine curves.
     """
     def __init__(self):
-        Fit.__init__(self, 4, "Damped Oscillator")
+        CurveFit.__init__(self, 4, "Damped Oscillator")
 
+    # pylint: disable=arguments-differ
     @staticmethod
-    def _damped_oscillator_model(x, center, amp, freq, width):
+    def _model(x, center, amp, freq, width):
         """
         This is the model for a damped Oscillator.
 
@@ -196,19 +227,22 @@ class DampedOscillatorFit(Fit):
         """
         return amp * np.cos((x-center)*freq)*np.exp(-((x-center)/width)**2)
 
-    def get_y(self, x, fit):
-        return self._damped_oscillator_model(x, *fit)
-
-    def fit(self, x, y):
-        from scipy.optimize import curve_fit
-        guess = x[np.argmax(y)]
-        popt = [guess, 1, 2*np.pi/(750.0), max(x)-min(x)]
-        return curve_fit(self._damped_oscillator_model, x, y, popt)[0]
+    @staticmethod
+    def guess(x, y):
+        peak = x[np.argmax(y)]
+        valley = x[np.argmin(y)]
+        return [peak, 1, np.pi/np.abs(peak-valley), max(x)-min(x)]
 
     def readable(self, fit):
         return {"center": fit[0], "amplitude": fit[1],
                 "frequency": fit[2], "width": fit[3]}
 
+    def title(self, x, y):
+        # pylint: disable=arguments-differ
+        result = self.readable(self.fit(x, y))
+        return (self._title + ": " +
+                "y={amplitude:.3g}*exp(((x-{center:.3g})" +
+                "/{width:.3g})$^2$)*cos({frequency:.3g}*(x-{center:.3g})").format(**result)
 
 #: A linear regression
 Linear = PolyFit(1, title="Linear")
