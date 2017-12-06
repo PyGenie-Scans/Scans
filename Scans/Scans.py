@@ -82,6 +82,9 @@ class Scan(object):
         The measurement parameter can be used to set what type of measurement
         is to be taken.  If the save parameter is set to a file name, then the
         plot will be saved in that file."""
+        import warnings
+        warnings.simplefilter("ignore", UserWarning)
+
         if g and g.get_runstate() != "SETUP":
             raise RuntimeError("Cannot start scan while already in a run!")
 
