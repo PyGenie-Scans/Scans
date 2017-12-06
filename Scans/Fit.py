@@ -47,9 +47,14 @@ class Fit(object):
         """
         return lambda i: {}
 
-    def title(self, *args):
+    def title(self, params):
         """
         Give the title of the fit.
+
+        Parameters
+        ==========
+        params
+          The list of fit method parameters
         """
         # pylint: disable=unused-argument
         return self._title
@@ -96,16 +101,15 @@ class Fit(object):
                         continue
                     fity = self.get_y(plot_x, params[-1])
                     fig.plot(plot_x, fity, "-",
-                             label="{} fit".format(self.title(x, v)))
+                             label="{} fit".format(self.title(params[-1])))
             else:
                 try:
-                    print(type(y))
-                    params = self.fit(x, y)
+                    params = self.fit(x, [float(v) for v in y])
                 except RuntimeError:
                     return None
                 fity = self.get_y(plot_x, params)
-                fig.plot(x, fity, "-",
-                        label="{} fit".format(self.title(x, y)))
+                fig.plot(plot_x, fity, "-",
+                         label="{} fit".format(self.title(params)))
             fig.legend()
             return params
         return action
@@ -136,14 +140,11 @@ class PolyFit(Fit):
             results["^{}".format(key)] = value
         return results
 
-    def title(self, x, y):
+    def title(self, params):
         # pylint: disable=arguments-differ
-        if len(y) < self.degree:
-            return self._title
-        result = self.fit(x, y)
-        xs = ["x^{}".format(i) for i in range(1, len(result))]
+        xs = ["x^{}".format(i) for i in range(1, len(params))]
         xs = ([""] + xs)[::-1]
-        terms = ["{:0.3g}".format(t) + i for i, t in zip(xs, result)]
+        terms = ["{:0.3g}".format(t) + i for i, t in zip(xs, params)]
         return self._title + ": $y = " + " + ".join(terms) + "$"
 
 
@@ -211,12 +212,12 @@ class GaussianFit(CurveFit):
         return {"center": fit[0], "sigma": fit[1],
                 "amplitude": fit[2], "background": fit[3]}
 
-    def title(self, x, y):
+    def title(self, params):
         # pylint: disable=arguments-differ
-        result = self.readable(self.fit(x, y))
+        params = self.readable(params)
         return (self._title + ": " +
                 "y={amplitude:.3g}*exp((x-{center:.3g})$^2$" +
-                "/{sigma:.3g})+{background:.1g}").format(**result)
+                "/{sigma:.3g})+{background:.1g}").format(**params)
 
 
 class DampedOscillatorFit(CurveFit):
@@ -256,12 +257,11 @@ class DampedOscillatorFit(CurveFit):
         return {"center": fit[0], "amplitude": fit[1],
                 "frequency": fit[2], "width": fit[3]}
 
-    def title(self, x, y):
+    def title(self, params):
         # pylint: disable=arguments-differ
-        result = self.readable(self.fit(x, y))
         return (self._title + ": " +
                 "y={amplitude:.3g}*exp(-((x-{center:.3g})" +
-                "/{width:.3g})$^2$)*cos({frequency:.3g}*(x-{center:.3g}))").format(**result)
+                "/{width:.3g})$^2$)*cos({frequency:.3g}*(x-{center:.3g}))").format(**params)
 
 #: A linear regression
 Linear = PolyFit(1, title="Linear")

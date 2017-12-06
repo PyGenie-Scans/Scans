@@ -46,6 +46,7 @@ def _plot_range(array):
                 high = float(x.max())
         diff = high-low
     else:
+        array = [float(x) for x in array]
         low = min(array)
         high = max(array)
         diff = max(array) - min(array)
@@ -142,11 +143,15 @@ class Scan(object):
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
                     if isinstance(ys[0], MonoidList):
-                        values = np.array([[v for v in y] for y in ys]).T
-                        for v in values:
-                            axis.plot(xs, v, "d")
+                        values = np.array([[float(v) for v in y] for y in ys]).T
+                        errors = np.array([[v for v in y.err()] for y in ys]).T
+                        for v, err in zip(values, errors):
+                            axis.errorbar(xs, v, yerr=err, fmt="d")
                     else:
-                        axis.plot(xs, [float(y) for y in ys], "d")
+                        axis.errorbar(
+                            xs, [float(y) for y in ys],
+                            yerr=[y.err() for y in ys],
+                            fmt="d")
                     if action:
                         action_remainder = action(xs, ys,
                                                   axis)

@@ -10,6 +10,7 @@ information out of a combined measuremnts.
 """
 
 from abc import ABCMeta, abstractmethod
+import numpy as np
 from six import add_metaclass
 
 
@@ -26,6 +27,13 @@ class Monoid(object):
         The zero element of the monoid.  This element obeys the law that
 
         x + x.zero() == x
+        """
+        pass
+
+    @abstractmethod
+    def err(self):
+        """
+        Return the uncertainty of the current value
         """
         pass
 
@@ -63,6 +71,9 @@ class Average(Monoid):
     def zero():
         Average(0, 0)
 
+    def err(self):
+        return np.sqrt(self.total)/self.count
+
     def __str__(self):
         return str(self.total/self.count)
 
@@ -90,6 +101,9 @@ class Sum(Monoid):
     @staticmethod
     def zero():
         return Sum(0)
+
+    def err(self):
+        return np.sqrt(self.total)
 
     def __str__(self):
         return str(self.total)
@@ -119,6 +133,9 @@ class Polarisation(Monoid):
         return Polarisation(
             self.ups + y.ups,
             self.downs + y.downs)
+
+    def err(self):
+        return np.sqrt(4*self.ups*self.downs/(self.ups+self.downs)**3)
 
     @staticmethod
     def zero():
@@ -162,7 +179,11 @@ class MonoidList(Monoid):
         for x in self.values:
             yield x
 
+    def err(self):
+        return [x.err() for x in self.values]
+
     def min(self):
+        """Return the smallest value"""
         lowest = self.values[0]
         for x in self.values[1:]:
             if float(lowest) > float(x):
@@ -170,6 +191,7 @@ class MonoidList(Monoid):
         return lowest
 
     def max(self):
+        """Return the largest value"""
         best = self.values[0]
         for x in self.values[1:]:
             if float(best) < float(x):

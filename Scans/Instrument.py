@@ -80,11 +80,11 @@ def pol_measure(*args, **kwargs):
         x = instrument["theta"]
         pol = np.exp(-((x - 1)/width)**2)*np.cos(freq * (x - 1))
 
-        ups = (1 + pol)*1000
-        down = (1 - pol)*1000
-        ups += 5*np.sqrt(ups)*(2*np.random.rand()-1)
-        down += 5*np.sqrt(down)*(2*np.random.rand()-1)
+        ups = (1 + pol)*50
+        down = (1 - pol)*50
+        ups += np.sqrt(ups)*(2*np.random.rand()-1)
+        down += np.sqrt(down)*(2*np.random.rand()-1)
         results.append(Polarisation(ups, down))
-    sleep(0.05)
+    sleep(0.01*kwargs["frames"])
 
     return MonoidList(results)
