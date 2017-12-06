@@ -10,7 +10,10 @@ treated as private.
 """
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
+from collections import Iterable
+import numpy as np
 from six import add_metaclass
+from .Monoid import MonoidList
 
 try:
     # pylint: disable=import-error
@@ -32,10 +35,22 @@ def merge_dicts(x, y):
 def _plot_range(array):
     if not array:
         return (-0.05, 0.05)
-    array = [float(x) for x in array]
-    diff = max(array) - min(array)
-    return (min(array) - 0.05 * diff,
-            max(array) + 0.05 * diff)
+    # array = [float(x) for x in array]
+    if isinstance(array[0], MonoidList):
+        low = float(array[0].min())
+        high = float(array[0].max())
+        for x in array[1:]:
+            if float(x.min()) < low:
+                low = float(x.min())
+            if float(x.max()) > high:
+                high = float(x.max())
+        diff = high-low
+    else:
+        low = min(array)
+        high = max(array)
+        diff = max(array) - min(array)
+    return (low - 0.05 * diff,
+            high + 0.05 * diff)
 
 
 @add_metaclass(ABCMeta)
@@ -113,15 +128,20 @@ class Scan(object):
                     else:
                         xs.append(position)
                         ys.append(value)
-                    logfile.write("{}\t{}\n".format(xs[-1], float(ys[-1])))
+                    logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
                     rng = _plot_range(xs)
                     axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
-                    axis.plot(xs, [float(y) for y in ys])
+                    if isinstance(ys[0], MonoidList):
+                        values = np.array([[v for v in y] for y in ys]).T
+                        for v in values:
+                            axis.plot(xs, v, "d")
+                    else:
+                        axis.plot(xs, [float(y) for y in ys], "d")
                     if action:
-                        action_remainder = action(xs, [float(y) for y in ys],
+                        action_remainder = action(xs, ys,
                                                   axis)
         except KeyboardInterrupt:
             pass
@@ -155,6 +175,10 @@ class Scan(object):
         result = self.plot(return_values=True,
                            action=fit.fit_plot_action(),
                            return_figure=True, **kwargs)
+
+        if isinstance(result[0], Iterable):
+            result = np.array(result)
+            result = np.mean(result, axis=0)
 
         return fit.readable(result)
 

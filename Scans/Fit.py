@@ -6,6 +6,7 @@ fits (i.e. Linear and Gaussian).
 from abc import ABCMeta, abstractmethod
 import numpy as np
 from six import add_metaclass
+from .Monoid import MonoidList
 
 
 @add_metaclass(ABCMeta)
@@ -83,13 +84,28 @@ class Fit(object):
             """
             if len(x) < self.degree:
                 return None
-            try:
-                params = self.fit(x, y)
-            except RuntimeError:
-                return None
-            fity = self.get_y(x, params)
-            fig.plot(x, fity, "-",
-                     label="{} fit".format(self.title(x, y)))
+            plot_x = np.linspace(np.min(x), np.max(x), 1000)
+            if isinstance(y[0], MonoidList):
+                values = np.array([[float(v) for v in Y] for Y in y]).T
+                params = []
+                for v in values:
+                    try:
+                        params.append(self.fit(x, v))
+                    except RuntimeError:
+                        params.append(None)
+                        continue
+                    fity = self.get_y(plot_x, params[-1])
+                    fig.plot(plot_x, fity, "-",
+                             label="{} fit".format(self.title(x, v)))
+            else:
+                try:
+                    print(type(y))
+                    params = self.fit(x, y)
+                except RuntimeError:
+                    return None
+                fity = self.get_y(plot_x, params)
+                fig.plot(x, fity, "-",
+                        label="{} fit".format(self.title(x, y)))
             fig.legend()
             return params
         return action

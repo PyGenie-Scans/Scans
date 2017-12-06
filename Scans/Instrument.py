@@ -12,7 +12,7 @@ import numpy as np
 from .Util import make_scan, make_estimator
 from .Motion import Motion
 from .Defaults import Defaults
-from .Monoid import Polarisation
+from .Monoid import Polarisation, MonoidList
 
 instrument = {"theta": 0, "two_theta": 0}
 
@@ -75,13 +75,16 @@ def pol_measure(*args, **kwargs):
     """
     from time import sleep
 
-    x = instrument["theta"]
-    pol = np.exp(-((x - 1)/3)**2)*np.cos(4 * (x - 1))
+    results = []
+    for freq, width in zip([4, 6, 8, 4], [9, 9, 9, 3]):
+        x = instrument["theta"]
+        pol = np.exp(-((x - 1)/width)**2)*np.cos(freq * (x - 1))
 
-    ups = (1 + pol)*1000
-    down = (1 - pol)*1000
-    ups += 5*np.sqrt(ups)*(2*np.random.rand()-1)
-    down += 5*np.sqrt(down)*(2*np.random.rand()-1)
+        ups = (1 + pol)*1000
+        down = (1 - pol)*1000
+        ups += 5*np.sqrt(ups)*(2*np.random.rand()-1)
+        down += 5*np.sqrt(down)*(2*np.random.rand()-1)
+        results.append(Polarisation(ups, down))
     sleep(0.05)
 
-    return Polarisation(ups, down)
+    return MonoidList(results)

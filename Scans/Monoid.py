@@ -63,6 +63,12 @@ class Average(Monoid):
     def zero():
         Average(0, 0)
 
+    def __str__(self):
+        return str(self.total/self.count)
+
+    def __repr__(self):
+        return "Average({}, count={})".format(self.total, self.count)
+
 
 class Sum(Monoid):
     """
@@ -84,6 +90,12 @@ class Sum(Monoid):
     @staticmethod
     def zero():
         return Sum(0)
+
+    def __str__(self):
+        return str(self.total)
+
+    def __repr__(self):
+        return "Sum({})".format(self.total)
 
 
 class Polarisation(Monoid):
@@ -112,6 +124,12 @@ class Polarisation(Monoid):
     def zero():
         Polarisation(0, 0)
 
+    def __str__(self):
+        return str(float(self.ups - self.downs) / float(self.ups + self.downs))
+
+    def __repr__(self):
+        return "Polarisation({}, {})".format(self.ups, self.downs)
+
 
 class MonoidList(Monoid):
     """
@@ -133,3 +151,27 @@ class MonoidList(Monoid):
         for value, update in zip(self.values, y):
             value += update
         return self
+
+    def __str__(self):
+        return str([str(x) for x in self.values])
+
+    def __repr__(self):
+        return "MonoidList({})".format([repr(x) for x in self.values])
+
+    def __iter__(self):
+        for x in self.values:
+            yield x
+
+    def min(self):
+        lowest = self.values[0]
+        for x in self.values[1:]:
+            if float(lowest) > float(x):
+                lowest = x
+        return lowest
+
+    def max(self):
+        best = self.values[0]
+        for x in self.values[1:]:
+            if float(best) < float(x):
+                best = x
+        return best
