@@ -11,6 +11,7 @@ treated as private.
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
 from collections import Iterable
+from matplotlib.pyplot import rcParams
 import numpy as np
 from six import add_metaclass
 from .Monoid import MonoidList
@@ -117,6 +118,8 @@ class Scan(object):
         if not detector:
             detector = self.defaults.detector
         axis = NBPlot()
+        color_cycle = rcParams["axes.prop_cycle"].by_key()["color"]
+        markers = "ospP*h+xv^<>"
 
         xs = []
         ys = []
@@ -145,8 +148,10 @@ class Scan(object):
                     if isinstance(ys[0], MonoidList):
                         values = np.array([[float(v) for v in y] for y in ys]).T
                         errors = np.array([[v for v in y.err()] for y in ys]).T
-                        for v, err in zip(values, errors):
-                            axis.errorbar(xs, v, yerr=err, fmt="d")
+                        for v, err, color, m in zip(values, errors, color_cycle, markers):
+                            axis.errorbar(xs, v, yerr=err, fmt="",
+                                          color=color, marker=m,
+                                          linestyle="None")
                     else:
                         axis.errorbar(
                             xs, [float(y) for y in ys],

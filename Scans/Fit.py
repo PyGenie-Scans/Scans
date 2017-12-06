@@ -259,6 +259,7 @@ class DampedOscillatorFit(CurveFit):
 
     def title(self, params):
         # pylint: disable=arguments-differ
+        params = self.readable(params)
         return (self._title + ": " +
                 "y={amplitude:.3g}*exp(-((x-{center:.3g})" +
                 "/{width:.3g})$^2$)*cos({frequency:.3g}*(x-{center:.3g}))").format(**params)
