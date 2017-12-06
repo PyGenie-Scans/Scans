@@ -73,6 +73,16 @@ class Scan(object):
         """Create a new scan that runs in the opposite direction"""
         pass
 
+    @abstractmethod
+    def min(self):
+        """Find the smallest point in a scan"""
+        pass
+
+    @abstractmethod
+    def max(self):
+        """Find the largest point in a scan"""
+        pass
+
     def __iter__(self):
         pass
 
@@ -114,6 +124,8 @@ class Scan(object):
         action_remainder = None
         try:
             with open(self.defaults.log_file(), "w") as logfile:
+                rng = [self.min(), self.max()]
+                axis.set_xlim(rng[0], rng[1])
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
@@ -130,8 +142,6 @@ class Scan(object):
                         ys.append(value)
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
-                    rng = _plot_range(xs)
-                    axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
                     if isinstance(ys[0], MonoidList):
@@ -225,6 +235,12 @@ class SimpleScan(Scan):
         """Create a new scan that runs in the opposite direction"""
         return SimpleScan(self.action, self.values[::-1], self.name)
 
+    def min(self):
+        return self.values.min()
+
+    def max(self):
+        return self.values.max()
+
     def __iter__(self):
         for i in self.values:
             self.action(i)
@@ -271,6 +287,12 @@ class SumScan(Scan):
         return SumScan(self.second.reverse(),
                        self.first.reverse())
 
+    def min(self):
+        return min(self.first.min(), self.second.min())
+
+    def max(self):
+        return max(self.first.max(), self.second.max())
+
 
 class ProductScan(Scan):
     """ProductScan performs every possible combination of the positions of
@@ -304,6 +326,12 @@ class ProductScan(Scan):
         return ProductScan(self.outer.reverse(),
                            self.inner.reverse())
 
+    def min(self):
+        return (self.outer.min(), self.inner.min())
+
+    def max(self):
+        return (self.outer.max(), self.inner.max())
+
 
 class ParallelScan(Scan):
     """ParallelScan runs two scans alongside each other, performing both
@@ -336,6 +364,12 @@ class ParallelScan(Scan):
         return ParallelScan(self.first.reverse(),
                             self.second.reverse())
 
+    def min(self):
+        return (self.first.min(), self.second.min())
+
+    def max(self):
+        return (self.first.max(), self.second.max())
+
 
 class ForeverScan(Scan):
     """
@@ -362,3 +396,9 @@ class ForeverScan(Scan):
 
     def reverse(self):
         return ForeverScan(self.scan.reverse())
+
+    def min(self):
+        return self.scan.min()
+
+    def max(self):
+        return self.scan.max()
