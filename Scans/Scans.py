@@ -124,8 +124,6 @@ class Scan(object):
         action_remainder = None
         try:
             with open(self.defaults.log_file(), "w") as logfile:
-                rng = [self.min(), self.max()]
-                axis.set_xlim(rng[0], rng[1])
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
@@ -142,6 +140,8 @@ class Scan(object):
                         ys.append(value)
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
+                    rng = [self.min(), self.max()]
+                    axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
                     if isinstance(ys[0], MonoidList):
