@@ -76,14 +76,17 @@ class Fit(object):
 
             Returns
             -------
-            line : None or matplotlib plot
-              If nothing has been plotted, simply returns None.  Otherwise,
-              the plotted line is returned
+            line : None or dict
+                Either None if the fit is not possible or a dict of the fit
+                parameters if the fit was performed
 
             """
             if len(x) < self.degree:
                 return None
-            params = self.fit(x, y)
+            try:
+                params = self.fit(x, y)
+            except RuntimeError:
+                return None
             fity = self.get_y(x, params)
             fig.plot(x, fity, "-",
                      label="{} fit".format(self.title(x, y)))
@@ -100,10 +103,10 @@ class PolyFit(Fit):
                  title=None):
         if title is None:
             title = "Polynomial fit of degree {}".format(degree)
-        Fit.__init__(self, degree+1, title)
+        Fit.__init__(self, degree + 1, title)
 
     def fit(self, x, y):
-        return np.polyfit(x, y, self.degree-1)
+        return np.polyfit(x, y, self.degree - 1)
 
     def get_y(self, x, fit):
         return np.polyval(fit, x)
@@ -124,7 +127,7 @@ class PolyFit(Fit):
         result = self.fit(x, y)
         xs = ["x^{}".format(i) for i in range(1, len(result))]
         xs = ([""] + xs)[::-1]
-        terms = ["{:0.3g}".format(t)+i for i, t in zip(xs, result)]
+        terms = ["{:0.3g}".format(t) + i for i, t in zip(xs, result)]
         return self._title + ": $y = " + " + ".join(terms) + "$"
 
 
@@ -143,13 +146,14 @@ class GaussianFit(Fit):
         background.
 
         """
-        return background + amplitude * np.exp(-((xs-cen)/sigma/np.sqrt(2))**2)
+        return background + amplitude * np.exp(-((xs - cen) / sigma /
+                                                 np.sqrt(2)) ** 2)
 
     def fit(self, x, y):
         from scipy.optimize import curve_fit
         return curve_fit(self._gaussian_model, x, y,
-                         [np.mean(x), np.max(x)-np.min(x),
-                          np.max(y)-np.min(y), np.min(y)])[0]
+                         [np.mean(x), np.max(x) - np.min(x),
+                          np.max(y) - np.min(y), np.min(y)])[0]
 
     def get_y(self, x, fit):
         return self._gaussian_model(x, *fit)

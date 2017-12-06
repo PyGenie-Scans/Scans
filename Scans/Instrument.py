@@ -32,11 +32,16 @@ class MockInstrument(Defaults):
         sleep(MockInstrument.time_estimator(**kwargs))
         print("Taking a count at theta=%0.2f and two theta=%0.2f" %
               (instrument["theta"], instrument["two_theta"]))
-        return np.sqrt(instrument["theta"])+instrument["two_theta"]**2
+        return np.sqrt(instrument["theta"]) + instrument["two_theta"] ** 2 \
+            + 0.05 * np.random.rand()
 
     @staticmethod
     def time_estimator(**kwargs):
-        return make_estimator(1e6)(**kwargs)
+        return make_estimator(1e7)(**kwargs)
+
+    @staticmethod
+    def log_file():
+        return "mock_scan.dat"
 
     def __repr__(self):
         return "MockInstrument()"
@@ -57,7 +62,7 @@ def mock_motion(name):
     return Motion(lambda: instrument[name], set_motion(name), name)
 
 
-theta = mock_motion("theta")
-two_theta = mock_motion("two_theta")
+THETA = mock_motion("theta")
+TWO_THETA = mock_motion("two_theta")
 
 scan = make_scan(MockInstrument())

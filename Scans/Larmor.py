@@ -16,13 +16,10 @@ except ImportError:
 from .Util import make_scan, make_estimator
 from .Defaults import Defaults
 
-instrument = {"theta": 0, "two_theta": 0}
-
 
 class Larmor(Defaults):
     """
-    This class represents a fake instrument that can be
-    used for testing purposes.
+    This class represents the default functions for the Larmor instrument.
     """
 
     @staticmethod
@@ -45,6 +42,13 @@ class Larmor(Defaults):
     @staticmethod
     def time_estimator(**kwargs):
         return make_estimator(1e6)(**kwargs)
+
+    @staticmethod
+    def log_file():
+        from datetime import datetime
+        now = datetime.now()
+        return "U:/larmor_scan_{}_{}_{}_{}_{}_{}.dat".format(
+            now.year, now.month, now.day, now.hour, now.minute, now.second)
 
     def __repr__(self):
         return "Larmor()"

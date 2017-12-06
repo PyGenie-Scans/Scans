@@ -10,6 +10,8 @@ treated as private.
 """
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
+from six import add_metaclass
+
 try:
     # pylint: disable=import-error
     from genie_python import genie as g
@@ -17,6 +19,7 @@ except ImportError:
     # We must be in a test environment
     g = None
 from .multiplot import NBPlot
+from .Monoid import Average
 
 
 def merge_dicts(x, y):
@@ -27,17 +30,19 @@ def merge_dicts(x, y):
 
 
 def _plot_range(array):
+    if not array:
+        return (-0.05, 0.05)
+    array = [float(x) for x in array]
     diff = max(array) - min(array)
-    return (min(array)-0.05*diff,
-            max(array)+0.05*diff)
+    return (min(array) - 0.05 * diff,
+            max(array) + 0.05 * diff)
 
 
+@add_metaclass(ABCMeta)
 class Scan(object):
     """The virtual class that represents all controlled scans.  This class
     should never be instantiated directly, but rather by one of its
     subclasses."""
-
-    __metaclass__ = ABCMeta
 
     defaults = None
 
@@ -65,6 +70,12 @@ class Scan(object):
     def __and__(self, x):
         return ParallelScan(self, x)
 
+    def forever(self):
+        """
+        Create a scan that will cycle until stopped by the user.
+        """
+        return ForeverScan(self)
+
     def plot(self, detector=None, save=None,
              action=None, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
@@ -84,22 +95,31 @@ class Scan(object):
 
         action_remainder = None
         try:
-            for x in self:
-                # FIXME: Handle multidimensional plots
-                (label, position) = next(iter(x.items()))
-                if not xlabelled:
-                    axis.set_xlabel(label)
-                    xlabelled = True
-                xs.append(position)
-                ys.append(detector(**kwargs))
-                axis.clear()
-                rng = _plot_range(xs)
-                axis.set_xlim(rng[0], rng[1])
-                rng = _plot_range(ys)
-                axis.set_ylim(rng[0], rng[1])
-                axis.plot(xs, ys)
-                if action:
-                    action_remainder = action(xs, ys, axis)
+            with open(self.defaults.log_file(), "w") as logfile:
+                for x in self:
+                    # FIXME: Handle multidimensional plots
+                    (label, position) = next(iter(x.items()))
+                    if not xlabelled:
+                        axis.set_xlabel(label)
+                        xlabelled = True
+                    value = detector(**kwargs)
+                    if isinstance(value, float):
+                        value = Average(value)
+                    if position in xs:
+                        ys[xs.index(position)] += value
+                    else:
+                        xs.append(position)
+                        ys.append(value)
+                    logfile.write("{}\t{}\n".format(xs[-1], float(ys[-1])))
+                    axis.clear()
+                    rng = _plot_range(xs)
+                    axis.set_xlim(rng[0], rng[1])
+                    rng = _plot_range(ys)
+                    axis.set_ylim(rng[0], rng[1])
+                    axis.plot(xs, [float(y) for y in ys])
+                    if action:
+                        action_remainder = action(xs, [float(y) for y in ys],
+                                                  axis)
         except KeyboardInterrupt:
             pass
         if save:
@@ -153,7 +173,7 @@ class Scan(object):
         total = len(self) * (pad + est(**kwargs))
         if time:
             delta = timedelta(0, total)
-            print("The run would finish at {}".format(delta+datetime.now()))
+            print("The run would finish at {}".format(delta + datetime.now()))
         return total
 
 
@@ -239,7 +259,7 @@ class ProductScan(Scan):
                 yield merge_dicts(i, j)
 
     def __len__(self):
-        return len(self.outer)*len(self.inner)
+        return len(self.outer) * len(self.inner)
 
     def __repr__(self):
         return "{} * {}".format(self.outer, self.inner)
@@ -288,3 +308,30 @@ class ParallelScan(Scan):
         """Creates a new scan that runs in the opposite direction"""
         return ParallelScan(self.first.reverse(),
                             self.second.reverse())
+
+
+class ForeverScan(Scan):
+    """
+    ForeverScan repeats the same scan over and over again to improve
+    the statistics until the user manually halts the scan.
+    """
+    def __init__(self, scan):
+        self.scan = scan
+        self.defaults = scan.defaults
+
+    def __iter__(self):
+        while True:
+            for x in self.scan:
+                yield x
+
+    def __repr__(self):
+        return "ForeverScan(" + repr(self.scan) + ")"
+
+    def __len__(self):
+        raise RuntimeError("Attempted to get the length of an infinite list")
+
+    def map(self, func):
+        return ForeverScan(self.scan.map(func))
+
+    def reverse(self):
+        return ForeverScan(self.scan.reverse())
