@@ -119,7 +119,6 @@ class Scan(object):
 
         xs = []
         ys = []
-        xlabelled = False
 
         action_remainder = None
         try:
@@ -127,9 +126,6 @@ class Scan(object):
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
-                    if not xlabelled:
-                        axis.set_xlabel(label)
-                        xlabelled = True
                     value = detector(**kwargs)
                     if isinstance(value, float):
                         value = Average(value)
@@ -140,6 +136,7 @@ class Scan(object):
                         ys.append(value)
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
+                    axis.set_xlabel(label)
                     rng = [self.min(), self.max()]
                     axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
