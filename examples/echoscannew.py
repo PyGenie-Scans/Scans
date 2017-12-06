@@ -36,4 +36,5 @@ def echoscan_axis(scan, rtitle, frames=100, save=False):
     return result["center"]
 
 th = scan(THETA, start=-8, stop=5, stride=0.1)
-echoscan_axis(th.forever() , "Test")
+result = echoscan_axis(th.forever() , "Test")
+THETA(result["center"])
