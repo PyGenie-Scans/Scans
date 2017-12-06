@@ -170,8 +170,50 @@ class GaussianFit(Fit):
                 "/{sigma:.3g})+{background:.1g}").format(**result)
 
 
+class DampedOscillatorFit(Fit):
+    """
+    A class for fitting decaying cosine curves.
+    """
+    def __init__(self):
+        Fit.__init__(self, 4, "Damped Oscillator")
+
+    @staticmethod
+    def _damped_oscillator_model(x, center, amp, freq, width):
+        """
+        This is the model for a damped Oscillator.
+
+        Parameters
+        ==========
+        cen
+          The center of the Damping
+        amp
+          The maximum amplitude
+        freq
+          The base frequency of the oscillator
+        width
+          The standard deviation of the damping.
+
+        """
+        return amp * np.cos((x-center)*freq)*np.exp(-((x-center)/width)**2)
+
+    def get_y(self, x, fit):
+        return self._damped_oscillator_model(x, *fit)
+
+    def fit(self, x, y):
+        from scipy.optimize import curve_fit
+        guess = x[np.argmax(y)]
+        popt = [guess, 1, 2*np.pi/(750.0), max(x)-min(x)]
+        return curve_fit(self._damped_oscillator_model, x, y, popt)[0]
+
+    def readable(self, fit):
+        return {"center": fit[0], "amplitude": fit[1],
+                "frequency": fit[2], "width": fit[3]}
+
+
 #: A linear regression
 Linear = PolyFit(1, title="Linear")
 
 #: A gaussian fit
 Gaussian = GaussianFit()
+
+DampedOscillator = DampedOscillatorFit()
