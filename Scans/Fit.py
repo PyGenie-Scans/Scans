@@ -5,16 +5,16 @@ fits (i.e. Linear and Gaussian).
 """
 from abc import ABCMeta, abstractmethod
 import numpy as np
+from six import add_metaclass
 
 
+@add_metaclass(ABCMeta)
 class Fit(object):
     """The Fit class combines the common requirements needed for fitting.
     We need to be able to turn a set of data points into a set of
     parameters, get the simulated curve from a set of parameters, and
     extract usable information from those parameters.
     """
-
-    __metaclass__ = ABCMeta
 
     def __init__(self, degree, title):
         self.degree = degree
