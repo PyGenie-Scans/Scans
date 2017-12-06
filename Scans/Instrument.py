@@ -12,6 +12,7 @@ import numpy as np
 from .Util import make_scan, make_estimator
 from .Motion import Motion
 from .Defaults import Defaults
+from .Monoid import Polarisation
 
 instrument = {"theta": 0, "two_theta": 0}
 
@@ -66,3 +67,21 @@ THETA = mock_motion("theta")
 TWO_THETA = mock_motion("two_theta")
 
 scan = make_scan(MockInstrument())
+
+
+def pol_measure(*args, **kwargs):
+    """
+    Get a single polarisation measurement
+    """
+    from time import sleep
+
+    x = instrument["theta"]
+    pol = np.exp(-((x - 1)/3)**2)*np.cos(4 * (x - 1))
+
+    ups = (1 + pol)*1000
+    down = (1 - pol)*1000
+    ups += 5*np.sqrt(ups)*(2*np.random.rand()-1)
+    down += 5*np.sqrt(down)*(2*np.random.rand()-1)
+    sleep(0.05)
+
+    return Polarisation(ups, down)
