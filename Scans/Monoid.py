@@ -10,6 +10,7 @@ information out of a combined measuremnts.
 """
 
 from abc import ABCMeta, abstractmethod
+from matplotlib.pyplot import rcParams
 import numpy as np
 from six import add_metaclass
 
@@ -197,3 +198,44 @@ class MonoidList(Monoid):
             if float(best) < float(x):
                 best = x
         return best
+
+
+class ListOfMonoids(list):
+    """
+    A modified list class with special helpers for handlings
+    lists of Monoids
+    """
+    def __init__(self, *args):
+        list.__init__(self, *args)
+        self.color_cycle = rcParams["axes.prop_cycle"].by_key()["color"]
+
+    def values(self):
+        """
+        Get the numerical values from the List
+        """
+        if isinstance(self[0], MonoidList):
+            return np.array([[float(v) for v in y] for y in self]).T
+        return [float(y) for y in self]
+
+    def err(self):
+        """
+        Get the uncertainty values from the List
+        """
+        if isinstance(self[0], MonoidList):
+            return np.array([[v for v in y.err()] for y in self]).T
+        return [y.err() for y in self]
+
+    def plot(self, axis, xs):
+        """
+        Make an errorbar plot of a monoid onto an axis
+        at a given set of x coordinates
+        """
+        markers = "ospP*h+xv^<>"
+        if isinstance(self[0], MonoidList):
+            for y, err, color, marker in zip(self.values(), self.err(),
+                                             self.color_cycle, markers):
+                axis.errorbar(xs, y, yerr=err, fmt="",
+                              color=color, marker=marker,
+                              linestyle="None")
+        else:
+            axis.errorbar(xs, self.values(), yerr=self.err(), fmt="d")
