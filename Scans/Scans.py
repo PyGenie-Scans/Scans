@@ -36,20 +36,9 @@ def _plot_range(array):
     if not array:
         return (-0.05, 0.05)
     # array = [float(x) for x in array]
-    if isinstance(array[0], MonoidList):
-        low = float(array[0].min())
-        high = float(array[0].max())
-        for x in array[1:]:
-            if float(x.min()) < low:
-                low = float(x.min())
-            if float(x.max()) > high:
-                high = float(x.max())
-        diff = high-low
-    else:
-        array = [float(x) for x in array]
-        low = min(array)
-        high = max(array)
-        diff = max(array) - min(array)
+    low = array.min()
+    high = array.max()
+    diff = high-low
     return (low - 0.05 * diff,
             high + 0.05 * diff)
 
@@ -138,7 +127,8 @@ class Scan(object):
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
                     axis.set_xlabel(label)
-                    rng = [self.min(), self.max()]
+                    rng = [1.05*self.min() - 0.05 * self.max(),
+                           1.05*self.max() - 0.05 * self.min()]
                     axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])

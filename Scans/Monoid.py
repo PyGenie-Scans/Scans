@@ -239,3 +239,11 @@ class ListOfMonoids(list):
                               linestyle="None")
         else:
             axis.errorbar(xs, self.values(), yerr=self.err(), fmt="d")
+
+    def max(self):
+        return np.nanmax(np.array(self.values()) +
+                         np.array(self.err()))
+
+    def min(self):
+        return np.nanmin(np.array(self.values()) -
+                         np.array(self.err()))
