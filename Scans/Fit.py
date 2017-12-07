@@ -90,12 +90,12 @@ class Fit(object):
             if len(x) < self.degree:
                 return None
             plot_x = np.linspace(np.min(x), np.max(x), 1000)
-            if isinstance(y[0], MonoidList):
-                values = np.array([[float(v) for v in Y] for Y in y]).T
+            values = np.array(y.values())
+            if len(values.shape) > 1:
                 params = []
-                for v in values:
+                for value in values:
                     try:
-                        params.append(self.fit(x, v))
+                        params.append(self.fit(x, value))
                     except RuntimeError:
                         params.append(None)
                         continue
@@ -104,7 +104,7 @@ class Fit(object):
                              label="{} fit".format(self.title(params[-1])))
             else:
                 try:
-                    params = self.fit(x, [float(v) for v in y])
+                    params = self.fit(x, values)
                 except RuntimeError:
                     return None
                 fity = self.get_y(plot_x, params)
