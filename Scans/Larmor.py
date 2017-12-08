@@ -27,15 +27,13 @@ class Larmor(Defaults):
         g.change_title(title.format(**position))
         g.begin()
         g.waitfor(**kwargs)
-        temp = sum(g.get_spectrum(11)["signal"])
-        g.abort()
-        return temp
+        g.end()
 
     @staticmethod
     def detector(**kwargs):
         g.begin()
         g.waitfor(**kwargs)
-        temp = sum(g.get_spectrum(11)["signal"])
+        temp = sum(g.get_spectrum(4)["signal"])
         g.abort()
         return temp
 
