@@ -11,7 +11,6 @@ try:
 except ImportError:
     g = None
 from .Defaults import Defaults
-from .Monoid import Polarisation, ListOfMonoids
 from .Motion import populate
 from .Util import make_scan, make_estimator
 
@@ -38,8 +37,8 @@ class Zoom(Defaults):
     @staticmethod
     def time_estimator(**kwargs):
         #Double check this value
-        MONITOR_COUNTS_PER_SECOND = 1e6
-        return make_estimator(MONITOR_COUNTS_PER_SECOND)(**kwargs)
+        MONITOR_COUNT_RATE = 1e6
+        return make_estimator(MONITOR_COUNT_RATE)(**kwargs)
 
     @staticmethod
     def log_file():
@@ -50,6 +49,6 @@ class Zoom(Defaults):
 
     def __repr__(self):
         return "Zoom()"
-        
+
 scan = make_scan(Zoom())
 populate()
