@@ -10,6 +10,8 @@ information out of a combined measuremnts.
 """
 
 from abc import ABCMeta, abstractmethod
+from matplotlib.pyplot import rcParams
+import numpy as np
 from six import add_metaclass
 
 
@@ -26,6 +28,13 @@ class Monoid(object):
         The zero element of the monoid.  This element obeys the law that
 
         x + x.zero() == x
+        """
+        pass
+
+    @abstractmethod
+    def err(self):
+        """
+        Return the uncertainty of the current value
         """
         pass
 
@@ -63,6 +72,15 @@ class Average(Monoid):
     def zero():
         Average(0, 0)
 
+    def err(self):
+        return np.sqrt(self.total)/self.count
+
+    def __str__(self):
+        return str(self.total/self.count)
+
+    def __repr__(self):
+        return "Average({}, count={})".format(self.total, self.count)
+
 
 class Sum(Monoid):
     """
@@ -84,6 +102,15 @@ class Sum(Monoid):
     @staticmethod
     def zero():
         return Sum(0)
+
+    def err(self):
+        return np.sqrt(self.total)
+
+    def __str__(self):
+        return str(self.total)
+
+    def __repr__(self):
+        return "Sum({})".format(self.total)
 
 
 class Polarisation(Monoid):
@@ -108,9 +135,18 @@ class Polarisation(Monoid):
             self.ups + y.ups,
             self.downs + y.downs)
 
+    def err(self):
+        return np.sqrt(4*self.ups*self.downs/(self.ups+self.downs)**3)
+
     @staticmethod
     def zero():
         Polarisation(0, 0)
+
+    def __str__(self):
+        return str(float(self.ups - self.downs) / float(self.ups + self.downs))
+
+    def __repr__(self):
+        return "Polarisation({}, {})".format(self.ups, self.downs)
 
 
 class MonoidList(Monoid):
@@ -133,3 +169,87 @@ class MonoidList(Monoid):
         for value, update in zip(self.values, y):
             value += update
         return self
+
+    def __str__(self):
+        return str([str(x) for x in self.values])
+
+    def __repr__(self):
+        return "MonoidList({})".format([repr(x) for x in self.values])
+
+    def __iter__(self):
+        for x in self.values:
+            yield x
+
+    def err(self):
+        return [x.err() for x in self.values]
+
+    def min(self):
+        """Return the smallest value"""
+        lowest = self.values[0]
+        for x in self.values[1:]:
+            if float(lowest) > float(x):
+                lowest = x
+        return lowest
+
+    def max(self):
+        """Return the largest value"""
+        best = self.values[0]
+        for x in self.values[1:]:
+            if float(best) < float(x):
+                best = x
+        return best
+
+
+class ListOfMonoids(list):
+    """
+    A modified list class with special helpers for handlings
+    lists of Monoids
+    """
+    def __init__(self, *args):
+        list.__init__(self, *args)
+        self.color_cycle = rcParams["axes.prop_cycle"].by_key()["color"]
+
+    def values(self):
+        """
+        Get the numerical values from the List
+        """
+        if isinstance(self[0], MonoidList):
+            return np.array([[float(v) for v in y] for y in self]).T
+        return [float(y) for y in self]
+
+    def err(self):
+        """
+        Get the uncertainty values from the List
+        """
+        if isinstance(self[0], MonoidList):
+            return np.array([[v for v in y.err()] for y in self]).T
+        return [y.err() for y in self]
+
+    def plot(self, axis, xs):
+        """
+        Make an errorbar plot of a monoid onto an axis
+        at a given set of x coordinates
+        """
+        markers = "ospP*h+xv^<>"
+        if isinstance(self[0], MonoidList):
+            for y, err, color, marker in zip(self.values(), self.err(),
+                                             self.color_cycle, markers):
+                axis.errorbar(xs, y, yerr=err, fmt="",
+                              color=color, marker=marker,
+                              linestyle="None")
+        else:
+            axis.errorbar(xs, self.values(), yerr=self.err(), fmt="d")
+
+    def max(self):
+        """
+        Find the largest value in the list, including for uncertainty
+        """
+        return np.nanmax(np.array(self.values()) +
+                         np.array(self.err()))
+
+    def min(self):
+        """
+        Find the smallest value in the list, including for uncertainty
+        """
+        return np.nanmin(np.array(self.values()) -
+                         np.array(self.err()))

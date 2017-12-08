@@ -178,7 +178,7 @@ Perform Fits
   Taking a count at theta=1.00 and two theta=0.00
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> abs(fit["slope"] - 0.67) < 0.01
+  >>> abs(fit["slope"] - 0.67) < 0.02
   True
 
   In this instance, the user requested a linear fit.  The result was an
@@ -281,10 +281,28 @@ Perform complex scans
   Taking a count at theta=0.50 and two theta=3.00
   Taking a count at theta=1.00 and two theta=3.00
 
+  A scan can also be run in the reverse direction, if desired.
+
+  >>> th.reverse.plot(frames=5)
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=0.00 and two theta=3.00
+
+  To minimise motor movement, a scan can turn around at its end and
+  run backwards to collect more statistics
+
+  >>> th.and_back.plot(frames=5)
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=0.00 and two theta=3.00
+
   For a more interactive experience, a scan be set to cycle forever,
   improving the statistics until the use manually kills the scan.
 
-  >>> scan(THETA, start=0, stop=1, stride=0.5).forever().plot(Gaussian, frames=5) #doctest: +SKIP
+  >>> scan(THETA, start=0, stop=1, stride=0.5).forever.fit(Gaussian, frames=5) #doctest: +SKIP
 
 Estimate time
 -------------
@@ -327,7 +345,8 @@ Class setup
        function.  The original position of each point is fed as input to
        the function and the return value of the function is the new
        position.
-  :reverse: Create a copy of the scan that runs in the opposite direction
+  :reverse: Create a copy of the scan that runs in the opposite direction.
+	    Reverse should be a property, since it takes no parameters
   :__len__: Return the number of elements in the scan
   :__iter__: Return an iterator that steps through the scan one position at
 	    a time, yielding the current position at each point.

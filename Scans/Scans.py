@@ -10,7 +10,10 @@ treated as private.
 """
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
+from collections import Iterable
+import numpy as np
 from six import add_metaclass
+from .Monoid import ListOfMonoids
 
 try:
     # pylint: disable=import-error
@@ -32,10 +35,12 @@ def merge_dicts(x, y):
 def _plot_range(array):
     if not array:
         return (-0.05, 0.05)
-    array = [float(x) for x in array]
-    diff = max(array) - min(array)
-    return (min(array) - 0.05 * diff,
-            max(array) + 0.05 * diff)
+    # array = [float(x) for x in array]
+    low = array.min()
+    high = array.max()
+    diff = high-low
+    return (low - 0.05 * diff,
+            high + 0.05 * diff)
 
 
 @add_metaclass(ABCMeta)
@@ -53,9 +58,20 @@ class Scan(object):
         """
         pass
 
+    @property
     @abstractmethod
     def reverse(self):
         """Create a new scan that runs in the opposite direction"""
+        pass
+
+    @abstractmethod
+    def min(self):
+        """Find the smallest point in a scan"""
+        pass
+
+    @abstractmethod
+    def max(self):
+        """Find the largest point in a scan"""
         pass
 
     def __iter__(self):
@@ -70,11 +86,20 @@ class Scan(object):
     def __and__(self, x):
         return ParallelScan(self, x)
 
+    @property
     def forever(self):
         """
         Create a scan that will cycle until stopped by the user.
         """
         return ForeverScan(self)
+
+    @property
+    def and_back(self):
+        """
+        Run then scan both forwards and in reverse.  This can help minimise
+        motor movement.
+        """
+        return self + self.reverse
 
     def plot(self, detector=None, save=None,
              action=None, **kwargs):
@@ -82,6 +107,9 @@ class Scan(object):
         The measurement parameter can be used to set what type of measurement
         is to be taken.  If the save parameter is set to a file name, then the
         plot will be saved in that file."""
+        import warnings
+        warnings.simplefilter("ignore", UserWarning)
+
         if g and g.get_runstate() != "SETUP":
             raise RuntimeError("Cannot start scan while already in a run!")
 
@@ -90,8 +118,7 @@ class Scan(object):
         axis = NBPlot()
 
         xs = []
-        ys = []
-        xlabelled = False
+        ys = ListOfMonoids()
 
         action_remainder = None
         try:
@@ -99,9 +126,6 @@ class Scan(object):
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
-                    if not xlabelled:
-                        axis.set_xlabel(label)
-                        xlabelled = True
                     value = detector(**kwargs)
                     if isinstance(value, float):
                         value = Average(value)
@@ -110,15 +134,17 @@ class Scan(object):
                     else:
                         xs.append(position)
                         ys.append(value)
-                    logfile.write("{}\t{}\n".format(xs[-1], float(ys[-1])))
+                    logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
-                    rng = _plot_range(xs)
+                    axis.set_xlabel(label)
+                    rng = [1.05*self.min() - 0.05 * self.max(),
+                           1.05*self.max() - 0.05 * self.min()]
                     axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
-                    axis.plot(xs, [float(y) for y in ys])
+                    ys.plot(axis, xs)
                     if action:
-                        action_remainder = action(xs, [float(y) for y in ys],
+                        action_remainder = action(xs, ys,
                                                   axis)
         except KeyboardInterrupt:
             pass
@@ -152,6 +178,10 @@ class Scan(object):
         result = self.plot(return_values=True,
                            action=fit.fit_plot_action(),
                            return_figure=True, **kwargs)
+
+        if isinstance(result[0], Iterable):
+            result = np.array(result)
+            result = np.mean(result, axis=0)
 
         return fit.readable(result)
 
@@ -194,9 +224,16 @@ class SimpleScan(Scan):
                           map(func, self.values),
                           self.name)
 
+    @property
     def reverse(self):
         """Create a new scan that runs in the opposite direction"""
-        return SimpleScan(self.action, self.values[::-1], self.name)
+        return SimpleScan(self.action, self.values[::-1], self.defaults)
+
+    def min(self):
+        return self.values.min()
+
+    def max(self):
+        return self.values.max()
 
     def __iter__(self):
         for i in self.values:
@@ -239,10 +276,16 @@ class SumScan(Scan):
         return SumScan(self.first.map(func),
                        self.second.map(func))
 
+    @property
     def reverse(self):
         """Creates a new scan that runs in the opposite direction"""
-        return SumScan(self.second.reverse(),
-                       self.first.reverse())
+        return SumScan(self.second.reverse, self.first.reverse)
+
+    def min(self):
+        return min(self.first.min(), self.second.min())
+
+    def max(self):
+        return max(self.first.max(), self.second.max())
 
 
 class ProductScan(Scan):
@@ -272,10 +315,16 @@ class ProductScan(Scan):
         return ProductScan(self.outer.map(func),
                            self.inner.map(func))
 
+    @property
     def reverse(self):
         """Creates a new scan that runs in the opposite direction"""
-        return ProductScan(self.outer.reverse(),
-                           self.inner.reverse())
+        return ProductScan(self.outer.reverse, self.inner.reverse)
+
+    def min(self):
+        return (self.outer.min(), self.inner.min())
+
+    def max(self):
+        return (self.outer.max(), self.inner.max())
 
 
 class ParallelScan(Scan):
@@ -304,10 +353,16 @@ class ParallelScan(Scan):
         return ParallelScan(self.first.map(func),
                             self.second.map(func))
 
+    @property
     def reverse(self):
         """Creates a new scan that runs in the opposite direction"""
-        return ParallelScan(self.first.reverse(),
-                            self.second.reverse())
+        return ParallelScan(self.first.reverse, self.second.reverse)
+
+    def min(self):
+        return (self.first.min(), self.second.min())
+
+    def max(self):
+        return (self.first.max(), self.second.max())
 
 
 class ForeverScan(Scan):
@@ -333,5 +388,12 @@ class ForeverScan(Scan):
     def map(self, func):
         return ForeverScan(self.scan.map(func))
 
+    @property
     def reverse(self):
-        return ForeverScan(self.scan.reverse())
+        return ForeverScan(self.scan.reverse)
+
+    def min(self):
+        return self.scan.min()
+
+    def max(self):
+        return self.scan.max()
