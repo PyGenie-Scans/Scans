@@ -112,7 +112,7 @@ class Scan(object):
 
         if g and g.get_runstate() != "SETUP":
             raise RuntimeError("Cannot start scan while already in a run!" +
-                " Current state is: " + str(g.get_runstate()))
+                               " Current state is: " + str(g.get_runstate()))
 
         if not detector:
             detector = self.defaults.detector
