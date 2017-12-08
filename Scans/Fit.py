@@ -261,7 +261,9 @@ class DampedOscillatorFit(CurveFit):
         params = self.readable(params)
         return (self._title + ": " +
                 "y={amplitude:.3g}*exp(-((x-{center:.3g})" +
-                "/{width:.3g})$^2$)*cos({frequency:.3g}*(x-{center:.3g}))").format(**params)
+                "/{width:.3g})$^2$)*" +
+                "cos({frequency:.3g}*(x-{center:.3g}))").format(**params)
+
 
 #: A linear regression
 Linear = PolyFit(1, title="Linear")
