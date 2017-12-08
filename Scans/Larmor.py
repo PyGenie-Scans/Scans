@@ -13,8 +13,10 @@ try:
     from genie_python import genie as g
 except ImportError:
     g = None
+import LSS.SANSroutines as lm
 from .Util import make_scan, make_estimator
 from .Defaults import Defaults
+from .Monoid import Polarisation, ListOfMonoids
 
 
 class Larmor(Defaults):
@@ -50,5 +52,42 @@ class Larmor(Defaults):
 
     def __repr__(self):
         return "Larmor()"
+
+
+def full_pol(**kwargs):
+    """
+    Get the up and down counts as a function of the
+    time of flight channel
+    """
+    lm.flipper1(1)
+    g.waitfor_move()
+    g.begin()
+    g.waitfor(**kwargs)
+    ups = sum(g.get_spectrum(11, 1)["signal"])
+    ups += sum(g.get_spectrum(12, 1)["signal"])
+    g.abort()
+    lm.flipper1(0)
+    g.waitfor_move()
+    g.begin()
+    g.waitfor(**kwargs)
+    down = sum(g.get_spectrum(11, 2)["signal"])
+    down += sum(g.get_spectrum(12, 2)["signal"])
+    g.abort()
+    return (ups, down)
+
+
+def pol_measure(**kwargs):
+    """
+    Get the polarisation curves used in locating the spin echos
+    """
+    ups, downs = full_pol(**kwargs)
+    slices = [slice(222, 666), slice(222, 370),
+              slice(370, 518), slice(518, 666)]
+    ups = [sum(ups[slc]) for slc in slices]
+    downs = [sum(downs[slc]) for slc in slices]
+    pols = [Polarisation(up, down)
+            for up, down in zip(ups, downs)]
+    return ListOfMonoids(pols)
+
 
 scan = make_scan(Larmor())
