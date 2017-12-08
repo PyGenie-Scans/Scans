@@ -93,6 +93,14 @@ class Scan(object):
         """
         return ForeverScan(self)
 
+    @property
+    def and_back(self):
+        """
+        Run then scan both forwards and in reverse.  This can help minimise
+        motor movement.
+        """
+        return self + self.reverse
+
     def plot(self, detector=None, save=None,
              action=None, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
@@ -219,7 +227,7 @@ class SimpleScan(Scan):
     @property
     def reverse(self):
         """Create a new scan that runs in the opposite direction"""
-        return SimpleScan(self.action, self.values[::-1], self.name)
+        return SimpleScan(self.action, self.values[::-1], self.defaults)
 
     def min(self):
         return self.values.min()

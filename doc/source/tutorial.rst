@@ -288,6 +288,17 @@ Perform complex scans
   Taking a count at theta=0.50 and two theta=3.00
   Taking a count at theta=0.00 and two theta=3.00
 
+  To minimise motor movement, a scan can turn around at its end and
+  run backwards to collect more statistics
+
+  >>> th.and_back.plot(frames=5)
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=0.00 and two theta=3.00
+
   For a more interactive experience, a scan be set to cycle forever,
   improving the statistics until the use manually kills the scan.
 
