@@ -13,7 +13,7 @@ from abc import ABCMeta, abstractmethod
 from collections import Iterable
 import numpy as np
 from six import add_metaclass
-from .Monoid import MonoidList, ListOfMonoids
+from .Monoid import ListOfMonoids
 
 try:
     # pylint: disable=import-error

@@ -69,7 +69,7 @@ TWO_THETA = mock_motion("two_theta")
 scan = make_scan(MockInstrument())
 
 
-def pol_measure(*args, **kwargs):
+def pol_measure(**kwargs):
     """
     Get a single polarisation measurement
     """

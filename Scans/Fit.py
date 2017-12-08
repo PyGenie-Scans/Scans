@@ -6,7 +6,6 @@ fits (i.e. Linear and Gaussian).
 from abc import ABCMeta, abstractmethod
 import numpy as np
 from six import add_metaclass
-from .Monoid import MonoidList
 
 
 @add_metaclass(ABCMeta)

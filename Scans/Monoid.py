@@ -241,9 +241,15 @@ class ListOfMonoids(list):
             axis.errorbar(xs, self.values(), yerr=self.err(), fmt="d")
 
     def max(self):
+        """
+        Find the largest value in the list, including for uncertainty
+        """
         return np.nanmax(np.array(self.values()) +
                          np.array(self.err()))
 
     def min(self):
+        """
+        Find the smallest value in the list, including for uncertainty
+        """
         return np.nanmin(np.array(self.values()) -
                          np.array(self.err()))

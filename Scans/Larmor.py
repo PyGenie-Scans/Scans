@@ -13,7 +13,7 @@ try:
     from genie_python import genie as g
 except ImportError:
     g = None
-import LSS.SANSroutines as lm
+import LSS.SANSroutines as lm  # pylint: disable=import-error
 from .Util import make_scan, make_estimator
 from .Defaults import Defaults
 from .Monoid import Polarisation, ListOfMonoids
