@@ -111,7 +111,8 @@ class Scan(object):
         warnings.simplefilter("ignore", UserWarning)
 
         if g and g.get_runstate() != "SETUP":
-            raise RuntimeError("Cannot start scan while already in a run!")
+            raise RuntimeError("Cannot start scan while already in a run!" +
+                " Current state is: " + str(g.get_runstate()))
 
         if not detector:
             detector = self.defaults.detector
@@ -180,7 +181,7 @@ class Scan(object):
                            return_figure=True, **kwargs)
 
         if isinstance(result[0], Iterable):
-            result = np.array(result)
+            result = np.array([x for x in result if x is not None])
             result = np.mean(result, axis=0)
 
         return fit.readable(result)
