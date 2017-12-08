@@ -291,7 +291,7 @@ Perform complex scans
   For a more interactive experience, a scan be set to cycle forever,
   improving the statistics until the use manually kills the scan.
 
-  >>> scan(THETA, start=0, stop=1, stride=0.5).forever().plot(Gaussian, frames=5) #doctest: +SKIP
+  >>> scan(THETA, start=0, stop=1, stride=0.5).forever.fit(Gaussian, frames=5) #doctest: +SKIP
 
 Estimate time
 -------------
