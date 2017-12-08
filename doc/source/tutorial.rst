@@ -281,6 +281,13 @@ Perform complex scans
   Taking a count at theta=0.50 and two theta=3.00
   Taking a count at theta=1.00 and two theta=3.00
 
+  A scan can also be run in the reverse direction, if desired.
+
+  >>> th.reverse.plot(frames=5)
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=0.00 and two theta=3.00
+
   For a more interactive experience, a scan be set to cycle forever,
   improving the statistics until the use manually kills the scan.
 
@@ -327,7 +334,8 @@ Class setup
        function.  The original position of each point is fed as input to
        the function and the return value of the function is the new
        position.
-  :reverse: Create a copy of the scan that runs in the opposite direction
+  :reverse: Create a copy of the scan that runs in the opposite direction.
+	    Reverse should be a property, since it takes no parameters
   :__len__: Return the number of elements in the scan
   :__iter__: Return an iterator that steps through the scan one position at
 	    a time, yielding the current position at each point.

@@ -58,6 +58,7 @@ class Scan(object):
         """
         pass
 
+    @property
     @abstractmethod
     def reverse(self):
         """Create a new scan that runs in the opposite direction"""
@@ -85,6 +86,7 @@ class Scan(object):
     def __and__(self, x):
         return ParallelScan(self, x)
 
+    @property
     def forever(self):
         """
         Create a scan that will cycle until stopped by the user.
@@ -214,6 +216,7 @@ class SimpleScan(Scan):
                           map(func, self.values),
                           self.name)
 
+    @property
     def reverse(self):
         """Create a new scan that runs in the opposite direction"""
         return SimpleScan(self.action, self.values[::-1], self.name)
@@ -265,10 +268,10 @@ class SumScan(Scan):
         return SumScan(self.first.map(func),
                        self.second.map(func))
 
+    @property
     def reverse(self):
         """Creates a new scan that runs in the opposite direction"""
-        return SumScan(self.second.reverse(),
-                       self.first.reverse())
+        return SumScan(self.second.reverse, self.first.reverse)
 
     def min(self):
         return min(self.first.min(), self.second.min())
@@ -304,10 +307,10 @@ class ProductScan(Scan):
         return ProductScan(self.outer.map(func),
                            self.inner.map(func))
 
+    @property
     def reverse(self):
         """Creates a new scan that runs in the opposite direction"""
-        return ProductScan(self.outer.reverse(),
-                           self.inner.reverse())
+        return ProductScan(self.outer.reverse, self.inner.reverse)
 
     def min(self):
         return (self.outer.min(), self.inner.min())
@@ -342,10 +345,10 @@ class ParallelScan(Scan):
         return ParallelScan(self.first.map(func),
                             self.second.map(func))
 
+    @property
     def reverse(self):
         """Creates a new scan that runs in the opposite direction"""
-        return ParallelScan(self.first.reverse(),
-                            self.second.reverse())
+        return ParallelScan(self.first.reverse, self.second.reverse)
 
     def min(self):
         return (self.first.min(), self.second.min())
@@ -377,8 +380,9 @@ class ForeverScan(Scan):
     def map(self, func):
         return ForeverScan(self.scan.map(func))
 
+    @property
     def reverse(self):
-        return ForeverScan(self.scan.reverse())
+        return ForeverScan(self.scan.reverse)
 
     def min(self):
         return self.scan.min()
