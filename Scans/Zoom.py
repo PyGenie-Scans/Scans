@@ -14,6 +14,7 @@ from .Defaults import Defaults
 from .Motion import populate
 from .Util import make_scan, make_estimator
 
+
 class Zoom(Defaults):
     """
     This class represents the default functions for the Larmor instrument.
@@ -36,9 +37,9 @@ class Zoom(Defaults):
 
     @staticmethod
     def time_estimator(**kwargs):
-        #Double check this value
-        MONITOR_COUNT_RATE = 1e6
-        return make_estimator(MONITOR_COUNT_RATE)(**kwargs)
+        # Double check this value
+        monitor_count_rate = 1e6
+        return make_estimator(monitor_count_rate)(**kwargs)
 
     @staticmethod
     def log_file():
@@ -49,6 +50,7 @@ class Zoom(Defaults):
 
     def __repr__(self):
         return "Zoom()"
+
 
 scan = make_scan(Zoom())
 populate()
