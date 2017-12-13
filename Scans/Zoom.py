@@ -17,7 +17,7 @@ from .Util import make_scan, make_estimator
 
 class Zoom(Defaults):
     """
-    This class represents the default functions for the Larmor instrument.
+    This class represents the default functions for the Zoom instrument.
     """
 
     @staticmethod
