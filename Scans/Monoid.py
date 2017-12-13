@@ -207,7 +207,10 @@ class ListOfMonoids(list):
     """
     def __init__(self, *args):
         list.__init__(self, *args)
-        self.color_cycle = rcParams["axes.prop_cycle"].by_key()["color"]
+        try:
+            self.color_cycle = rcParams["axes.prop_cycle"].by_key()["color"]
+        except KeyError:
+            self.color_cycle = ["k", "b", "g", "r"]
 
     def values(self):
         """
@@ -230,7 +233,7 @@ class ListOfMonoids(list):
         Make an errorbar plot of a monoid onto an axis
         at a given set of x coordinates
         """
-        markers = "ospP*h+xv^<>"
+        markers = "osp+xv^<>"
         if isinstance(self[0], MonoidList):
             for y, err, color, marker in zip(self.values(), self.err(),
                                              self.color_cycle, markers):
