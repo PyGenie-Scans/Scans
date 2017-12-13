@@ -19,9 +19,19 @@ Scans.Instrument
 .. automodule:: Scans.Instrument
    :members:
 
+Scans.Monoid
+------------
+.. automodule:: Scans.Monoid
+   :members:
+
 Scans.Motion
 ------------
 .. automodule:: Scans.Motion
+   :members:
+
+Scans.multiplot
+---------------
+.. automodule:: Scans.multiplot
    :members:
 
 Scans.Scans
