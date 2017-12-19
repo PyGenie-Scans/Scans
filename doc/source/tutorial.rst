@@ -5,9 +5,9 @@ Introduction
 ============
 
   This is a proposal for an improved system for running scans on the
-  instrument.  The idea is to use `Scan' objects to represent the parts
+  instrument.  The idea is to use ``Scan`` objects to represent the parts
   of the scan.  These scan objects form an algebra, making them easier
-  to compose than using `for' loops.  These scan objects are mainly
+  to compose than using ``for`` loops.  These scan objects are mainly
   intended as tools for the instrument scientists for creating a higher
   level interface that the users will interact with.
 
@@ -76,7 +76,7 @@ Examples
   can run on a computer that isn't attached to a beamline
 
   >>> import matplotlib
-  >>> matplotlib.use("Agg")
+  >>> # matplotlib.use("Agg")
   >>> from Scans.Instrument import scan, THETA, TWO_THETA
 
 Plot Motor Scan
@@ -93,7 +93,7 @@ Plot Motor Scan
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
 
-  The `save' argument allows the figure to be saved to a file.
+  The ``save`` argument allows the figure to be saved to a file.
   Otherwise, the screen will show the plot interactively.
 
   [file:plot_example.png]
@@ -115,10 +115,10 @@ Plot Motor Scan
   2.0
 
 
-  The `stride' option gives an appoximate step size, but forces ensures
-  that the beginning and final points are measured.  `step' forces the
-  exact spacing, but may not measure the final point.  `count' and
-  `gaps' allow the user to specify the number of measurements and the
+  The ``stride`` option gives an appoximate step size, but forces ensures
+  that the beginning and final points are measured.  ``step`` forces the
+  exact spacing, but may not measure the final point.  ``count`` and
+  ``gaps`` allow the user to specify the number of measurements and the
   number of gaps, respectively.
 
   >>> scan(THETA, start=0, stop=2, step=0.6).plot(frames=5)
@@ -334,12 +334,12 @@ Class setup
 
   [file:classes.pdf]
 
-  The base class for the low level code is the `Scan' class.  This
+  The base class for the low level code is the ``Scan`` class.  This
   ensures that any functionality added to this class or bugs fixed in
   its code propagate out to all callers of this library.  Unfortunately,
   Python does not have a concept of interfaces, so we cannot force all
   children to have a set of defined functions.  However, any subclasses
-  of `Scan' must contain the follow member functions:
+  of ``Scan`` must contain the follow member functions:
 
   :map: Create a modified version of the scan based on a user supplied
        function.  The original position of each point is fed as input to
@@ -371,20 +371,20 @@ Class setup
 
   ParallelScan
 	     takes to scans and runs their actions together at each
-	     step.  For example, if `a' was a scan over theta and `b'
-	     was a scan over two theta, then `a && b' would scan each
+	     step.  For example, if ``a' was a scan over theta and `b``
+	     was a scan over two theta, then ``a && b`` would scan each
 	     theta angle with its corresponding two theta.
 
-  The base `Scan' class contains four useful member functions.
+  The base ``Scan`` class contains four useful member functions.
 
-  :plot: The `plot' function goes to each position listed in the scan,
+  :plot: The ``plot`` function goes to each position listed in the scan,
 	 takes a count, and plots it on an axis.  The user can specify the
 	 counting command.
-  :measure: The `measure' function goes to each position in the in the scan
+  :measure: The ``measure`` function goes to each position in the in the scan
 	    and records a measurement.  The function is passed a title
 	    which can include information about the current position in the
 	    scan.
-  :fit: Like `plot', this function takes a single count at each position.
+  :fit: Like ``plot``, this function takes a single count at each position.
 	It then fits it to the user supplied model and returns the fitted
 	value.  This could be anything from the peak position to the
 	frequency of the curve.
@@ -398,7 +398,7 @@ High Level interface
 ====================
 
   I've included an example of a possible high level interface in the
-  `scan' function.  It takes a motor name followed by a plethora of
+  ``scan`` function.  It takes a motor name followed by a plethora of
   keyword arguments to easily create scans for the users.
 
 
@@ -429,11 +429,11 @@ Position Commands
 	 always one greater than the number of gaps.
   :stride: A /requested/, but not /mandatory/, step size.  Users often know
 	   the range over which they wish to scan and their desired
-	   scanning resolution.  `stride' measured the entire range, but
+	   scanning resolution.  ``stride`` measured the entire range, but
 	   may increase the resolution to give equally spaced measurements.
-	   `stride' always take precedence over `step`
+	   ``stride` always take precedence over `step``
   :step: A mandatory step size.  If the request measurement range is not an
 	 integer number of steps, the measurement will stop before the
 	 requested end.
 
-  See the :py:func:`Scans.Util.get_points` function for more informatoin on the parameters.
+  See the :py:func:``Scans.Util.get_points`` function for more informatoin on the parameters.

@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    tutorial
+   instrument
    reference
    issues
 
