@@ -46,7 +46,8 @@ class ProcessPlotter(object):
             command = self.pipe.recv()
 
             if command is None:
-                self.pipe.send((self.x, self.y, self.fig))
+                del self.fig
+                self.pipe.send((self.x, self.y))
                 return False
             elif isinstance(command, tuple):
                 if command[0] == "clf":
@@ -80,7 +81,7 @@ class NBPlot(object):
         self.plotter = ProcessPlotter(**kwargs)
         self.plot_process = Process(target=self.plotter,
                                     args=(plotter_pipe,))
-        # self.plot_process.daemon = True
+        self.plot_process.daemon = True
         self.plot_process.start()
 
     def __call__(self, data):
@@ -88,12 +89,10 @@ class NBPlot(object):
 
     def join(self):
         """Close the plot and get the results from it"""
-        if not self.plot_process.daemon:
-            return
 
         self.plot_pipe.send(None)
         result = self.plot_pipe.recv()
-        self.plot_process.join()
+        self.plot_pipe.close()
         return result
 
     def __getattr__(self, name):
@@ -103,6 +102,9 @@ class NBPlot(object):
             """
             self.plot_pipe.send((name, args, kwargs))
         return wrapper
+
+    def __del__(self):
+        self.join()
 
 
 def main():
