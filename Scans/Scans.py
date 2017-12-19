@@ -13,7 +13,7 @@ from abc import ABCMeta, abstractmethod
 from collections import Iterable
 import numpy as np
 from six import add_metaclass
-from .Monoid import ListOfMonoids
+from .Monoid import ListOfMonoids, Monoid
 
 try:
     # pylint: disable=import-error
@@ -325,7 +325,87 @@ class ProductScan(Scan):
     def max(self):
         return (self.outer.max(), self.inner.max())
 
+    def plot(self, detector=None, save=None,
+             action=None, **kwargs):
+        """An overloading of Scan.plot to handle multidimensional
+        scans."""
+        import warnings
+        warnings.simplefilter("ignore", UserWarning)
 
+        if g and g.get_runstate() != "SETUP":
+            raise RuntimeError("Cannot start scan while already in a run!" +
+                               " Current state is: " + str(g.get_runstate()))
+
+        if not detector:
+            detector = self.defaults.detector
+        axis = NBPlot()
+
+        xs = []
+        ys = []
+
+        zs = []
+        for i in range(len(self.outer)):
+            zs.append([np.nan] * len(self.inner))
+
+        action_remainder = None
+        try:
+            with open(self.defaults.log_file(), "w") as logfile:
+                for x in self:
+                    value = detector(**kwargs)
+
+                    keys = list(x.keys())
+                    xlabel = keys[1]
+                    ylabel = keys[0]
+                    y = x[ylabel]
+                    x = x[xlabel]
+                    if isinstance(value, float):
+                        value = Average(value)
+                    if x not in xs:
+                        xs.append(x)
+                    if y not in ys:
+                        ys.append(y)
+                    if isinstance(zs[ys.index(y)][xs.index(x)], Monoid):
+                        zs[ys.index(y)][xs.index(x)] += value
+                    else:
+                        zs[ys.index(y)][xs.index(x)] = value
+                    logfile.write("{}\t{}\n".format(xs[-1], str(zs[-1])))
+                    axis.clear()
+                    axis.set_xlabel(xlabel)
+                    axis.set_ylabel(ylabel)
+                    miny, minx = self.min()
+                    maxy, maxx = self.max()
+                    rng = [1.05*minx - 0.05 * maxx,
+                           1.05*maxx - 0.05 * minx]
+                    axis.set_xlim(rng[0], rng[1]+1)
+                    rng = [1.05*miny - 0.05 * maxy,
+                           1.05*maxy - 0.05 * miny]
+                    axis.set_ylim(rng[0], rng[1]+1)
+                    nzs = np.array([[float(z) for z in row] for row in zs])
+                    print(
+                        np.array(
+                            xs + list(np.arange(0, len(self.inner)-len(xs)+1)
+                                      + max(xs)+1)),
+                        np.array(
+                            ys + list(np.arange(0, len(self.outer)-len(ys)+1)
+                                      + max(ys)+1)),
+                        nzs)
+                    axis.pcolor(
+                        np.array(
+                            xs + list(np.arange(0, len(self.inner)-len(xs)+1)
+                                      + max(xs)+1)),
+                        np.array(
+                            ys + list(np.arange(0, len(self.outer)-len(ys)+1)
+                                      + max(ys)+1)),
+                        nzs)
+                    if action:
+                        action_remainder = action(xs, zs,
+                                                  axis)
+        except KeyboardInterrupt:
+            pass
+        if save:
+            axis.savefig(save)
+
+        return action_remainder
 class ParallelScan(Scan):
     """ParallelScan runs two scans alongside each other, performing both
     sets of position adjustments before each step of the scan."""
@@ -363,56 +443,6 @@ class ParallelScan(Scan):
     def max(self):
         return (self.first.max(), self.second.max())
 
-    def plot(self, detector=None, save=None,
-             action=None, **kwargs):
-        """An overloading of Scan.plot to handle multidimensional
-        scans."""
-        import warnings
-        warnings.simplefilter("ignore", UserWarning)
-
-        if g and g.get_runstate() != "SETUP":
-            raise RuntimeError("Cannot start scan while already in a run!" +
-                               " Current state is: " + str(g.get_runstate()))
-
-        if not detector:
-            detector = self.defaults.detector
-        axis = NBPlot()
-
-        xs = []
-        ys = ListOfMonoids()
-
-        action_remainder = None
-        try:
-            with open(self.defaults.log_file(), "w") as logfile:
-                for x in self:
-                    # FIXME: Handle multidimensional plots
-                    (label, position) = next(iter(x.items()))
-                    value = detector(**kwargs)
-                    if isinstance(value, float):
-                        value = Average(value)
-                    if position in xs:
-                        ys[xs.index(position)] += value
-                    else:
-                        xs.append(position)
-                        ys.append(value)
-                    logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
-                    axis.clear()
-                    axis.set_xlabel(label)
-                    rng = [1.05*self.min() - 0.05 * self.max(),
-                           1.05*self.max() - 0.05 * self.min()]
-                    axis.set_xlim(rng[0], rng[1])
-                    rng = _plot_range(ys)
-                    axis.set_ylim(rng[0], rng[1])
-                    ys.plot(axis, xs)
-                    if action:
-                        action_remainder = action(xs, ys,
-                                                  axis)
-        except KeyboardInterrupt:
-            pass
-        if save:
-            axis.savefig(save)
-
-        return action_remainder
 
 class ForeverScan(Scan):
     """
