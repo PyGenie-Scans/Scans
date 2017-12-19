@@ -229,7 +229,7 @@ class ErrorFit(CurveFit):
     @staticmethod
     # pylint: disable=arguments-differ
     def _model(xs, center, sigma, bottom, top):
-        from scipy.special import erf
+        from scipy.special import erf  # pylint: disable=no-name-in-module
         amplitude = (top-bottom)/2
         height = (top+bottom)/2
         return amplitude*erf((xs-center)/sigma) + height
