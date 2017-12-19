@@ -343,9 +343,9 @@ class ProductScan(Scan):
         xs = []
         ys = []
 
-        zs = []
-        for i in range(len(self.outer)):
-            zs.append([np.nan] * len(self.inner))
+        values = []
+        for _ in range(len(self.outer)):
+            values.append([np.nan] * len(self.inner))
 
         action_remainder = None
         try:
@@ -354,24 +354,24 @@ class ProductScan(Scan):
                     value = detector(**kwargs)
 
                     keys = list(x.keys())
-                    xlabel = keys[1]
-                    ylabel = keys[0]
-                    y = x[ylabel]
-                    x = x[xlabel]
+                    keys[1] = keys[1]
+                    keys[0] = keys[0]
+                    y = x[keys[0]]
+                    x = x[keys[1]]
                     if isinstance(value, float):
                         value = Average(value)
                     if x not in xs:
                         xs.append(x)
                     if y not in ys:
                         ys.append(y)
-                    if isinstance(zs[ys.index(y)][xs.index(x)], Monoid):
-                        zs[ys.index(y)][xs.index(x)] += value
+                    if isinstance(values[ys.index(y)][xs.index(x)], Monoid):
+                        values[ys.index(y)][xs.index(x)] += value
                     else:
-                        zs[ys.index(y)][xs.index(x)] = value
-                    logfile.write("{}\t{}\n".format(xs[-1], str(zs[-1])))
+                        values[ys.index(y)][xs.index(x)] = value
+                    logfile.write("{}\t{}\n".format(xs[-1], str(values[-1])))
                     axis.clear()
-                    axis.set_xlabel(xlabel)
-                    axis.set_ylabel(ylabel)
+                    axis.set_xlabel(keys[1])
+                    axis.set_ylabel(keys[0])
                     miny, minx = self.min()
                     maxy, maxx = self.max()
                     rng = [1.05*minx - 0.05 * maxx,
@@ -380,15 +380,16 @@ class ProductScan(Scan):
                     rng = [1.05*miny - 0.05 * maxy,
                            1.05*maxy - 0.05 * miny]
                     axis.set_ylim(rng[0], rng[1])
-                    nzs = np.array([[float(z) for z in row] for row in zs])
+                    nvalues = np.array([[float(z) for z in row]
+                                        for row in values])
                     axis.pcolor(
                         self._estimate_locations(xs, len(self.inner),
                                                  minx, maxx),
                         self._estimate_locations(ys, len(self.outer),
                                                  miny, maxy),
-                        nzs)
+                        nvalues)
                     if action:
-                        action_remainder = action(xs, zs,
+                        action_remainder = action(xs, values,
                                                   axis)
         except KeyboardInterrupt:
             pass
@@ -402,14 +403,14 @@ class ProductScan(Scan):
         xs = np.array(xs)
         steps = xs[1:] - xs[:-1]
         if len(xs) >= 2:
-            dx = np.mean(steps)
+            deltax = np.mean(steps)
         else:
-            dx = (high-low)/float(size)
+            deltax = (high-low)/float(size)
 
-        first = np.array([xs[0]]-dx/2)
+        first = np.array([xs[0]]-deltax/2)
         remainder = size + 1 - len(xs)
-        end = np.linspace(xs[-1] + dx/2, high, remainder)[1:]
-        return np.hstack([first, xs+dx/2, end])
+        end = np.linspace(xs[-1] + deltax/2, high, remainder)[1:]
+        return np.hstack([first, xs+deltax/2, end])
 
 
 class ParallelScan(Scan):
