@@ -219,6 +219,40 @@ class GaussianFit(CurveFit):
                 "/{sigma:.3g})+{background:.1g}").format(**params)
 
 
+class ErrorFit(CurveFit):
+    """
+    A fitting class for the error function
+    """
+    def __init__(self):
+        CurveFit.__init__(self, 4, "Erf Fit")
+
+    @staticmethod
+    # pylint: disable=arguments-differ
+    def _model(xs, center, sigma, bottom, top):
+        from scipy.special import erf
+        amplitude = (top-bottom)/2
+        height = (top+bottom)/2
+        return amplitude*erf((xs-center)/sigma) + height
+
+    @staticmethod
+    def guess(x, y):
+        return [np.mean(x), 1, y[0], y[-1]]
+
+    def readable(self, fit):
+        return {"center": fit[0], "sigma": fit[2],
+                "left": fit[3], "right": fit[4]}
+
+    def title(self, params):
+        # pylint: disable=arguments-differ
+        params = self.readable(params)
+        return (self._title + ": " +
+                "y={amplitude:.3g}*erf((x-{center:.3g})" +
+                "/{sigma:.3g})+{background:.1g}").format(
+                    amplitude=(params["right"]-params["left"])/2,
+                    background=(params["right"]+params["left"])/2,
+                    **params)
+
+
 class DampedOscillatorFit(CurveFit):
     """
     A class for fitting decaying cosine curves.
@@ -272,3 +306,5 @@ Linear = PolyFit(1, title="Linear")
 Gaussian = GaussianFit()
 
 DampedOscillator = DampedOscillatorFit()
+
+Erf = ErrorFit()
