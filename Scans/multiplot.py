@@ -61,6 +61,7 @@ class ProcessPlotter(object):
         self.fig.canvas.draw()
         self.fig.canvas.show()
         threading.Timer(0.5, self.poll_draw).start()
+        return None
 
     def __call__(self, pipe):
 
