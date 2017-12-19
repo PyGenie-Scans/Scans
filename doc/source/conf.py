@@ -186,6 +186,7 @@ htmlhelp_basename = 'PyGenieScansdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
+latex_engine = "xelatex"
 latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
 #'papersize': 'letterpaper',
@@ -195,6 +196,14 @@ latex_elements = {
 
 # Additional stuff for the LaTeX preamble.
 #'preamble': '',
+    'preamble':'''
+\usepackage{fontspec}
+\usepackage{ucharclasses}
+
+\setmainfont{Symbola}
+% \setDefaultTransitions{\setmainfont{Nimbus Roman}}{}
+% \setTransitionsForSymbols{\setmainfont{Symbola}}{}
+'''
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
