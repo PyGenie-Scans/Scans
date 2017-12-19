@@ -363,6 +363,56 @@ class ParallelScan(Scan):
     def max(self):
         return (self.first.max(), self.second.max())
 
+    def plot(self, detector=None, save=None,
+             action=None, **kwargs):
+        """An overloading of Scan.plot to handle multidimensional
+        scans."""
+        import warnings
+        warnings.simplefilter("ignore", UserWarning)
+
+        if g and g.get_runstate() != "SETUP":
+            raise RuntimeError("Cannot start scan while already in a run!" +
+                               " Current state is: " + str(g.get_runstate()))
+
+        if not detector:
+            detector = self.defaults.detector
+        axis = NBPlot()
+
+        xs = []
+        ys = ListOfMonoids()
+
+        action_remainder = None
+        try:
+            with open(self.defaults.log_file(), "w") as logfile:
+                for x in self:
+                    # FIXME: Handle multidimensional plots
+                    (label, position) = next(iter(x.items()))
+                    value = detector(**kwargs)
+                    if isinstance(value, float):
+                        value = Average(value)
+                    if position in xs:
+                        ys[xs.index(position)] += value
+                    else:
+                        xs.append(position)
+                        ys.append(value)
+                    logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
+                    axis.clear()
+                    axis.set_xlabel(label)
+                    rng = [1.05*self.min() - 0.05 * self.max(),
+                           1.05*self.max() - 0.05 * self.min()]
+                    axis.set_xlim(rng[0], rng[1])
+                    rng = _plot_range(ys)
+                    axis.set_ylim(rng[0], rng[1])
+                    ys.plot(axis, xs)
+                    if action:
+                        action_remainder = action(xs, ys,
+                                                  axis)
+        except KeyboardInterrupt:
+            pass
+        if save:
+            axis.savefig(save)
+
+        return action_remainder
 
 class ForeverScan(Scan):
     """
