@@ -152,9 +152,7 @@ class Scan(object):
         if save:
             axis.savefig(save)
 
-        if action_remainder is not None:
-            return action_remainder
-        return
+        return action_remainder
 
     def measure(self, title, measure=None, **kwargs):
         """Perform a full measurement at each position indicated by the scan.

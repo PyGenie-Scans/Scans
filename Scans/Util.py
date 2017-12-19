@@ -149,4 +149,5 @@ def make_estimator(flux):
             return 90 * uamps
         elif monitor:
             return monitor / flux
+        return 0
     return estimate
