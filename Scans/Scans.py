@@ -376,26 +376,16 @@ class ProductScan(Scan):
                     maxy, maxx = self.max()
                     rng = [1.05*minx - 0.05 * maxx,
                            1.05*maxx - 0.05 * minx]
-                    axis.set_xlim(rng[0], rng[1]+1)
+                    axis.set_xlim(rng[0], rng[1])
                     rng = [1.05*miny - 0.05 * maxy,
                            1.05*maxy - 0.05 * miny]
-                    axis.set_ylim(rng[0], rng[1]+1)
+                    axis.set_ylim(rng[0], rng[1])
                     nzs = np.array([[float(z) for z in row] for row in zs])
-                    print(
-                        np.array(
-                            xs + list(np.arange(0, len(self.inner)-len(xs)+1)
-                                      + max(xs)+1)),
-                        np.array(
-                            ys + list(np.arange(0, len(self.outer)-len(ys)+1)
-                                      + max(ys)+1)),
-                        nzs)
                     axis.pcolor(
-                        np.array(
-                            xs + list(np.arange(0, len(self.inner)-len(xs)+1)
-                                      + max(xs)+1)),
-                        np.array(
-                            ys + list(np.arange(0, len(self.outer)-len(ys)+1)
-                                      + max(ys)+1)),
+                        self._estimate_locations(xs, len(self.inner),
+                                                 minx, maxx),
+                        self._estimate_locations(ys, len(self.outer),
+                                                 miny, maxy),
                         nzs)
                     if action:
                         action_remainder = action(xs, zs,
@@ -406,6 +396,22 @@ class ProductScan(Scan):
             axis.savefig(save)
 
         return action_remainder
+
+    @staticmethod
+    def _estimate_locations(xs, size, low, high):
+        xs = np.array(xs)
+        steps = xs[1:] - xs[:-1]
+        if len(xs) >= 2:
+            dx = np.mean(steps)
+        else:
+            dx = (high-low)/float(size)
+
+        first = np.array([xs[0]]-dx/2)
+        remainder = size + 1 - len(xs)
+        end = np.linspace(xs[-1] + dx/2, high, remainder)[1:]
+        return np.hstack([first, xs+dx/2, end])
+
+
 class ParallelScan(Scan):
     """ParallelScan runs two scans alongside each other, performing both
     sets of position adjustments before each step of the scan."""
