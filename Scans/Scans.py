@@ -13,7 +13,7 @@ from abc import ABCMeta, abstractmethod
 from collections import Iterable
 import numpy as np
 from six import add_metaclass
-from .Monoid import ListOfMonoids
+from .Monoid import ListOfMonoids, Monoid
 
 try:
     # pylint: disable=import-error
@@ -324,6 +324,93 @@ class ProductScan(Scan):
 
     def max(self):
         return (self.outer.max(), self.inner.max())
+
+    def plot(self, detector=None, save=None,
+             action=None, **kwargs):
+        """An overloading of Scan.plot to handle multidimensional
+        scans."""
+        import warnings
+        warnings.simplefilter("ignore", UserWarning)
+
+        if g and g.get_runstate() != "SETUP":
+            raise RuntimeError("Cannot start scan while already in a run!" +
+                               " Current state is: " + str(g.get_runstate()))
+
+        if not detector:
+            detector = self.defaults.detector
+        axis = NBPlot()
+
+        xs = []
+        ys = []
+
+        values = []
+        for _ in range(len(self.outer)):
+            values.append([np.nan] * len(self.inner))
+
+        action_remainder = None
+        try:
+            with open(self.defaults.log_file(), "w") as logfile:
+                for x in self:
+                    value = detector(**kwargs)
+
+                    keys = list(x.keys())
+                    keys[1] = keys[1]
+                    keys[0] = keys[0]
+                    y = x[keys[0]]
+                    x = x[keys[1]]
+                    if isinstance(value, float):
+                        value = Average(value)
+                    if x not in xs:
+                        xs.append(x)
+                    if y not in ys:
+                        ys.append(y)
+                    if isinstance(values[ys.index(y)][xs.index(x)], Monoid):
+                        values[ys.index(y)][xs.index(x)] += value
+                    else:
+                        values[ys.index(y)][xs.index(x)] = value
+                    logfile.write("{}\t{}\n".format(xs[-1], str(values[-1])))
+                    axis.clear()
+                    axis.set_xlabel(keys[1])
+                    axis.set_ylabel(keys[0])
+                    miny, minx = self.min()
+                    maxy, maxx = self.max()
+                    rng = [1.05*minx - 0.05 * maxx,
+                           1.05*maxx - 0.05 * minx]
+                    axis.set_xlim(rng[0], rng[1])
+                    rng = [1.05*miny - 0.05 * maxy,
+                           1.05*maxy - 0.05 * miny]
+                    axis.set_ylim(rng[0], rng[1])
+                    nvalues = np.array([[float(z) for z in row]
+                                        for row in values])
+                    axis.pcolor(
+                        self._estimate_locations(xs, len(self.inner),
+                                                 minx, maxx),
+                        self._estimate_locations(ys, len(self.outer),
+                                                 miny, maxy),
+                        nvalues)
+                    if action:
+                        action_remainder = action(xs, values,
+                                                  axis)
+        except KeyboardInterrupt:
+            pass
+        if save:
+            axis.savefig(save)
+
+        return action_remainder
+
+    @staticmethod
+    def _estimate_locations(xs, size, low, high):
+        xs = np.array(xs)
+        steps = xs[1:] - xs[:-1]
+        if len(xs) >= 2:
+            deltax = np.mean(steps)
+        else:
+            deltax = (high-low)/float(size)
+
+        first = np.array([xs[0]]-deltax/2)
+        remainder = size + 1 - len(xs)
+        end = np.linspace(xs[-1] + deltax/2, high, remainder)[1:]
+        return np.hstack([first, xs+deltax/2, end])
 
 
 class ParallelScan(Scan):
