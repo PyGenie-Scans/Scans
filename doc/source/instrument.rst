@@ -120,7 +120,7 @@ Boolean
 Product
   1 is the zero element and multiplication is the operator
 Sum
-  1 is the zero element and multiplication is the operator
+  0 is the zero element and addition is the operator
 Unit Monoid
   The collection with only a single element is a monoid.  The zero
   value is that element and the operator just returns its first
