@@ -250,19 +250,19 @@ Perform complex scans
 
   >>> th = scan(THETA, start=0, stop=1, stride=0.5)
   >>> two_th = scan(TWO_THETA, start=0, stop=3, stride=1.0)
-  >>> (th * two_th).measure("theta={theta} and two_theta={two_theta}")
-  theta=0.0 and two_theta=0.0
-  theta=0.0 and two_theta=1.0
-  theta=0.0 and two_theta=2.0
-  theta=0.0 and two_theta=3.0
-  theta=0.5 and two_theta=0.0
-  theta=0.5 and two_theta=1.0
-  theta=0.5 and two_theta=2.0
-  theta=0.5 and two_theta=3.0
-  theta=1.0 and two_theta=0.0
-  theta=1.0 and two_theta=1.0
-  theta=1.0 and two_theta=2.0
-  theta=1.0 and two_theta=3.0
+  >>> (th * two_th).plot(frames=5)
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.00 and two theta=1.00
+  Taking a count at theta=0.00 and two theta=2.00
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.50 and two theta=0.00
+  Taking a count at theta=0.50 and two theta=1.00
+  Taking a count at theta=0.50 and two theta=2.00
+  Taking a count at theta=0.50 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=1.00
+  Taking a count at theta=1.00 and two theta=2.00
+  Taking a count at theta=1.00 and two theta=3.00
 
   Two scans can also be run one after the other.  If there are any
   overlapping points, then the measurement at that location will be
