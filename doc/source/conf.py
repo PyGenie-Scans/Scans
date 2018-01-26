@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyGenie Scans'
-copyright = u'2017, Washington et al'
+copyright = u'2018, Washington et al'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
