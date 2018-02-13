@@ -166,6 +166,16 @@ Plot Motor Scan
   Taking a count at theta=3.50 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
 
+  Finally, if a specifc set of arbitrary positions are needs, they can
+  be specified through the `exact` keyword
+
+  >>> scan(THETA, exact=[2,3,5,7,11]).plot(frames=5)
+  Taking a count at theta=2.00 and two theta=0.00
+  Taking a count at theta=3.00 and two theta=0.00
+  Taking a count at theta=5.00 and two theta=0.00
+  Taking a count at theta=7.00 and two theta=0.00
+  Taking a count at theta=11.00 and two theta=0.00
+
 Perform Fits
 ------------
 
