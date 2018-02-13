@@ -1,5 +1,5 @@
 from .Fit import *
-import Fit as Fit
+import .Fit as Fit
 from socket import gethostname
 
 host = gethostname().upper()
