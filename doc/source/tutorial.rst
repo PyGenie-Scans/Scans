@@ -77,7 +77,7 @@ Examples
 
   >>> import matplotlib
   >>> # matplotlib.use("Agg")
-  >>> from Scans.Instrument import scan, THETA, TWO_THETA
+  >>> from Scans import *
 
 Plot Motor Scan
 ---------------
@@ -171,7 +171,6 @@ Perform Fits
   Performing a fit on a measurement is merely a modification of
   performing the plot
 
-  >>> from Scans.Fit import Linear, Gaussian
   >>> fit = scan(THETA, start=0, stop=2, stride=0.6).fit(Linear, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
