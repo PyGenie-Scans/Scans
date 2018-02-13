@@ -77,7 +77,7 @@ def get_points(
     """
 
     if exact is not None:
-        return exact
+        return np.array(exact)
     if gaps:
         count = gaps + 1
     if before is not None:
