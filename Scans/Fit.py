@@ -4,9 +4,14 @@ fits (i.e. Linear and Gaussian).
 
 """
 from abc import ABCMeta, abstractmethod
+import os
 import numpy as np
 from six import add_metaclass
 
+# Disable Intel Fortran default console event handler
+env = 'FOR_DISABLE_CONSOLE_CTRL_HANDLER'
+if env not in os.environ:
+    os.environ[env] = '1'
 
 @add_metaclass(ABCMeta)
 class Fit(object):
