@@ -3,6 +3,7 @@
 A wildcard import from this module will provide all of the scanning utilities
 a user could be expected to need at the beamline."""
 
+from __future__ import absolute_import
 # We are doing some trickery with the imports that pylint doesn't
 # understand, so we need to turn off some warnings
 # pylint: disable=wildcard-import, unused-import, unused-wildcard-import
