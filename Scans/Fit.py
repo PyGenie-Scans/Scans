@@ -173,7 +173,9 @@ class CurveFit(Fit):
         pass
 
     def fit(self, x, y):
-        from scipy.optimize import curve_fit
+        import warnings
+        from scipy.optimize import curve_fit, OptimizeWarning
+        warnings.simplefilter("ignore", OptimizeWarning)
         return curve_fit(self._model, x, y, self.guess(x, y))[0]
 
     def get_y(self, x, fit):
@@ -186,9 +188,6 @@ class GaussianFit(CurveFit):
     """
     def __init__(self):
         CurveFit.__init__(self, 4, "Gaussian Fit")
-        import warnings
-        from scipy.optimize import OptimizeWarning
-        warnings.simplefilter("ignore", OptimizeWarning)
 
     @staticmethod
     # pylint: disable=arguments-differ
@@ -308,3 +307,5 @@ Gaussian = GaussianFit()
 DampedOscillator = DampedOscillatorFit()
 
 Erf = ErrorFit()
+
+__all__ = ["Linear", "Gaussian", "DampedOscillator", "Erf"]

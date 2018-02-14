@@ -77,7 +77,7 @@ Examples
 
   >>> import matplotlib
   >>> # matplotlib.use("Agg")
-  >>> from Scans.Instrument import scan, THETA, TWO_THETA
+  >>> from Scans import *
 
 Plot Motor Scan
 ---------------
@@ -108,6 +108,7 @@ Plot Motor Scan
   >>> lines = infile.readlines()
   >>> infile.close()
   >>> for line in lines: print(line.split("\t")[0])
+  theta
   0.0
   0.5
   1.0
@@ -165,13 +166,22 @@ Plot Motor Scan
   Taking a count at theta=3.50 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
 
+  Finally, if a specifc set of arbitrary positions are needs, they can
+  be specified through the `exact` keyword
+
+  >>> scan(THETA, exact=[2,3,5,7,11]).plot(frames=5)
+  Taking a count at theta=2.00 and two theta=0.00
+  Taking a count at theta=3.00 and two theta=0.00
+  Taking a count at theta=5.00 and two theta=0.00
+  Taking a count at theta=7.00 and two theta=0.00
+  Taking a count at theta=11.00 and two theta=0.00
+
 Perform Fits
 ------------
 
   Performing a fit on a measurement is merely a modification of
   performing the plot
 
-  >>> from Scans.Fit import Linear, Gaussian
   >>> fit = scan(THETA, start=0, stop=2, stride=0.6).fit(Linear, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
