@@ -16,7 +16,7 @@ except ImportError:
 import LSS.SANSroutines as lm  # pylint: disable=import-error
 from .Util import make_scan, make_estimator
 from .Defaults import Defaults
-from .Monoid import Polarisation, ListOfMonoids
+from .Monoid import Polarisation, ListOfMonoids, Average
 
 
 class Larmor(Defaults):
@@ -36,8 +36,9 @@ class Larmor(Defaults):
         g.begin()
         g.waitfor(**kwargs)
         temp = sum(g.get_spectrum(4)["signal"])
+        base = sum(g.get_spectrum(1)["signal"])
         g.abort()
-        return temp
+        return Average(temp*100, count=base)
 
     @staticmethod
     def time_estimator(**kwargs):
