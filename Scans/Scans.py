@@ -124,7 +124,6 @@ class Scan(object):
         action_remainder = None
         try:
             with open(self.defaults.log_file(), "w") as logfile:
-                unlabelled = True
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
@@ -136,9 +135,6 @@ class Scan(object):
                     else:
                         xs.append(position)
                         ys.append(value)
-                    if unlabelled:
-                        unlabelled = False
-                        logfile.write("{}\tMeasurement\n".format(label))
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
                     axis.set_xlabel(label)
