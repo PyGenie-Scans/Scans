@@ -5,7 +5,9 @@ fits (i.e. Linear and Gaussian).
 """
 from abc import ABCMeta, abstractmethod
 import os
+import warnings
 import numpy as np
+from scipy.optimize import curve_fit, OptimizeWarning
 from six import add_metaclass
 
 # Disable Intel Fortran default console event handler
@@ -178,7 +180,6 @@ class CurveFit(Fit):
         pass
 
     def fit(self, x, y):
-        from scipy.optimize import curve_fit
         return curve_fit(self._model, x, y, self.guess(x, y))[0]
 
     def get_y(self, x, fit):
@@ -191,9 +192,7 @@ class GaussianFit(CurveFit):
     """
     def __init__(self):
         CurveFit.__init__(self, 4, "Gaussian Fit")
-        #import warnings
-        #from scipy.optimize import OptimizeWarning
-        #warnings.simplefilter("ignore", OptimizeWarning)
+        warnings.simplefilter("ignore", OptimizeWarning)
 
     @staticmethod
     # pylint: disable=arguments-differ
