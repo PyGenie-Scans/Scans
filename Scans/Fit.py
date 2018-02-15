@@ -4,16 +4,11 @@ fits (i.e. Linear and Gaussian).
 
 """
 from abc import ABCMeta, abstractmethod
+from multiprocessing import Queue, Process
 import os
 import warnings
 import numpy as np
-from scipy.optimize import curve_fit, OptimizeWarning
 from six import add_metaclass
-
-# Disable Intel Fortran default console event handler
-env = 'FOR_DISABLE_CONSOLE_CTRL_HANDLER'
-if env not in os.environ:
-    os.environ[env] = '1'
 
 @add_metaclass(ABCMeta)
 class Fit(object):
@@ -180,7 +175,14 @@ class CurveFit(Fit):
         pass
 
     def fit(self, x, y):
-        return curve_fit(self._model, x, y, self.guess(x, y))[0]
+        def proc(q):
+            warnings.simplefilter("ignore", OptimizeWarning)
+            from scipy.optimize import curve_fit, OptimizeWarning
+            q.put(curve_fit(self._model, x, y, self.guess(x, y))[0])
+        q = Queue()
+        p = Process(target=proc, args=(q,))
+        p.start()
+        return q.get()
 
     def get_y(self, x, fit):
         return self._model(x, *fit)
@@ -192,7 +194,6 @@ class GaussianFit(CurveFit):
     """
     def __init__(self):
         CurveFit.__init__(self, 4, "Gaussian Fit")
-        warnings.simplefilter("ignore", OptimizeWarning)
 
     @staticmethod
     # pylint: disable=arguments-differ
