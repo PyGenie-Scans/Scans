@@ -120,7 +120,7 @@ def make_scan(defaults):
         spacing.
 
         """
-        if type(motion) is str:
+        if isinstance(motion, str):
             from .Motion import BlockMotion
             motion = BlockMotion(motion)
 
