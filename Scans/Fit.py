@@ -176,8 +176,8 @@ class CurveFit(Fit):
 
     def fit(self, x, y):
         def proc(q):
-            warnings.simplefilter("ignore", OptimizeWarning)
             from scipy.optimize import curve_fit, OptimizeWarning
+            warnings.simplefilter("ignore", OptimizeWarning)
             q.put(curve_fit(self._model, x, y, self.guess(x, y))[0])
         q = Queue()
         p = Process(target=proc, args=(q,))
