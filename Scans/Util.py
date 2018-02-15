@@ -120,6 +120,10 @@ def make_scan(defaults):
         spacing.
 
         """
+        if type(motion) is str:
+            from .Motion import BlockMotion
+            motion = BlockMotion(motion)
+
         points = get_points(motion(), **kwargs)
 
         return SimpleScan(motion, points, defaults)
