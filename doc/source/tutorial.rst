@@ -176,6 +176,16 @@ Plot Motor Scan
   Taking a count at theta=7.00 and two theta=0.00
   Taking a count at theta=11.00 and two theta=0.00
 
+  In addition to the motor objects, it's also possible to use string
+  names for motors, if you find that more convenient.
+
+  >>> scan("theta", exact=[2,3,5,7,11]).plot(frames=5) # doctest: +SKIP
+  Taking a count at theta=2.00 and two theta=0.00
+  Taking a count at theta=3.00 and two theta=0.00
+  Taking a count at theta=5.00 and two theta=0.00
+  Taking a count at theta=7.00 and two theta=0.00
+  Taking a count at theta=11.00 and two theta=0.00
+
 Perform Fits
 ------------
 
