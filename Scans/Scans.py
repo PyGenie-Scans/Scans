@@ -364,10 +364,10 @@ class ProductScan(Scan):
                         xs.append(x)
                     if y not in ys:
                         ys.append(y)
-                    if isinstance(values[ys.index(y)][xs.index(x)], Monoid):
-                        values[ys.index(y)][xs.index(x)] += value
+                    if isinstance(values[xs.index(x)][ys.index(y)], Monoid):
+                        values[xs.index(x)][ys.index(y)] += value
                     else:
-                        values[ys.index(y)][xs.index(x)] = value
+                        values[xs.index(x)][ys.index(y)] = value
                     logfile.write("{}\t{}\n".format(xs[-1], str(values[-1])))
                     axis.clear()
                     axis.set_xlabel(keys[1])
