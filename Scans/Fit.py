@@ -355,4 +355,4 @@ Erf = ErrorFit()
 
 Trapezoid = TrapezoidFit()
 
-__all__ = ["Linear", "Gaussian", "DampedOscillator", "Erf"]
+__all__ = ["Linear", "Gaussian", "DampedOscillator", "Erf", "Trapezoid"]
