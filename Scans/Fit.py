@@ -278,8 +278,8 @@ class ErrorFit(CurveFit):
         return [np.mean(x), 1, y[0], y[-1]]
 
     def readable(self, fit):
-        return {"center": fit[0], "sigma": fit[2],
-                "left": fit[3], "right": fit[4]}
+        return {"center": fit[0], "sigma": fit[1],
+                "left": fit[2], "right": fit[3]}
 
     def title(self, params):
         # pylint: disable=arguments-differ
