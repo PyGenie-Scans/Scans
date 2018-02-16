@@ -40,9 +40,7 @@ class Motion(object):
     def __call__(self, x=None):
         if x is None:
             return self.getter()
-        reach, msg = self.accessible(x)
-        if not reach:
-            raise RuntimeError(msg)
+        self.require(x)
         return self.setter(x)
 
     def __iadd__(self, x):
@@ -87,6 +85,16 @@ class Motion(object):
                     "Position {} is above upper limit {} of motor {}".format(
                         x, self.high, self.title))
         return (True, "Position is Accessible")
+
+    def require(self, x):
+        """Requires that the given position is accessible.  If not, an
+        exception is thrown
+
+        """
+        success, msg = self.accessible(x)
+        if success:
+            return
+        raise RuntimeError(msg)
 
     @property
     def low(self):

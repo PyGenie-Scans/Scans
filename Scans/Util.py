@@ -116,9 +116,7 @@ def make_scan(defaults):
         points = get_points(motion(), **kwargs)
 
         for point in points:
-            success, msg = motion.accessible(point)
-            if not success:
-                raise RuntimeError(msg)
+            motion.require(point)
 
         return SimpleScan(motion, points, defaults)
     return scan
