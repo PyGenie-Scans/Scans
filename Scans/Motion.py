@@ -82,7 +82,7 @@ def populate():
     block registered with IBEX."""
     # pylint: disable=import-error
     from genie_python import genie as g
-    if g.get_blocks()h is None:
+    if g.get_blocks() is None:
         return
     for i in g.get_blocks():
         __builtins__[i.upper()] = BlockMotion(i)
