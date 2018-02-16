@@ -114,6 +114,7 @@ class Motion(object):
     def high(self, x):
         self._high = x
 
+
 class BlockMotion(Motion):
     """
 
