@@ -56,6 +56,8 @@ class Average(Monoid):
         self.count = count
 
     def __float__(self):
+        if self.count == 0:
+            return float(np.nan)
         return float(self.total) / float(self.count)
 
     def __add__(self, y):
@@ -73,9 +75,13 @@ class Average(Monoid):
         Average(0, 0)
 
     def err(self):
+        if self.count == 0:
+            return np.nan
         return np.sqrt(self.total)/self.count
 
     def __str__(self):
+        if self.count == 0:
+            return str(np.nan)
         return str(self.total/self.count)
 
     def __repr__(self):
