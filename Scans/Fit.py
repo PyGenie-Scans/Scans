@@ -255,7 +255,7 @@ class TrapezoidFit(CurveFit):
     def title(self, params):
         # pylint: disable=arguments-differ
         params = self.readable(params)
-        return (self._title + ": " + "Center @ {}".format(params["center"]))
+        return self._title + ": " + "Center @ {}".format(params["center"])
 
 
 class ErrorFit(CurveFit):
