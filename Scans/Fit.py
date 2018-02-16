@@ -244,9 +244,9 @@ class TrapezoidFit(CurveFit):
 
     @staticmethod
     def guess(x, y):
-        cen = x[len(x)//2]
+        cen = len(x)//2
         breadth = max(x)-min(x)
-        return [cen, breadth/3, 2*breadth/3, y[cen], (y[0]+y[-1])/2]
+        return [x[cen], breadth/3, 2*breadth/3, y[cen], (y[0]+y[-1])/2]
 
     def readable(self, fit):
         return {"center": fit[0], "FWHM": (fit[1]+fit[2])/2,
@@ -255,12 +255,7 @@ class TrapezoidFit(CurveFit):
     def title(self, params):
         # pylint: disable=arguments-differ
         params = self.readable(params)
-        return (self._title + ": " +
-                "y={amplitude:.3g}*erf((x-{center:.3g})" +
-                "/{sigma:.3g})+{background:.1g}").format(
-                    amplitude=(params["right"]-params["left"])/2,
-                    background=(params["right"]+params["left"])/2,
-                    **params)
+        return (self._title + ": " + "Center @ {}".format(params["center"]))
 
 
 class ErrorFit(CurveFit):
