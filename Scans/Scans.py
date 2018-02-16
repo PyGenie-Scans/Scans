@@ -10,7 +10,7 @@ treated as private.
 """
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
-from collections import Iterable
+from collections import Iterable, OrderedDict
 import numpy as np
 from six import add_metaclass
 from .Monoid import ListOfMonoids, Monoid
@@ -26,7 +26,7 @@ from .Monoid import Average
 
 
 def merge_dicts(x, y):
-    """Given two dices, merge them into a new dict as a shallow copy."""
+    """Given two dicts, merge them into a new dict as a shallow copy."""
     final = x.copy()
     final.update(y)
     return final
@@ -237,7 +237,9 @@ class SimpleScan(Scan):
     def __iter__(self):
         for i in self.values:
             self.action(i)
-            yield {self.name: i}
+            d = OrderedDict()
+            d[self.name] = i
+            yield d
 
     def __len__(self):
         return len(self.values)
@@ -364,10 +366,10 @@ class ProductScan(Scan):
                         xs.append(x)
                     if y not in ys:
                         ys.append(y)
-                    if isinstance(values[xs.index(x)][ys.index(y)], Monoid):
-                        values[xs.index(x)][ys.index(y)] += value
+                    if isinstance(values[ys.index(y)][xs.index(x)], Monoid):
+                        values[ys.index(y)][xs.index(x)] += value
                     else:
-                        values[xs.index(x)][ys.index(y)] = value
+                        values[ys.index(y)][xs.index(x)] = value
                     logfile.write("{}\t{}\n".format(xs[-1], str(values[-1])))
                     axis.clear()
                     axis.set_xlabel(keys[1])
