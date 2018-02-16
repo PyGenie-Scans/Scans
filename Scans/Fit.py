@@ -308,5 +308,3 @@ Gaussian = GaussianFit()
 DampedOscillator = DampedOscillatorFit()
 
 Erf = ErrorFit()
-
-__all__ = ["Linear", "Gaussian", "DampedOscillator", "Erf"]
