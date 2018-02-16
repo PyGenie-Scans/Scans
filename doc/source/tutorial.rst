@@ -165,6 +165,17 @@ Plot Motor Scan
   Taking a count at theta=3.50 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
 
+  Soft limits can be placed on motors with the `low` and `high`
+  properties.  Scans that attempt to exceed these values will throw an
+  error.
+
+  >>> THETA.high = 2
+  >>> scan(THETA, start=0, stop=10, count=21)
+  Traceback (most recent call last):
+      ...
+  RuntimeError: Position 2.5 is above upper limit 2 of motor theta
+  >>> THETA.high = None
+
 Perform Fits
 ------------
 

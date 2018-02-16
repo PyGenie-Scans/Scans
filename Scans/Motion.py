@@ -30,14 +30,17 @@ class Motion(object):
     5
 
     """
-    def __init__(self, getter, setter, title):
+    def __init__(self, getter, setter, title, low=None, high=None):
         self.getter = getter
         self.setter = setter
         self.title = title
+        self._low = low
+        self._high = high
 
     def __call__(self, x=None):
         if x is None:
             return self.getter()
+        self.require(x)
         return self.setter(x)
 
     def __iadd__(self, x):
@@ -54,6 +57,62 @@ class Motion(object):
 
     def __repr__(self):
         return "{} is at {}".format(self.title, self())
+
+    def accessible(self, x):
+        """Determines whether a motor can reach the desired position.
+
+        Parameters
+        ==========
+        x
+          The desired position for the motor
+
+        Returns
+        =======
+
+        Tuple (Bool, Str)
+
+        The boolean represents whether the possition can be reached
+        The string is an error message explaining why the position is
+        unreachable.
+
+        """
+        if self.low is not None and x < self.low:
+            return (False,
+                    "Position {} is below lower limit {} of motor {}".format(
+                        x, self.low, self.title))
+        if self.high is not None and x > self.high:
+            return (False,
+                    "Position {} is above upper limit {} of motor {}".format(
+                        x, self.high, self.title))
+        return (True, "Position is Accessible")
+
+    def require(self, x):
+        """Requires that the given position is accessible.  If not, an
+        exception is thrown
+
+        """
+        success, msg = self.accessible(x)
+        if success:
+            return
+        raise RuntimeError(msg)
+
+    @property
+    def low(self):
+        """The motion's lower limit"""
+        return self._low
+
+    @low.setter
+    def low(self, x):
+        self._low = x
+
+    @property
+    def high(self):
+        """The motion's uppder limit"""
+        return self._high
+
+    @high.setter
+    def high(self, x):
+        self._high = x
 
 
 class BlockMotion(Motion):

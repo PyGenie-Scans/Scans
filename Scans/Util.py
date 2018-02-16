@@ -115,6 +115,9 @@ def make_scan(defaults):
         """
         points = get_points(motion(), **kwargs)
 
+        for point in points:
+            motion.require(point)
+
         return SimpleScan(motion, points, defaults)
     return scan
 
