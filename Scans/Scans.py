@@ -10,7 +10,7 @@ treated as private.
 """
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
-from collections import Iterable
+from collections import Iterable, OrderedDict
 import numpy as np
 from six import add_metaclass
 from .Monoid import ListOfMonoids, Monoid
@@ -26,7 +26,7 @@ from .Monoid import Average
 
 
 def merge_dicts(x, y):
-    """Given two dices, merge them into a new dict as a shallow copy."""
+    """Given two dicts, merge them into a new dict as a shallow copy."""
     final = x.copy()
     final.update(y)
     return final
@@ -124,7 +124,6 @@ class Scan(object):
         action_remainder = None
         try:
             with open(self.defaults.log_file(), "w") as logfile:
-                unlabelled = True
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
@@ -136,9 +135,6 @@ class Scan(object):
                     else:
                         xs.append(position)
                         ys.append(value)
-                    if unlabelled:
-                        unlabelled = False
-                        logfile.write("{}\tMeasurement\n".format(label))
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
                     axis.set_xlabel(label)
@@ -241,7 +237,9 @@ class SimpleScan(Scan):
     def __iter__(self):
         for i in self.values:
             self.action(i)
-            yield {self.name: i}
+            dic = OrderedDict()
+            dic[self.name] = i
+            yield dic
 
     def __len__(self):
         return len(self.values)

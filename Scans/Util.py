@@ -13,7 +13,6 @@ def get_points(
         step=None, stride=None,
         count=None, gaps=None,
         before=None, after=None,
-        exact=None,
         **_):
     """This function takes a dictionary of keyword arguments for
     a scan and returns the points at which the scan should be measured.
@@ -58,10 +57,6 @@ def get_points(
       The number of steps that the motor will take.  A scan with a ``gaps``
       of 1 would measure at only the beginning and the end.  This is a
       valid number of points.
-    exact : list of float
-      An array of the exact values to visit.  This allows taking scans
-      at any arbitrary set of points.  This is also necessary for
-      scans that don't use numerical values, such as the sample changer.
 
     Returns
     -------
@@ -76,8 +71,6 @@ def get_points(
 
     """
 
-    if exact is not None:
-        return np.array(exact)
     if gaps:
         count = gaps + 1
     if before is not None:
