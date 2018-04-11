@@ -8,15 +8,41 @@ environment.
 
 """
 from __future__ import print_function
+import mock
+import numpy as np
 try:
     # pylint: disable=import-error
     from genie_python import genie as g
 except ImportError:
-    g = None
-import LSS.SANSroutines as lm  # pylint: disable=import-error
+    from .Instrument import THETA
+    from time import sleep
+    g = mock.Mock()
+    g._period = 0
+    g._frames = 0
+    g.get_period = lambda: g._period
+    g.get_frames = lambda: g._frames
+
+    def fake_spectrum(channel, period):
+        if channel == 1:
+            return {"signal": np.zeros(1000)+1}
+        x = np.arange(1000)
+        base = np.cos(0.01*(THETA()+1.05)*x)+1
+        if period % 2 == 0:
+            base = 2 - base
+        base *= 100000
+        base += np.sqrt(base) * (2 * np.random.rand(1000) - 1)
+        base /= x
+        sleep(0.1)
+        return {"signal": base}
+
+    g.get_spectrum = fake_spectrum
+try:
+    import LSS.SANSroutines as lm  # pylint: disable=import-error
+except ImportError:
+    lm = mock.Mock()
 from .Util import make_scan, make_estimator
 from .Defaults import Defaults
-from .Monoid import Polarisation, ListOfMonoids, Average
+from .Monoid import Polarisation, ListOfMonoids, Average, MonoidList
 
 
 class Larmor(Defaults):
@@ -77,18 +103,44 @@ def full_pol(**kwargs):
     return (ups, down)
 
 
-def pol_measure(**kwargs):
+def pol_measure(frames, **kwargs):
     """
-    Get the polarisation curves used in locating the spin echos
+    Get a single polarisation measurement
     """
-    ups, downs = full_pol(**kwargs)
-    slices = [slice(222, 666), slice(222, 370),
-              slice(370, 518), slice(518, 666)]
-    ups = [sum(ups[slc]) for slc in slices]
-    downs = [sum(downs[slc]) for slc in slices]
-    pols = [Polarisation(up, down)
-            for up, down in zip(ups, downs)]
-    return ListOfMonoids(pols)
+    slices = [slice(222, 666), slice(222, 370), slice(370, 518),
+              slice(518, 666)]
 
+    i = g.get_period()
+
+    g.change(period=i+1)
+    lm.flipper1(1)
+    g.waitfor_move()
+    gfrm = g.get_frames()
+    g.resume()
+    g.waitfor(frames=gfrm+frames)
+    g.pause()
+
+    lm.flipper1(0)
+    g.change(period=i+2)
+    gfrm = g.get_frames()
+    g.resume()
+    g.waitfor(frames=gfrm+frames)
+    g.pause()
+
+    pols = [Polarisation.zero() for x in slices]
+    for channel in [11, 12]:
+        mon1 = g.get_spectrum(1, i+1)
+        a1 = g.get_spectrum(channel, i+1)
+        mon2 = g.get_spectrum(1, i+2)
+        a2 = g.get_spectrum(channel, i+2)
+        for idx, slc in enumerate(slices):
+            up = Average(
+                np.sum(a1["signal"][slc])*100.0,
+                np.sum(mon1["signal"][slc])*100.0)
+            down = Average(
+                np.sum(a2["signal"][slc])*100.0,
+                np.sum(mon2["signal"][slc])*100.0)
+            pols[idx] += Polarisation(up, down)
+    return MonoidList(pols)
 
 scan = make_scan(Larmor())
