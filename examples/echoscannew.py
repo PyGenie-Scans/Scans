@@ -35,13 +35,6 @@ def fake_spectrum(channel, period):
 
 gen.get_spectrum = fake_spectrum
 
-# currents = scan(THETA, start=-3, stop=2, stride=0.2).and_back.forever
-# result = currents.fit(PeakFit(0.3), frames=100,
-#                       detector=pol_measure)
-# print(result)
-# THETA(result["peak"])
-# print(THETA)
-
 def pol_measure2(frames, **kwargs):
     """
     Get a single polarisation measurement
