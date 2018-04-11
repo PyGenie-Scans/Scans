@@ -152,17 +152,21 @@ class PeakFit(Fit):
     A simple peak-finding fitter.
 
     This is a simple class that finds the highest point in the data set.
-    It will not find secondary peaks and won't handle peaks on the edges
-    of the measurement domain.
+    It will not find secondary peaks.
     """
-    def __init__(self, window=1):
+    def __init__(self, window=0.5):
         self._window = window
-        self._fit = np.zeros(2*window+1)
+        self._fit = np.zeros(3)
         Fit.__init__(self, 2*window+1, "Peak")
 
+    def _make_window(self, x, center):
+        return np.abs(x-center) < self._window
+
     def fit(self, x, y):
-        base = 1+np.argmax(y[self._window:-self._window])
-        window = np.arange(base-self._window, base+self._window+1)
+        x = np.array(x)
+        y = np.array(y)
+        base = np.argmax(y)
+        window = self._make_window(x, x[base])
         fit = np.polyfit(x[window], y[window], 2)
         self._fit = fit
         return np.array([-fit[1]/2/fit[0]])
@@ -171,8 +175,7 @@ class PeakFit(Fit):
         center = center[0]
         y = x * 0
         if max(x) >= center >= min(x):
-            base = np.argmin(np.abs(x-center))
-            window = np.arange(base-self._window, base+self._window+1)
+            window = self._make_window(x, center)
             y[window] = np.polyval(self._fit, x[window])
         return y
 
