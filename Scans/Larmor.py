@@ -20,6 +20,7 @@ except ImportError:
     from .Mocks import lm
 from .Util import make_scan, make_estimator
 from .Defaults import Defaults
+from .Detector import DetectorManager
 from .Monoid import Polarisation, Average, MonoidList
 
 
@@ -81,7 +82,7 @@ def full_pol(**kwargs):
     return (ups, down)
 
 
-def pol_measure(**kwargs):
+def pol_measure_inner(**kwargs):
     """
     Get a single polarisation measurement
     """
@@ -121,5 +122,17 @@ def pol_measure(**kwargs):
             pols[idx] += Polarisation(ups, down)
     return MonoidList(pols)
 
+
+pol_measure = DetectorManager(pol_measure_inner)
+
+
+def pol_measure_setup(self):
+    lm.setuplarmor_echoscan()
+    g.change(nperiods=len(self.scan)*2)
+    g.begin(paused=1)
+    return self._f
+
+
+pol_measure.__enter__ = pol_measure_setup
 
 scan = make_scan(Larmor())

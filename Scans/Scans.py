@@ -102,7 +102,7 @@ class Scan(object):
         """
         return self + self.reverse
 
-    def plot(self, detector_manager=None, save=None,
+    def plot(self, detector=None, save=None,
              action=None, **kwargs):
         """Run over the scan an perform a simple measurement at each position.
         The measurement parameter can be used to set what type of measurement
@@ -115,10 +115,10 @@ class Scan(object):
             raise RuntimeError("Cannot start scan while already in a run!" +
                                " Current state is: " + str(g.get_runstate()))
 
-        if not detector_manager:
-            detector_manager = self.defaults.detector
-        if not isinstance(detector_manager, DetectorManager):
-            detector_manager = DetectorManager(detector_manager)
+        if not detector:
+            detector = self.defaults.detector
+        if not isinstance(detector, DetectorManager):
+            detector = DetectorManager(detector)
         axis = NBPlot()
 
         xs = []
@@ -127,11 +127,11 @@ class Scan(object):
         action_remainder = None
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
-                 detector_manager as detector:
+                 detector(self) as detect:
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
-                    value = detector(**kwargs)
+                    value = detect(**kwargs)
                     if isinstance(value, float):
                         value = Average(value)
                     if position in xs:
@@ -329,7 +329,7 @@ class ProductScan(Scan):
     def max(self):
         return (self.outer.max(), self.inner.max())
 
-    def plot(self, detector_manager=None, save=None,
+    def plot(self, detector=None, save=None,
              action=None, **kwargs):
         """An overloading of Scan.plot to handle multidimensional
         scans."""
@@ -340,10 +340,10 @@ class ProductScan(Scan):
             raise RuntimeError("Cannot start scan while already in a run!" +
                                " Current state is: " + str(g.get_runstate()))
 
-        if not detector_manager:
-            detector_manager = self.defaults.detector
-        if not isinstance(detector_manager, DetectorManager):
-            detector_manager = DetectorManager(detector_manager)
+        if not detector:
+            detector = self.defaults.detector
+        if not isinstance(detector, DetectorManager):
+            detector = DetectorManager(detector)
         axis = NBPlot()
 
         xs = []
@@ -356,9 +356,9 @@ class ProductScan(Scan):
         action_remainder = None
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
-                 detector_manager as detector:
+                 detector(self) as detect:
                 for x in self:
-                    value = detector(**kwargs)
+                    value = detect(**kwargs)
 
                     keys = list(x.keys())
                     keys[1] = keys[1]
