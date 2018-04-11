@@ -27,5 +27,5 @@ elif "ZOOM" in host:
     from .Zoom import scan
     _all += ["populate", "scan"]
 else:
-    from .Instrument import scan, THETA, TWO_THETA  # noqa: F403,F401
-    _all += ["scan", "THETA", "TWO_THETA"]
+    from .Instrument import scan, THETA, TWO_THETA, pol_measure  # noqa: F403,F401,E501
+    _all += ["scan", "THETA", "TWO_THETA", "pol_measure"]

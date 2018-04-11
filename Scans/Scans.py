@@ -178,7 +178,7 @@ class Scan(object):
 
         if isinstance(result[0], Iterable):
             result = np.array([x for x in result if x is not None])
-            result = np.mean(result, axis=0)
+            result = np.median(result, axis=0)
 
         return fit.readable(result)
 
