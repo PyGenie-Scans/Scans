@@ -147,6 +147,43 @@ class PolyFit(Fit):
         return self._title + ": $y = " + " + ".join(terms) + "$"
 
 
+class PeakFit(Fit):
+    """
+    A simple peak-finding fitter.
+
+    This is a simple class that finds the highest point in the data set.
+    It will not find secondary peaks and won't handle peaks on the edges
+    of the measurement domain.
+    """
+    def __init__(self, window=1):
+        self._window = window
+        self._fit = np.zeros(2*window+1)
+        Fit.__init__(self, 2*window+1, "Peak")
+
+    def fit(self, x, y):
+        base = 1+np.argmax(y[self._window:-self._window])
+        window = np.arange(base-self._window, base+self._window+1)
+        fit = np.polyfit(x[window], y[window], 2)
+        self._fit = fit
+        return np.array([-fit[1]/2/fit[0]])
+
+    def get_y(self, x, center):
+        center = center[0]
+        y = x * 0
+        if max(x) >= center >= min(x):
+            base = np.argmin(np.abs(x-center))
+            window = np.arange(base-self._window, base+self._window+1)
+            y[window] = np.polyval(self._fit, x[window])
+        return y
+
+    def readable(self, center):
+        return {"peak": center[0]}
+
+    def title(self, center):
+        # pylint: disable=arguments-differ
+        return "Peak at {}".format(center)
+
+
 @add_metaclass(ABCMeta)
 class CurveFit(Fit):
     """
