@@ -188,7 +188,7 @@ Perform Fits
   Taking a count at theta=1.00 and two theta=0.00
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> abs(fit["slope"] - 0.67) < 0.02
+  >>> abs(fit["slope"] - 0.33) < 0.02
   True
 
   In this instance, the user requested a linear fit.  The result was an
@@ -211,7 +211,7 @@ Perform Fits
   Taking a count at theta=1.60 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> abs(fit["center"] - 2.1) < 0.2
+  >>> abs(fit["center"] - 1.0) < 0.2
   True
 
 Perform Measurement Scan
