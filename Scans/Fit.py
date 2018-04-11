@@ -171,16 +171,16 @@ class PeakFit(Fit):
         self._fit = fit
         return np.array([-fit[1]/2/fit[0]])
 
-    def get_y(self, x, center):
-        center = center[0]
+    def get_y(self, x, fit):
+        center = fit[0]
         y = x * 0
         if max(x) >= center >= min(x):
             window = self._make_window(x, center)
             y[window] = np.polyval(self._fit, x[window])
         return y
 
-    def readable(self, center):
-        return {"peak": center[0]}
+    def readable(self, fit):
+        return {"peak": fit[0]}
 
     def title(self, center):
         # pylint: disable=arguments-differ
