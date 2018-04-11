@@ -7,11 +7,8 @@ import numpy as np
 from Scans import *
 from Scans.Monoid import Average, MonoidList, Polarisation
 from Scans.Larmor import pol_measure
-from mock import Mock
-
-
-gen = Mock()
-lm = Mock()
+from Scans.Mocks import g as gen
+from Scans.Mocks import lm
 
 
 def echoscan_axis(axis, startval, endval, npoints, frms, rtitle, save=False):
