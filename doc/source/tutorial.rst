@@ -214,6 +214,26 @@ Perform Fits
   >>> abs(fit["center"] - 1.0) < 0.2
   True
 
+  There is a simple peak finder as well.  It finds the largest data
+  point and then fits the local neighbourhood of points to a parabola
+  to refine that point.  The width of that neighbourhood is the
+  parameter to PeakFit.
+
+  >>> fit = scan(THETA, start=0, stop=2, count=11).fit(PeakFit(0.7), frames=5)
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.20 and two theta=0.00
+  Taking a count at theta=0.40 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=0.80 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  >>> abs(fit["peak"] - 1.0) < 0.1
+  True
+
 Perform Measurement Scan
 ------------------------
 
