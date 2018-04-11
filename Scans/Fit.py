@@ -147,6 +147,46 @@ class PolyFit(Fit):
         return self._title + ": $y = " + " + ".join(terms) + "$"
 
 
+class PeakFit(Fit):
+    """
+    A simple peak-finding fitter.
+
+    This is a simple class that finds the highest point in the data set.
+    It will not find secondary peaks.
+    """
+    def __init__(self, window=0.5):
+        self._window = window
+        self._fit = np.zeros(3)
+        Fit.__init__(self, 2*window+1, "Peak")
+
+    def _make_window(self, x, center):
+        return np.abs(x-center) < self._window
+
+    def fit(self, x, y):
+        x = np.array(x)
+        y = np.array(y)
+        base = np.argmax(y)
+        window = self._make_window(x, x[base])
+        fit = np.polyfit(x[window], y[window], 2)
+        self._fit = fit
+        return np.array([-fit[1]/2/fit[0]])
+
+    def get_y(self, x, fit):
+        center = fit[0]
+        y = x * 0
+        if max(x) >= center >= min(x):
+            window = self._make_window(x, center)
+            y[window] = np.polyval(self._fit, x[window])
+        return y
+
+    def readable(self, fit):
+        return {"peak": fit[0]}
+
+    def title(self, center):
+        # pylint: disable=arguments-differ
+        return "Peak at {}".format(center)
+
+
 @add_metaclass(ABCMeta)
 class CurveFit(Fit):
     """
@@ -350,4 +390,5 @@ Erf = ErrorFit()
 
 Trapezoid = TrapezoidFit()
 
-__all__ = ["Linear", "Gaussian", "DampedOscillator", "Erf", "Trapezoid"]
+__all__ = ["Linear", "Gaussian", "DampedOscillator", "Erf", "PeakFit",
+           "Trapezoid"]
