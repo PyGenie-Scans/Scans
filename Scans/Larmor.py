@@ -8,7 +8,6 @@ environment.
 
 """
 from __future__ import print_function
-import mock
 import numpy as np
 try:
     # pylint: disable=import-error
@@ -21,7 +20,7 @@ except ImportError:
     from .Mocks import lm
 from .Util import make_scan, make_estimator
 from .Defaults import Defaults
-from .Monoid import Polarisation, ListOfMonoids, Average, MonoidList
+from .Monoid import Polarisation, Average, MonoidList
 
 
 class Larmor(Defaults):
@@ -82,7 +81,7 @@ def full_pol(**kwargs):
     return (ups, down)
 
 
-def pol_measure(frames, **kwargs):
+def pol_measure(**kwargs):
     """
     Get a single polarisation measurement
     """
@@ -96,30 +95,31 @@ def pol_measure(frames, **kwargs):
     g.waitfor_move()
     gfrm = g.get_frames()
     g.resume()
-    g.waitfor(frames=gfrm+frames)
+    g.waitfor(frames=gfrm+kwargs["frames"])
     g.pause()
 
     lm.flipper1(0)
     g.change(period=i+2)
     gfrm = g.get_frames()
     g.resume()
-    g.waitfor(frames=gfrm+frames)
+    g.waitfor(frames=gfrm+kwargs["frames"])
     g.pause()
 
-    pols = [Polarisation.zero() for x in slices]
+    pols = [Polarisation.zero() for _ in slices]
     for channel in [11, 12]:
         mon1 = g.get_spectrum(1, i+1)
-        a1 = g.get_spectrum(channel, i+1)
+        spec1 = g.get_spectrum(channel, i+1)
         mon2 = g.get_spectrum(1, i+2)
-        a2 = g.get_spectrum(channel, i+2)
+        spec2 = g.get_spectrum(channel, i+2)
         for idx, slc in enumerate(slices):
-            up = Average(
-                np.sum(a1["signal"][slc])*100.0,
+            ups = Average(
+                np.sum(spec1["signal"][slc])*100.0,
                 np.sum(mon1["signal"][slc])*100.0)
             down = Average(
-                np.sum(a2["signal"][slc])*100.0,
+                np.sum(spec2["signal"][slc])*100.0,
                 np.sum(mon2["signal"][slc])*100.0)
-            pols[idx] += Polarisation(up, down)
+            pols[idx] += Polarisation(ups, down)
     return MonoidList(pols)
+
 
 scan = make_scan(Larmor())

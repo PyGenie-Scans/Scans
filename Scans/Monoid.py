@@ -142,7 +142,8 @@ class Polarisation(Monoid):
     def __float__(self):
         if float(self.ups) + float(self.downs) == 0:
             return 0.0
-        return (float(self.ups) - float(self.downs)) / (float(self.ups) + float(self.downs))
+        return (float(self.ups) - float(self.downs)) / \
+            (float(self.ups) + float(self.downs))
 
     def __iadd__(self, y):
         if y == 0 or y == 0.0:
@@ -161,7 +162,8 @@ class Polarisation(Monoid):
     def err(self):
         if float(self.ups) + float(self.downs) == 0:
             return 0.0
-        return np.sqrt(4*float(self.ups)*float(self.downs)/float(self.ups+self.downs)**3)
+        return np.sqrt(4 * float(self.ups) * float(self.downs) /
+                       float(self.ups + self.downs)**3)
 
     @staticmethod
     def zero():

@@ -44,8 +44,7 @@ def echoscan_axis(axis, startval, endval, npoints, frms, rtitle, save=False):
     gen.change(title=rtitle)
     gen.change(nperiods=len(currents)*2)
     gen.begin(paused=1)
-    result = currents.fit(PeakFit(0.3), frames=100,
-                          detector=pol_measure)
+    result = currents.fit(PeakFit(0.3), frames=frms, detector=pol_measure)
     if save:
         gen.end()
     else:
