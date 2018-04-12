@@ -227,8 +227,8 @@ class GaussianFit(CurveFit):
     def __init__(self):
         CurveFit.__init__(self, 4, "Gaussian Fit")
         import warnings
-        from scipy.optimize import OptimizeWarning
-        warnings.simplefilter("ignore", OptimizeWarning)
+        # from scipy.optimize import OptimizeWarning
+        # warnings.simplefilter("ignore", OptimizeWarning)
 
     @staticmethod
     # pylint: disable=arguments-differ
