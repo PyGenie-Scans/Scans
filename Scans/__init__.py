@@ -24,8 +24,9 @@ if "LARMOR" in host:
 elif "ZOOM" in host:
     from .Motion import populate
     populate()
-    from .Zoom import scan, monitor1, monitor2, monitor3, monitor4
-    _all += ["populate", "scan", "monitor1", "monitor2", "monitor3", "monitor4"]
+    from .Zoom import scan, monitor1, monitor2, monitor3, monitor4  # noqa: F403,F401,E501
+    _all += ["populate", "scan", "monitor1", "monitor2",
+             "monitor3", "monitor4"]
 else:
     from .Instrument import scan, THETA, TWO_THETA, pol_measure  # noqa: F403,F401,E501
     _all += ["scan", "THETA", "TWO_THETA", "pol_measure"]

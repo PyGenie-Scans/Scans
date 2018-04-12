@@ -14,7 +14,9 @@ from .Defaults import Defaults
 from .Motion import populate
 from .Util import make_scan, make_estimator
 
+
 def zoom_monitor(spectrum):
+    """A generating function for detectors for monitor spectra"""
     def monitor(**kwargs):
         """A simple detector for monitor number {}""".format(spectrum)
         g.begin()
@@ -26,6 +28,7 @@ def zoom_monitor(spectrum):
         g.abort()
         return temp
     return monitor
+
 
 class Zoom(Defaults):
     """
