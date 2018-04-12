@@ -174,13 +174,11 @@ class Scan(object):
 
         """
 
-        result = self.plot(return_values=True,
-                           action=fit.fit_plot_action(),
-                           return_figure=True, **kwargs)
+        result = self.plot(action=fit.fit_plot_action(), **kwargs)
 
         if isinstance(result[0], Iterable):
             result = np.array([x for x in result if x is not None])
-            result = np.mean(result, axis=0)
+            result = np.median(result, axis=0)
 
         return fit.readable(result)
 

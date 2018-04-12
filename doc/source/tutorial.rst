@@ -77,7 +77,7 @@ Examples
 
   >>> import matplotlib
   >>> # matplotlib.use("Agg")
-  >>> from Scans.Instrument import scan, THETA, TWO_THETA
+  >>> from Scans import *
 
 Plot Motor Scan
 ---------------
@@ -165,20 +165,30 @@ Plot Motor Scan
   Taking a count at theta=3.50 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
 
+  Soft limits can be placed on motors with the `low` and `high`
+  properties.  Scans that attempt to exceed these values will throw an
+  error.
+
+  >>> THETA.high = 2
+  >>> scan(THETA, start=0, stop=10, count=21)
+  Traceback (most recent call last):
+      ...
+  RuntimeError: Position 2.5 is above upper limit 2 of motor theta
+  >>> THETA.high = None
+
 Perform Fits
 ------------
 
   Performing a fit on a measurement is merely a modification of
   performing the plot
 
-  >>> from Scans.Fit import Linear, Gaussian
   >>> fit = scan(THETA, start=0, stop=2, stride=0.6).fit(Linear, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> abs(fit["slope"] - 0.67) < 0.02
+  >>> abs(fit["slope"] - 0.33) < 0.02
   True
 
   In this instance, the user requested a linear fit.  The result was an
@@ -201,7 +211,27 @@ Perform Fits
   Taking a count at theta=1.60 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> abs(fit["center"] - 2.1) < 0.2
+  >>> abs(fit["center"] - 1.0) < 0.2
+  True
+
+  There is a simple peak finder as well.  It finds the largest data
+  point and then fits the local neighbourhood of points to a parabola
+  to refine that point.  The width of that neighbourhood is the
+  parameter to PeakFit.
+
+  >>> fit = scan(THETA, start=0, stop=2, count=11).fit(PeakFit(0.7), frames=5)
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.20 and two theta=0.00
+  Taking a count at theta=0.40 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=0.80 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  >>> abs(fit["peak"] - 1.0) < 0.1
   True
 
 Perform Measurement Scan

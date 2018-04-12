@@ -147,6 +147,46 @@ class PolyFit(Fit):
         return self._title + ": $y = " + " + ".join(terms) + "$"
 
 
+class PeakFit(Fit):
+    """
+    A simple peak-finding fitter.
+
+    This is a simple class that finds the highest point in the data set.
+    It will not find secondary peaks.
+    """
+    def __init__(self, window=0.5):
+        self._window = window
+        self._fit = np.zeros(3)
+        Fit.__init__(self, 2*window+1, "Peak")
+
+    def _make_window(self, x, center):
+        return np.abs(x-center) < self._window
+
+    def fit(self, x, y):
+        x = np.array(x)
+        y = np.array(y)
+        base = np.argmax(y)
+        window = self._make_window(x, x[base])
+        fit = np.polyfit(x[window], y[window], 2)
+        self._fit = fit
+        return np.array([-fit[1]/2/fit[0]])
+
+    def get_y(self, x, fit):
+        center = fit[0]
+        y = x * 0
+        if max(x) >= center >= min(x):
+            window = self._make_window(x, center)
+            y[window] = np.polyval(self._fit, x[window])
+        return y
+
+    def readable(self, fit):
+        return {"peak": fit[0]}
+
+    def title(self, center):
+        # pylint: disable=arguments-differ
+        return "Peak at {}".format(center)
+
+
 @add_metaclass(ABCMeta)
 class CurveFit(Fit):
     """
@@ -186,9 +226,9 @@ class GaussianFit(CurveFit):
     """
     def __init__(self):
         CurveFit.__init__(self, 4, "Gaussian Fit")
-        import warnings
-        from scipy.optimize import OptimizeWarning
-        warnings.simplefilter("ignore", OptimizeWarning)
+        # import warnings
+        # from scipy.optimize import OptimizeWarning
+        # warnings.simplefilter("ignore", OptimizeWarning)
 
     @staticmethod
     # pylint: disable=arguments-differ
@@ -219,6 +259,45 @@ class GaussianFit(CurveFit):
                 "/{sigma:.3g})+{background:.1g}").format(**params)
 
 
+class TrapezoidFit(CurveFit):
+    """
+    A fitting class for trapezoids
+    """
+    def __init__(self):
+        CurveFit.__init__(self, 5, "Trapezoid Fit")
+
+    @staticmethod
+    # pylint: disable=arguments-differ
+    def _model(xs, center, width, bottom_width, top, bottom):
+        ys = xs * 0
+        mask1 = np.abs(xs-center) <= width/2
+        ys[mask1] = top
+        mask2 = np.abs(xs-center) >= bottom_width/2
+        ys[mask2] = bottom
+        mask3 = np.logical_not(np.logical_or(mask1, mask2))
+
+        progress = (2.0*np.abs(xs[mask3]-center)-width)/(bottom_width-width)
+
+        ys[mask3] = top + (bottom-top) * progress
+
+        return ys
+
+    @staticmethod
+    def guess(x, y):
+        cen = len(x)//2
+        breadth = max(x)-min(x)
+        return [x[cen], breadth/3, 2*breadth/3, y[cen], (y[0]+y[-1])/2]
+
+    def readable(self, fit):
+        return {"center": fit[0], "FWHM": (fit[1]+fit[2])/2,
+                "top": fit[3], "bottom": fit[4]}
+
+    def title(self, params):
+        # pylint: disable=arguments-differ
+        params = self.readable(params)
+        return self._title + ": " + "Center @ {}".format(params["center"])
+
+
 class ErrorFit(CurveFit):
     """
     A fitting class for the error function
@@ -239,8 +318,8 @@ class ErrorFit(CurveFit):
         return [np.mean(x), 1, y[0], y[-1]]
 
     def readable(self, fit):
-        return {"center": fit[0], "sigma": fit[2],
-                "left": fit[3], "right": fit[4]}
+        return {"center": fit[0], "sigma": fit[1],
+                "left": fit[2], "right": fit[3]}
 
     def title(self, params):
         # pylint: disable=arguments-differ
@@ -308,3 +387,8 @@ Gaussian = GaussianFit()
 DampedOscillator = DampedOscillatorFit()
 
 Erf = ErrorFit()
+
+Trapezoid = TrapezoidFit()
+
+__all__ = ["Linear", "Gaussian", "DampedOscillator", "Erf", "PeakFit",
+           "Trapezoid"]

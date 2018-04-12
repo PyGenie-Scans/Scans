@@ -8,15 +8,19 @@ environment.
 
 """
 from __future__ import print_function
+import numpy as np
 try:
     # pylint: disable=import-error
     from genie_python import genie as g
 except ImportError:
-    g = None
-import LSS.SANSroutines as lm  # pylint: disable=import-error
+    from .Mocks import g
+try:
+    import LSS.SANSroutines as lm  # pylint: disable=import-error
+except ImportError:
+    from .Mocks import lm
 from .Util import make_scan, make_estimator
 from .Defaults import Defaults
-from .Monoid import Polarisation, ListOfMonoids
+from .Monoid import Polarisation, Average, MonoidList
 
 
 class Larmor(Defaults):
@@ -36,8 +40,9 @@ class Larmor(Defaults):
         g.begin()
         g.waitfor(**kwargs)
         temp = sum(g.get_spectrum(4)["signal"])
+        base = sum(g.get_spectrum(1)["signal"])
         g.abort()
-        return temp
+        return Average(temp*100, count=base)
 
     @staticmethod
     def time_estimator(**kwargs):
@@ -78,16 +83,43 @@ def full_pol(**kwargs):
 
 def pol_measure(**kwargs):
     """
-    Get the polarisation curves used in locating the spin echos
+    Get a single polarisation measurement
     """
-    ups, downs = full_pol(**kwargs)
-    slices = [slice(222, 666), slice(222, 370),
-              slice(370, 518), slice(518, 666)]
-    ups = [sum(ups[slc]) for slc in slices]
-    downs = [sum(downs[slc]) for slc in slices]
-    pols = [Polarisation(up, down)
-            for up, down in zip(ups, downs)]
-    return ListOfMonoids(pols)
+    slices = [slice(222, 666), slice(222, 370), slice(370, 518),
+              slice(518, 666)]
+
+    i = g.get_period()
+
+    g.change(period=i+1)
+    lm.flipper1(1)
+    g.waitfor_move()
+    gfrm = g.get_frames()
+    g.resume()
+    g.waitfor(frames=gfrm+kwargs["frames"])
+    g.pause()
+
+    lm.flipper1(0)
+    g.change(period=i+2)
+    gfrm = g.get_frames()
+    g.resume()
+    g.waitfor(frames=gfrm+kwargs["frames"])
+    g.pause()
+
+    pols = [Polarisation.zero() for _ in slices]
+    for channel in [11, 12]:
+        mon1 = g.get_spectrum(1, i+1)
+        spec1 = g.get_spectrum(channel, i+1)
+        mon2 = g.get_spectrum(1, i+2)
+        spec2 = g.get_spectrum(channel, i+2)
+        for idx, slc in enumerate(slices):
+            ups = Average(
+                np.sum(spec1["signal"][slc])*100.0,
+                np.sum(mon1["signal"][slc])*100.0)
+            down = Average(
+                np.sum(spec2["signal"][slc])*100.0,
+                np.sum(mon2["signal"][slc])*100.0)
+            pols[idx] += Polarisation(ups, down)
+    return MonoidList(pols)
 
 
 scan = make_scan(Larmor())
