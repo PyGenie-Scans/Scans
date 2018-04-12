@@ -12,6 +12,7 @@ except ImportError:
     g = None
 from .Defaults import Defaults
 from .Motion import populate
+from .Monoid import Sum
 from .Util import make_scan, make_estimator
 
 
@@ -26,7 +27,7 @@ def zoom_monitor(spectrum):
             spec = g.get_spectrum(spectrum)
         temp = sum(spec["signal"])
         g.abort()
-        return temp
+        return Sum(temp)
     return monitor
 
 
