@@ -13,7 +13,7 @@ except ImportError:
 from .Defaults import Defaults
 from .Motion import populate
 from .Monoid import Sum
-from .Util import make_scan, make_estimator
+from .Util import make_scan
 
 
 def zoom_monitor(spectrum):
@@ -44,12 +44,6 @@ class Zoom(Defaults):
         g.end()
 
     detector = zoom_monitor(4)
-
-    @staticmethod
-    def time_estimator(**kwargs):
-        # Double check this value
-        monitor_count_rate = 1e6
-        return make_estimator(monitor_count_rate)(**kwargs)
 
     @staticmethod
     def log_file():
