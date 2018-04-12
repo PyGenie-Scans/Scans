@@ -24,16 +24,17 @@ class Zoom(Defaults):
     def measure(title, position, **kwargs):
         g.change_title(title.format(**position))
         g.begin()
-        g.waitfor_runstate("running")
         g.waitfor(**kwargs)
         g.end()
 
     @staticmethod
     def detector(**kwargs):
         g.begin()
-        g.waitfor_runstate("running")
         g.waitfor(**kwargs)
-        temp = sum(g.get_spectrum(4)["signal"])
+        spec = g.get_spectrum(4)
+        while not spec:
+            spec = g.get_spectrum(4)
+        temp = sum(spec["signal"])
         g.abort()
         return temp
 
