@@ -14,6 +14,18 @@ from .Defaults import Defaults
 from .Motion import populate
 from .Util import make_scan, make_estimator
 
+def zoom_monitor(spectrum):
+    def monitor(**kwargs):
+        """A simple detector for monitor number {}""".format(spectrum)
+        g.begin()
+        g.waitfor(**kwargs)
+        spec = g.get_spectrum(spectrum)
+        while not spec:
+            spec = g.get_spectrum(spectrum)
+        temp = sum(spec["signal"])
+        g.abort()
+        return temp
+    return monitor
 
 class Zoom(Defaults):
     """
@@ -27,16 +39,7 @@ class Zoom(Defaults):
         g.waitfor(**kwargs)
         g.end()
 
-    @staticmethod
-    def detector(**kwargs):
-        g.begin()
-        g.waitfor(**kwargs)
-        spec = g.get_spectrum(4)
-        while not spec:
-            spec = g.get_spectrum(4)
-        temp = sum(spec["signal"])
-        g.abort()
-        return temp
+    detector = zoom_monitor(4)
 
     @staticmethod
     def time_estimator(**kwargs):
@@ -57,3 +60,7 @@ class Zoom(Defaults):
 
 scan = make_scan(Zoom())
 populate()
+monitor1 = zoom_monitor(1)
+monitor2 = zoom_monitor(2)
+monitor3 = zoom_monitor(3)
+monitor4 = zoom_monitor(4)
