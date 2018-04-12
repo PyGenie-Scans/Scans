@@ -96,7 +96,7 @@ Plot Motor Scan
   The ``save`` argument allows the figure to be saved to a file.
   Otherwise, the screen will show the plot interactively.
 
-  [file:plot_example.png]
+  .. image:: plot_example.png
 
   The results of all scans are saved to a log file.  The location of
   the log is set by the instrument scientist.  In the case of the
