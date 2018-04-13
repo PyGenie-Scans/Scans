@@ -169,6 +169,7 @@ Plot Motor Scan
   properties.  Scans that attempt to exceed these values will throw an
   error.
 
+  >>> THETA.low = 0
   >>> THETA.high = 2
   >>> scan(THETA, start=0, stop=10, count=21)
   Traceback (most recent call last):
@@ -358,6 +359,47 @@ Estimate time
   The run would finish at 2017-07-17 20:06:24.600802
   >>> print(needed) #doctest: +SKIP
   400.0
+
+SPEC compatibility
+------------------
+
+  As a convenience to users with an x-ray background, the `ascan` and
+  dscan from SPEC have been implemented on top of the scanning
+  interface.
+
+  >>> ascan(THETA, 0, 2, 10, 1)
+  Taking a count at theta=0.00 and two theta=3.00
+  Taking a count at theta=0.20 and two theta=3.00
+  Taking a count at theta=0.40 and two theta=3.00
+  Taking a count at theta=0.60 and two theta=3.00
+  Taking a count at theta=0.80 and two theta=3.00
+  Taking a count at theta=1.00 and two theta=3.00
+  Taking a count at theta=1.20 and two theta=3.00
+  Taking a count at theta=1.40 and two theta=3.00
+  Taking a count at theta=1.60 and two theta=3.00
+  Taking a count at theta=1.80 and two theta=3.00
+  Taking a count at theta=2.00 and two theta=3.00
+  >>> THETA(0.5)
+  >>> dscan(THETA, -1, 1, 10, -0.1)
+  Traceback (most recent call last):
+      ...
+  RuntimeError: Position -0.5 is below lower limit 0 of motor theta
+  >>> THETA(2.5)
+  >>> dscan(THETA, -1, 1, 10, -0.01)
+  Taking a count at theta=1.50 and two theta=3.00
+  Taking a count at theta=1.70 and two theta=3.00
+  Taking a count at theta=1.90 and two theta=3.00
+  Taking a count at theta=2.10 and two theta=3.00
+  Taking a count at theta=2.30 and two theta=3.00
+  Taking a count at theta=2.50 and two theta=3.00
+  Taking a count at theta=2.70 and two theta=3.00
+  Taking a count at theta=2.90 and two theta=3.00
+  Taking a count at theta=3.10 and two theta=3.00
+  Taking a count at theta=3.30 and two theta=3.00
+  Taking a count at theta=3.50 and two theta=3.00
+  >>> THETA
+  theta is at 2.5
+
 
 Class setup
 ===========
