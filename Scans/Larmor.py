@@ -18,9 +18,9 @@ try:
     import LSS.SANSroutines as lm  # pylint: disable=import-error
 except ImportError:
     from .Mocks import lm
-from .Util import make_scan, make_estimator
 from .Defaults import Defaults
 from .Monoid import Polarisation, Average, MonoidList
+from .Util import make_scan
 
 
 class Larmor(Defaults):
@@ -43,10 +43,6 @@ class Larmor(Defaults):
         base = sum(g.get_spectrum(1)["signal"])
         g.abort()
         return Average(temp*100, count=base)
-
-    @staticmethod
-    def time_estimator(**kwargs):
-        return make_estimator(1e6)(**kwargs)
 
     @staticmethod
     def log_file():

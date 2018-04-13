@@ -1,3 +1,12 @@
+v0.3
+----
+
+- Detectors
+  - time estimation is now universal and doesn't need to be
+    reimplemented for each beamline.
+- Documentation
+  - Update Guide for Instrument Scientists
+
 v0.2
 ----
 
