@@ -50,7 +50,7 @@ class Larmor(Defaults):
         return "Larmor()"
 
 
-@dae_periods(lm.setuplarmor_echoscan, lambda x:2*len(x))
+@dae_periods(lm.setuplarmor_echoscan, lambda x: 2*len(x))
 def pol_measure(**kwargs):
     """
     Get a single polarisation measurement

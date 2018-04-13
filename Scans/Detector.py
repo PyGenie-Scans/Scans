@@ -5,9 +5,12 @@ try:
 except ImportError:
     from .Mocks import g
 
+
 class DetectorManager(object):
+    """Manage routines for pulling data from the instrument"""
     def __init__(self, f):
         self._f = f
+        self.scan = None
 
     def __call__(self, scan, **kwargs):
         self.scan = scan
@@ -16,7 +19,7 @@ class DetectorManager(object):
     def __enter__(self):
         return self._f
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, typ, value, traceback):
         pass
 
 
@@ -42,7 +45,8 @@ class DaePeriods(DetectorManager):
           length of the scan.
         """
         self._pre_init = pre_init
-        self.save = True  # Default value should never be reachable
+        self._save = True  # Default value should never be reachable
+        self.period_function = period_function
         DetectorManager.__init__(self, f)
 
     def __call__(self, scan, save, **kwargs):
@@ -57,7 +61,7 @@ class DaePeriods(DetectorManager):
         g.begin(paused=1)
         return self._f
 
-    def __exit__(self):
+    def __exit__(self, typ, value, traceback):
         if self._save:
             g.end()
         else:
@@ -65,5 +69,8 @@ class DaePeriods(DetectorManager):
 
 
 def dae_periods(pre_init=lambda: None, period_function=len):
-    def inner(f):
-        return DaePeriods(f, pre_init, period_function=period_function)
+    """Decorate to add single run number support to a detector function"""
+    def inner(func):
+        """wrapper"""
+        return DaePeriods(func, pre_init, period_function=period_function)
+    return inner

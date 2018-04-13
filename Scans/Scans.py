@@ -12,7 +12,8 @@ from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
 from collections import Iterable, OrderedDict
 import numpy as np
-from six import add_metaclass, zip
+from six import add_metaclass
+import six
 from .Monoid import ListOfMonoids, Monoid
 from .Detector import DetectorManager
 
@@ -72,6 +73,13 @@ class Scan(object):
     subclasses."""
 
     defaults = None
+
+    def _normalise_detector(self, detector):
+        if not detector:
+            detector = self.defaults.detector
+        if not isinstance(detector, DetectorManager):
+            detector = DetectorManager(detector)
+        return detector
 
     @abstractmethod
     def map(self, func):
@@ -136,10 +144,7 @@ class Scan(object):
             raise RuntimeError("Cannot start scan while already in a run!" +
                                " Current state is: " + str(g.get_runstate()))
 
-        if not detector:
-            detector = self.defaults.detector
-        if not isinstance(detector, DetectorManager):
-            detector = DetectorManager(detector)
+        detector = self._normalise_detector(detector)
         axis = NBPlot()
 
         xs = []
@@ -364,10 +369,7 @@ class ProductScan(Scan):
             raise RuntimeError("Cannot start scan while already in a run!" +
                                " Current state is: " + str(g.get_runstate()))
 
-        if not detector:
-            detector = self.defaults.detector
-        if not isinstance(detector, DetectorManager):
-            detector = DetectorManager(detector)
+        detector = self._normalise_detector(detector)
         axis = NBPlot()
 
         xs = []
@@ -411,14 +413,13 @@ class ProductScan(Scan):
                     rng = [1.05*miny - 0.05 * maxy,
                            1.05*maxy - 0.05 * miny]
                     axis.set_ylim(rng[0], rng[1])
-                    nvalues = np.array([[float(z) for z in row]
-                                        for row in values])
                     axis.pcolor(
                         self._estimate_locations(xs, len(self.inner),
                                                  minx, maxx),
                         self._estimate_locations(ys, len(self.outer),
                                                  miny, maxy),
-                        nvalues)
+                        np.array([[float(z) for z in row]
+                                  for row in values]))
                     if action:
                         action_remainder = action(xs, values,
                                                   axis)
@@ -453,7 +454,7 @@ class ParallelScan(Scan):
         self.defaults = self.first.defaults
 
     def __iter__(self):
-        for x, y in zip(self.first, self.second):
+        for x, y in six.moves.zip(self.first, self.second):
             yield merge_dicts(x, y)
 
     def __repr__(self):
