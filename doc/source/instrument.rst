@@ -28,25 +28,10 @@ Defaults
 ========
 
 The ``Defaults`` class requires the instrument scientist to implement
-four class methods.  If any of the three methods are missing, the class
+four class methods.  If either of the two methods are missing, the class
 will immediately throw an error on the first attempt to instantiate
 it.  This helps finding errors quickly, instead of in the middle of a
 measurement when the missing function is first needed.
-
-measure
--------
-
-The :meth:`Scans.Defaults.Defaults.measure` function should start a
-full measurement on the instrument.  It will take two positional
-arguments:
-
-:title: A string containing the title of the measurement
-:position: The current position of the instrument in the scan
-
-The function may also take additional keyword arguments that were
-passed by the user.
-
-This function is deprecated and may be removed in the future.
 
 detector
 --------

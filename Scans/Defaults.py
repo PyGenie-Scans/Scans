@@ -20,21 +20,6 @@ class Defaults(object):
 
     @staticmethod
     @abstractmethod
-    def measure(title, position, **kwargs):
-        """Perform a full measurement.
-
-        Parameters
-        ----------
-        title
-          The title for the run.
-        position
-          The current position in the scan
-
-        """
-        pass
-
-    @staticmethod
-    @abstractmethod
     def detector(**kwargs):
         """
         The default function for pulling a count off the detector.

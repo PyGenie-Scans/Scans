@@ -235,26 +235,6 @@ Perform Fits
   >>> abs(fit["peak"] - 1.0) < 0.1
   True
 
-Perform Measurement Scan
-------------------------
-
-  To go from a simple counting scan to a full set of measurements, all
-  that needs to change is the method call.
-
-  >>> title = "Taking a measurement at theta={theta}"
-  >>> scan(THETA, start=0, stop=2, stride=0.6).measure(title)
-  Taking a measurement at theta=0.0
-  Taking a measurement at theta=0.5
-  Taking a measurement at theta=1.0
-  Taking a measurement at theta=1.5
-  Taking a measurement at theta=2.0
-  >>> scan(TWO_THETA, start=0, stop=2, stride=0.6).measure("two theta={two_theta}")
-  two theta=0.0
-  two theta=0.5
-  two theta=1.0
-  two theta=1.5
-  two theta=2.0
-
 
 Perform complex scans
 ---------------------
@@ -269,12 +249,12 @@ Perform complex scans
 
   >>> th= scan(THETA, start=0, stop=1, stride=0.3)
   >>> two_th= scan(TWO_THETA, start=0, stop=2, stride=0.6)
-  >>> (th& two_th).measure("theta={theta} and two_theta={two_theta}")
-  theta=0.0 and two_theta=0.0
-  theta=0.25 and two_theta=0.5
-  theta=0.5 and two_theta=1.0
-  theta=0.75 and two_theta=1.5
-  theta=1.0 and two_theta=2.0
+  >>> (th& two_th).plot("theta={theta} and two_theta={two_theta}")
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.25 and two theta=1.50
+  Taking a count at theta=0.50 and two theta=1.00
+  Taking a count at theta=0.75 and two theta=2.50
+  Taking a count at theta=1.00 and two theta=2.00
 
   On the other hand, if the user is unsure about the proper sample
   alignment, they may want to investigate theta and two-theta separately

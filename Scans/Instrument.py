@@ -25,10 +25,6 @@ class MockInstrument(Defaults):
     """
 
     @staticmethod
-    def measure(title, position, **kwargs):
-        print(title.format(**position))
-
-    @staticmethod
     def detector(**kwargs):
         from time import sleep
         sleep(estimate(**kwargs))

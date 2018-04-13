@@ -29,13 +29,6 @@ class Larmor(Defaults):
     """
 
     @staticmethod
-    def measure(title, position, **kwargs):
-        g.change_title(title.format(**position))
-        g.begin()
-        g.waitfor(**kwargs)
-        g.end()
-
-    @staticmethod
     def detector(**kwargs):
         g.begin()
         g.waitfor(**kwargs)
