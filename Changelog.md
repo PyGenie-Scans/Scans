@@ -10,6 +10,8 @@ v0.3
   - Updated Guide for Instrument Scientists.
 - Interface
   - Added SPEC compatability layer with functions ascan and dscan.
+- Plotting
+  - Fix plotting of Parallel Scans
 
 v0.2
 ----

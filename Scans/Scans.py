@@ -11,6 +11,7 @@ treated as private.
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
 from collections import Iterable, OrderedDict
+from itertools import izip
 import numpy as np
 from six import add_metaclass
 from .Monoid import ListOfMonoids, Monoid
@@ -163,8 +164,12 @@ class Scan(object):
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
                     axis.set_xlabel(label)
-                    rng = [1.05*self.min() - 0.05 * self.max(),
-                           1.05*self.max() - 0.05 * self.min()]
+                    if isinstance(self.min(), tuple):
+                        rng = [1.05*self.min()[0] - 0.05 * self.max()[0],
+                               1.05*self.max()[0] - 0.05 * self.min()[0]]
+                    else:
+                        rng = [1.05*self.min() - 0.05 * self.max(),
+                               1.05*self.max() - 0.05 * self.min()]
                     axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
@@ -449,7 +454,7 @@ class ParallelScan(Scan):
         self.defaults = self.first.defaults
 
     def __iter__(self):
-        for x, y in zip(self.first, self.second):
+        for x, y in izip(self.first, self.second):
             yield merge_dicts(x, y)
 
     def __repr__(self):

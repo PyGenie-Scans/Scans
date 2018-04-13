@@ -251,9 +251,9 @@ Perform complex scans
   >>> two_th= scan(TWO_THETA, start=0, stop=2, stride=0.6)
   >>> (th& two_th).plot(frames=10)
   Taking a count at theta=0.00 and two theta=0.00
-  Taking a count at theta=0.25 and two theta=1.50
+  Taking a count at theta=0.25 and two theta=0.50
   Taking a count at theta=0.50 and two theta=1.00
-  Taking a count at theta=0.75 and two theta=2.50
+  Taking a count at theta=0.75 and two theta=1.50
   Taking a count at theta=1.00 and two theta=2.00
 
   On the other hand, if the user is unsure about the proper sample
