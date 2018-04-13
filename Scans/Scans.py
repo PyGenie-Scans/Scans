@@ -11,9 +11,8 @@ treated as private.
 from __future__ import absolute_import, print_function
 from abc import ABCMeta, abstractmethod
 from collections import Iterable, OrderedDict
-from itertools import izip
 import numpy as np
-from six import add_metaclass
+from six import add_metaclass, zip
 from .Monoid import ListOfMonoids, Monoid
 from .Detector import DetectorManager
 
@@ -454,7 +453,7 @@ class ParallelScan(Scan):
         self.defaults = self.first.defaults
 
     def __iter__(self):
-        for x, y in izip(self.first, self.second):
+        for x, y in zip(self.first, self.second):
             yield merge_dicts(x, y)
 
     def __repr__(self):
