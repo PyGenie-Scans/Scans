@@ -36,13 +36,6 @@ class Zoom(Defaults):
     This class represents the default functions for the Zoom instrument.
     """
 
-    @staticmethod
-    def measure(title, position, **kwargs):
-        g.change_title(title.format(**position))
-        g.begin()
-        g.waitfor(**kwargs)
-        g.end()
-
     detector = zoom_monitor(4)
 
     @staticmethod

@@ -4,6 +4,8 @@ v0.3
 - Detectors
   - time estimation is now universal and doesn't need to be
 	reimplemented for each beamline.
+  - The `measure` function of the detector class has been removed,
+	as it was both unused and superceded by the generic detector facility.
 - Documentation
   - Updated Guide for Instrument Scientists.
 - Interface
