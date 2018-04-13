@@ -50,28 +50,6 @@ class Larmor(Defaults):
         return "Larmor()"
 
 
-def full_pol(**kwargs):
-    """
-    Get the up and down counts as a function of the
-    time of flight channel
-    """
-    lm.flipper1(1)
-    g.waitfor_move()
-    g.begin()
-    g.waitfor(**kwargs)
-    ups = sum(g.get_spectrum(11, 1)["signal"])
-    ups += sum(g.get_spectrum(12, 1)["signal"])
-    g.abort()
-    lm.flipper1(0)
-    g.waitfor_move()
-    g.begin()
-    g.waitfor(**kwargs)
-    down = sum(g.get_spectrum(11, 2)["signal"])
-    down += sum(g.get_spectrum(12, 2)["signal"])
-    g.abort()
-    return (ups, down)
-
-
 @dae_periods(lm.setuplarmor_echoscan, lambda x:2*len(x))
 def pol_measure(**kwargs):
     """
