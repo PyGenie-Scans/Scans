@@ -19,7 +19,7 @@ try:
 except ImportError:
     from .Mocks import lm
 from .Defaults import Defaults
-from .Detector import DetectorManager
+from .Detector import dae_periods
 from .Monoid import Polarisation, Average, MonoidList
 from .Util import make_scan
 
@@ -37,12 +37,13 @@ class Larmor(Defaults):
         g.end()
 
     @staticmethod
+    @dae_periods()
     def detector(**kwargs):
-        g.begin()
+        g.resume()
         g.waitfor(**kwargs)
         temp = sum(g.get_spectrum(4)["signal"])
         base = sum(g.get_spectrum(1)["signal"])
-        g.abort()
+        g.pause()
         return Average(temp*100, count=base)
 
     @staticmethod
@@ -78,7 +79,8 @@ def full_pol(**kwargs):
     return (ups, down)
 
 
-def pol_measure_inner(**kwargs):
+@dae_periods(lm.setuplarmor_echoscan, lambda x:2*len(x))
+def pol_measure(**kwargs):
     """
     Get a single polarisation measurement
     """
@@ -118,17 +120,5 @@ def pol_measure_inner(**kwargs):
             pols[idx] += Polarisation(ups, down)
     return MonoidList(pols)
 
-
-pol_measure = DetectorManager(pol_measure_inner)
-
-
-def pol_measure_setup(self):
-    lm.setuplarmor_echoscan()
-    g.change(nperiods=len(self.scan)*2)
-    g.begin(paused=1)
-    return self._f
-
-
-pol_measure.__enter__ = pol_measure_setup
 
 scan = make_scan(Larmor())
