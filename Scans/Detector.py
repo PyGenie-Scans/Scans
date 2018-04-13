@@ -5,7 +5,6 @@ try:
 except ImportError:
     from .Mocks import g
 
-
 class DetectorManager(object):
     def __init__(self, f):
         self._f = f
