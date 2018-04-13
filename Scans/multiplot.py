@@ -2,10 +2,17 @@
 """A demo of proper multiprocessing matplotlib"""
 from __future__ import print_function
 from multiprocessing import Process, Pipe
+import sys
 import threading
 import numpy as np
 
 import matplotlib.pyplot as plt
+
+# IBEX doesn't report a proper path for sys.executable
+# This breaks multiprocessing, since it doesn't know
+# where to find python to spawn a copy
+if sys.executable == '':
+    sys.executable = "C:/Instrument/Apps/Python/python.exe"
 
 
 class ProcessPlotter(object):

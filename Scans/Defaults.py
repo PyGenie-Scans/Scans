@@ -46,16 +46,6 @@ class Defaults(object):
 
     @staticmethod
     @abstractmethod
-    def time_estimator(**kwargs):
-        """
-        The default function for estimating the number of seconds
-        needed by a time settings (e.g. seconds, frames, uamps) as
-        keyword arguments.
-        """
-        pass
-
-    @staticmethod
-    @abstractmethod
     def log_file():
         """
         Returns the name of a unique log file where the scan data can be saved.

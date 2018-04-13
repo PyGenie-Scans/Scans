@@ -44,6 +44,27 @@ def _plot_range(array):
             high + 0.05 * diff)
 
 
+def estimate(seconds=None, minutes=None, hours=None,
+             uamps=None, frames=None, **_):
+    """Estimate takes a measurement specification and predicts how long
+    the measurement will take in seconds.
+
+    """
+    if seconds or minutes or hours:
+        if not seconds:
+            seconds = 0
+        if not minutes:
+            minutes = 0
+        if not hours:
+            hours = 0
+        return seconds + 60 * minutes + 3600 * hours
+    elif frames:
+        return frames / 10.0
+    elif uamps:
+        return 90 * uamps
+    return 0
+
+
 @add_metaclass(ABCMeta)
 class Scan(object):
     """The virtual class that represents all controlled scans.  This class
@@ -200,8 +221,7 @@ class Scan(object):
 
         """
         from datetime import timedelta, datetime
-        est = self.defaults.time_estimator
-        total = len(self) * (pad + est(**kwargs))
+        total = len(self) * (pad + estimate(**kwargs))
         if time:
             delta = timedelta(0, total)
             print("The run would finish at {}".format(delta + datetime.now()))
