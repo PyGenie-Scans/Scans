@@ -11,6 +11,7 @@ try:
 except ImportError:
     g = None
 from .Defaults import Defaults
+from .Detector import dae_periods
 from .Motion import populate
 from .Monoid import Sum
 from .Util import make_scan
@@ -18,15 +19,16 @@ from .Util import make_scan
 
 def zoom_monitor(spectrum):
     """A generating function for detectors for monitor spectra"""
+    @dae_periods()
     def monitor(**kwargs):
         """A simple detector for monitor number {}""".format(spectrum)
-        g.begin()
+        g.resume()
         g.waitfor(**kwargs)
         spec = g.get_spectrum(spectrum)
         while not spec:
             spec = g.get_spectrum(spectrum)
         temp = sum(spec["signal"])
-        g.abort()
+        g.pause()
         return Sum(temp)
     return monitor
 

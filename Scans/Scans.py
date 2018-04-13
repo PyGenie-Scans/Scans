@@ -13,7 +13,9 @@ from abc import ABCMeta, abstractmethod
 from collections import Iterable, OrderedDict
 import numpy as np
 from six import add_metaclass
+import six
 from .Monoid import ListOfMonoids, Monoid
+from .Detector import DetectorManager
 
 try:
     # pylint: disable=import-error
@@ -71,6 +73,13 @@ class Scan(object):
     subclasses."""
 
     defaults = None
+
+    def _normalise_detector(self, detector):
+        if not detector:
+            detector = self.defaults.detector
+        if not isinstance(detector, DetectorManager):
+            detector = DetectorManager(detector)
+        return detector
 
     @abstractmethod
     def map(self, func):
@@ -135,8 +144,7 @@ class Scan(object):
             raise RuntimeError("Cannot start scan while already in a run!" +
                                " Current state is: " + str(g.get_runstate()))
 
-        if not detector:
-            detector = self.defaults.detector
+        detector = self._normalise_detector(detector)
         axis = NBPlot()
 
         xs = []
@@ -144,11 +152,12 @@ class Scan(object):
 
         action_remainder = None
         try:
-            with open(self.defaults.log_file(), "w") as logfile:
+            with open(self.defaults.log_file(), "w") as logfile, \
+                 detector(self, **kwargs) as detect:
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
-                    value = detector(**kwargs)
+                    value = detect(**kwargs)
                     if isinstance(value, float):
                         value = Average(value)
                     if position in xs:
@@ -159,8 +168,12 @@ class Scan(object):
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
                     axis.set_xlabel(label)
-                    rng = [1.05*self.min() - 0.05 * self.max(),
-                           1.05*self.max() - 0.05 * self.min()]
+                    if isinstance(self.min(), tuple):
+                        rng = [1.05*self.min()[0] - 0.05 * self.max()[0],
+                               1.05*self.max()[0] - 0.05 * self.min()[0]]
+                    else:
+                        rng = [1.05*self.min() - 0.05 * self.max(),
+                               1.05*self.max() - 0.05 * self.min()]
                     axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
@@ -356,8 +369,7 @@ class ProductScan(Scan):
             raise RuntimeError("Cannot start scan while already in a run!" +
                                " Current state is: " + str(g.get_runstate()))
 
-        if not detector:
-            detector = self.defaults.detector
+        detector = self._normalise_detector(detector)
         axis = NBPlot()
 
         xs = []
@@ -369,9 +381,10 @@ class ProductScan(Scan):
 
         action_remainder = None
         try:
-            with open(self.defaults.log_file(), "w") as logfile:
+            with open(self.defaults.log_file(), "w") as logfile, \
+                 detector(self) as detect:
                 for x in self:
-                    value = detector(**kwargs)
+                    value = detect(**kwargs)
 
                     keys = list(x.keys())
                     keys[1] = keys[1]
@@ -400,14 +413,13 @@ class ProductScan(Scan):
                     rng = [1.05*miny - 0.05 * maxy,
                            1.05*maxy - 0.05 * miny]
                     axis.set_ylim(rng[0], rng[1])
-                    nvalues = np.array([[float(z) for z in row]
-                                        for row in values])
                     axis.pcolor(
                         self._estimate_locations(xs, len(self.inner),
                                                  minx, maxx),
                         self._estimate_locations(ys, len(self.outer),
                                                  miny, maxy),
-                        nvalues)
+                        np.array([[float(z) for z in row]
+                                  for row in values]))
                     if action:
                         action_remainder = action(xs, values,
                                                   axis)
@@ -442,7 +454,7 @@ class ParallelScan(Scan):
         self.defaults = self.first.defaults
 
     def __iter__(self):
-        for x, y in zip(self.first, self.second):
+        for x, y in six.moves.zip(self.first, self.second):
             yield merge_dicts(x, y)
 
     def __repr__(self):

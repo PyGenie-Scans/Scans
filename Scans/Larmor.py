@@ -19,6 +19,7 @@ try:
 except ImportError:
     from .Mocks import lm
 from .Defaults import Defaults
+from .Detector import dae_periods
 from .Monoid import Polarisation, Average, MonoidList
 from .Util import make_scan
 
@@ -29,12 +30,13 @@ class Larmor(Defaults):
     """
 
     @staticmethod
+    @dae_periods()
     def detector(**kwargs):
-        g.begin()
+        g.resume()
         g.waitfor(**kwargs)
         temp = sum(g.get_spectrum(4)["signal"])
         base = sum(g.get_spectrum(1)["signal"])
-        g.abort()
+        g.pause()
         return Average(temp*100, count=base)
 
     @staticmethod
@@ -48,28 +50,7 @@ class Larmor(Defaults):
         return "Larmor()"
 
 
-def full_pol(**kwargs):
-    """
-    Get the up and down counts as a function of the
-    time of flight channel
-    """
-    lm.flipper1(1)
-    g.waitfor_move()
-    g.begin()
-    g.waitfor(**kwargs)
-    ups = sum(g.get_spectrum(11, 1)["signal"])
-    ups += sum(g.get_spectrum(12, 1)["signal"])
-    g.abort()
-    lm.flipper1(0)
-    g.waitfor_move()
-    g.begin()
-    g.waitfor(**kwargs)
-    down = sum(g.get_spectrum(11, 2)["signal"])
-    down += sum(g.get_spectrum(12, 2)["signal"])
-    g.abort()
-    return (ups, down)
-
-
+@dae_periods(lm.setuplarmor_echoscan, lambda x: 2*len(x))
 def pol_measure(**kwargs):
     """
     Get a single polarisation measurement

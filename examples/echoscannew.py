@@ -40,10 +40,7 @@ def echoscan_axis(axis, startval, endval, npoints, frms, rtitle, save=False):
 
     currents = scan(axis, start=startval, stop=endval, count=npoints)
 
-    lm.setuplarmor_echoscan()
     gen.change(title=rtitle)
-    gen.change(nperiods=len(currents)*2)
-    gen.begin(paused=1)
     result = currents.fit(PeakFit(0.3), frames=frms, detector=pol_measure)
     if save:
         gen.end()
