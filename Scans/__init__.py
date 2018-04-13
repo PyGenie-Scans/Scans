@@ -30,3 +30,7 @@ elif "ZOOM" in host:
 else:
     from .Instrument import scan, THETA, TWO_THETA, pol_measure  # noqa: F403,F401,E501
     _all += ["scan", "THETA", "TWO_THETA", "pol_measure"]
+
+# pylint: disable=wrong-import-position
+from .Spec import ascan, dscan  # noqa: F403,F401,E501
+_all += ["ascan", "dscan"]
