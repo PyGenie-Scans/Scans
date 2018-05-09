@@ -31,7 +31,7 @@ g.cset = cset
 
 instrument = {"theta": 0, "two_theta": 0}
 
-g.get_blocks = lambda: instrument.keys()
+g.get_blocks = instrument.keys
 
 
 def set_motion(name):

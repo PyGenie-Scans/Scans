@@ -30,7 +30,8 @@ class MockInstrument(Defaults):
         print("Taking a count at theta=%0.2f and two theta=%0.2f" %
               (g.cget("theta")["value"], g.cget("two_theta")["value"]))
         return (1+np.cos(g.cget("theta")["value"])) * \
-            np.sqrt(g.cget("theta")["value"]) + g.cget("two_theta")["value"] ** 2 + \
+            np.sqrt(g.cget("theta")["value"]) + \
+            g.cget("two_theta")["value"] ** 2 + \
             0.05 * np.random.rand()
 
     @staticmethod
