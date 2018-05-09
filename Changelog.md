@@ -12,6 +12,9 @@ v0.3
   - Added SPEC compatability layer with functions ascan and dscan.
 - Plotting
   - Fix plotting of Parallel Scans
+- Larmor
+  - Save user logs in proper user directory
+  - Set user directory on Load
 
 v0.2
 ----
