@@ -51,17 +51,18 @@ class Larmor(Defaults):
 
 
 def get_user_dir():
+    """Move to the current user directory"""
     import os
     import os.path
     import six
-    BASE = r"U:/Users/"
+    base = r"U:/Users/"
     while True:
-        user = six.input("Enter the name of the user directory: ")
-        if os.path.isdir(os.path.join(BASE, user)):
+        user = six.moves.input("Enter the name of the user directory: ")
+        if os.path.isdir(os.path.join(base, user)):
             break
         print("""Directory {} not found.  Please create the directory or name
-        a different directory.""".format(os.path.join(BASE, user)))
-    os.chdir(os.path.join(BASE, user))
+        a different directory.""".format(os.path.join(base, user)))
+    os.chdir(os.path.join(base, user))
 
 
 get_user_dir()

@@ -13,7 +13,8 @@ from .Util import make_scan
 from .Defaults import Defaults
 from .Monoid import Polarisation, MonoidList
 from .Scans import estimate
-from .Mocks import THETA, TWO_THETA
+from .Motion import populate
+from .Mocks import g
 
 
 class MockInstrument(Defaults):
@@ -27,9 +28,10 @@ class MockInstrument(Defaults):
         from time import sleep
         sleep(estimate(**kwargs))
         print("Taking a count at theta=%0.2f and two theta=%0.2f" %
-              (THETA(), TWO_THETA()))
-        return (1+np.cos(THETA())) * \
-            np.sqrt(THETA()) + TWO_THETA() ** 2 + 0.05 * np.random.rand()
+              (g.cget("theta")["value"], g.cget("two_theta")["value"]))
+        return (1+np.cos(g.cget("theta")["value"])) * \
+            np.sqrt(g.cget("theta")["value"]) + g.cget("two_theta")["value"] ** 2 + \
+            0.05 * np.random.rand()
 
     @staticmethod
     def log_file():
@@ -39,6 +41,7 @@ class MockInstrument(Defaults):
         return "MockInstrument()"
 
 
+populate()
 scan = make_scan(MockInstrument())
 
 
@@ -50,7 +53,7 @@ def pol_measure(**kwargs):
 
     results = []
     for freq, width in zip([4, 6, 8, 4], [9, 9, 9, 3]):
-        x = THETA()
+        x = g.cget("theta")["value"]
         pol = np.exp(-((x - 1)/width)**2)*np.cos(freq * (x - 1))
 
         ups = (1 + pol)*50

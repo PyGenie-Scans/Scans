@@ -142,8 +142,11 @@ class BlockMotion(Motion):
 def populate():
     """Create Motion objects in the GLOBAL namespace for each
     block registered with IBEX."""
-    # pylint: disable=import-error
-    from genie_python import genie as g
+    try:
+        # pylint: disable=import-error
+        from genie_python import genie as g
+    except ImportError:
+        from .Mocks import g
     if g and g.get_blocks() is None:
         return
     for i in g.get_blocks():
