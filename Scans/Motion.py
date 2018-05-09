@@ -128,8 +128,11 @@ class BlockMotion(Motion):
       A string containing the name of the ibex block to control
     """
     def __init__(self, block):
-        # pylint: disable=import-error
-        from genie_python import genie as g
+        try:
+            # pylint: disable=import-error
+            from genie_python import genie as g
+        except ImportError:
+            from .Mocks import g
         Motion.__init__(self,
                         lambda: g.cget(block)["value"],
                         lambda x: g.cset(block, x),

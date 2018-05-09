@@ -15,6 +15,10 @@ v0.3
 - Larmor
   - Save user logs in proper user directory
   - Set user directory on Load
+- Scanning
+  - Add support for scanning on blocks given in strings
+- Mocks
+  - Add cget and cset to mock genie_python
 
 v0.2
 ----

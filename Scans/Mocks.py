@@ -16,6 +16,18 @@ g.get_period = lambda: g.period
 g.get_frames = lambda: g.frames
 
 
+def cget(block):
+    return {"value": instrument[block]}
+
+
+def cset(block, value):
+    instrument[block] = value
+
+
+g.cget = cget
+g.cset = cset
+
+
 instrument = {"theta": 0, "two_theta": 0}
 
 
