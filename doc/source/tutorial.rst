@@ -191,7 +191,7 @@ Plot Motor Scan
   >>> scan(True, start=0, stop=10, count=5)
   Traceback (most recent call last):
       ...
-  TypeError: Cannot run scan on axis of type <type 'bool'>
+  TypeError: Cannot run scan on axis True. Try a string or a motion object instead.
 
 Perform Fits
 ------------
