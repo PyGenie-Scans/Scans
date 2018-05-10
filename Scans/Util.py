@@ -5,6 +5,7 @@ module should ever need to be called by the end user.
 """
 import numpy as np
 from .Scans import SimpleScan
+from .Motion import Motion, BlockMotion
 
 
 def get_points(
@@ -113,6 +114,15 @@ def make_scan(defaults):
         spacing.
 
         """
+        if isinstance(motion, Motion):
+            pass
+        elif isinstance(motion, str):
+            motion = BlockMotion(motion)
+        else:
+            raise TypeError(
+                "Cannot run scan on axis {}. Try a string or a "
+                "motion object instead.".format(motion))
+
         points = get_points(motion(), **kwargs)
 
         for point in points:

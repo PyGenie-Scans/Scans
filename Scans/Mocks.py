@@ -7,7 +7,6 @@ on development or testing machines.
 from time import sleep
 from mock import Mock
 import numpy as np
-from .Motion import Motion
 
 g = Mock()
 g.period = 0
@@ -16,7 +15,23 @@ g.get_period = lambda: g.period
 g.get_frames = lambda: g.frames
 
 
+def cget(block):
+    """Fake cget for the fake genie_python"""
+    return {"value": instrument[block]}
+
+
+def cset(block, value):
+    """Fake cset for the fake genie_python"""
+    instrument[block] = value
+
+
+g.cget = cget
+g.cset = cset
+
+
 instrument = {"theta": 0, "two_theta": 0}
+
+g.get_blocks = instrument.keys
 
 
 def set_motion(name):
@@ -29,21 +44,12 @@ def set_motion(name):
     return inner
 
 
-def mock_motion(name):
-    """Create a motion object for the mcok instrument"""
-    return Motion(lambda: instrument[name], set_motion(name), name)
-
-
-THETA = mock_motion("theta")
-TWO_THETA = mock_motion("two_theta")
-
-
 def fake_spectrum(channel, period):
     """Create a fake intensity spectrum."""
     if channel == 1:
         return {"signal": np.zeros(1000)+1}
     x = np.arange(1000)
-    base = np.cos(0.01*(THETA()+1.05)*x)+1
+    base = np.cos(0.01*(instrument["theta"]+1.05)*x)+1
     if period % 2 == 0:
         base = 2 - base
     base *= 100000

@@ -43,11 +43,29 @@ class Larmor(Defaults):
     def log_file():
         from datetime import datetime
         now = datetime.now()
-        return "U:/larmor_scan_{}_{}_{}_{}_{}_{}.dat".format(
+        return "larmor_scan_{}_{}_{}_{}_{}_{}.dat".format(
             now.year, now.month, now.day, now.hour, now.minute, now.second)
 
     def __repr__(self):
         return "Larmor()"
+
+
+def get_user_dir():
+    """Move to the current user directory"""
+    import os
+    import os.path
+    import six
+    base = r"U:/Users/"
+    while True:
+        user = six.moves.input("Enter the name of the user directory: ")
+        if os.path.isdir(os.path.join(base, user)):
+            break
+        print("""Directory {} not found.  Please create the directory or name
+        a different directory.""".format(os.path.join(base, user)))
+    os.chdir(os.path.join(base, user))
+
+
+get_user_dir()
 
 
 @dae_periods(lm.setuplarmor_echoscan, lambda x: 2*len(x))

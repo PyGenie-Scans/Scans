@@ -66,14 +66,14 @@ Functionality
 Examples
 ========
 
-  These are examples of some basic scans that the user might perform on
-  the high level interface.  The examples have run on a 6 defined in a
-  later section.
+  These are examples of some basic scans that the user might perform
+  on the high level interface.  The examples have run on a virtual
+  instrument defined in a later section.
 
   This documentation also serves as a testing basis to ensure that this
   the code always matches the functionality declared here.  The lines
   below are just some adminstative details to ensure that the tests
-  can run on a computer that isn't attached to a beamline
+  can run on a computer that isn't attached to a beam-line.
 
   >>> import matplotlib
   >>> # matplotlib.use("Agg")
@@ -176,6 +176,22 @@ Plot Motor Scan
       ...
   RuntimeError: Position 2.5 is above upper limit 2 of motor theta
   >>> THETA.high = None
+
+  If there is no Motion object for a specific axis, the user can give
+  the name in a string and use that.  If the axis isn't a string or a
+  Motion object, the scan will fail.
+
+  >>> scan("theta", start=0, stop=10, stride=2).plot(frames=5)
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  Taking a count at theta=4.00 and two theta=0.00
+  Taking a count at theta=6.00 and two theta=0.00
+  Taking a count at theta=8.00 and two theta=0.00
+  Taking a count at theta=10.00 and two theta=0.00
+  >>> scan(True, start=0, stop=10, count=5)
+  Traceback (most recent call last):
+      ...
+  TypeError: Cannot run scan on axis True. Try a string or a motion object instead.
 
 Perform Fits
 ------------
