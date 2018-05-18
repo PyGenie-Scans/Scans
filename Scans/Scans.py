@@ -16,6 +16,7 @@ from six import add_metaclass
 import six
 from .Monoid import ListOfMonoids, Monoid
 from .Detector import DetectorManager
+from .Fit import Fit
 
 try:
     # pylint: disable=import-error
@@ -207,6 +208,10 @@ class Scan(object):
         the scan and the fitting parameters are returned.
 
         """
+
+        if not isinstance(fit, Fit):
+            raise TypeError("Cannot fit with {}. Perhaps you meant to call it"
+                            " as a function?".format(fit))
 
         result = self.plot(action=fit.fit_plot_action(), **kwargs)
 
