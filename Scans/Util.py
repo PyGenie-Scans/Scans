@@ -108,10 +108,69 @@ def make_scan(defaults):
 
     """
     def scan(motion, **kwargs):
-        """scan is the primary command that users will call to create scans.
-        The pv parameter should be a string containing the name of the
-        motor to be moved.  The keyword arguments decide the position
-        spacing.
+        """scan establishes the setup for performing a measurement scan.
+
+        Examples
+        --------
+
+        >>> scan(TRANSLATION, start=-5, stop=5, stride=0.1).plot(frames=50)
+
+        This will scan the translation access from -5 to 5 inclusive
+        in steps of 0.1.  At each point, the a measurement will be
+        taken for 50 frames and plotted.
+
+        As a different example,
+
+        >>> s = scan(COARSEZ, before=-50, step=5, gaps=20)
+
+        This will create a scan on the CoarseZ axis, starting at 50 mm
+        below the current position and continuing in 5 mm increments
+        for another 20 measurements (for a total of 21).  Note that
+        while the scan has been created, nothing will happen until we
+        ask the scan to act.
+
+        >>> result = s.fit(PeakFit(20), uamps=0.1)
+
+        This will perform a 0.1 uamp measurement at each point on the
+        scan and find the peak (with a presumed width of 20 mm).  At
+        the end of the measurement, the `result` variable will hold
+        the position of the observed peak.
+
+        The scan function itself has one mandatory parameter `motion`
+        but will require another three keyword parameters to define
+        the range of the scan.  In the example above, the motion
+        parameter was TRANSLATION and the keyword parameters were
+        start, stop, and stride.  Any set of three position parameters
+        that uniquely define a range of motions will be accepted.
+
+        PARAMETERS
+        ----------
+        motion
+          The axis on which to perform the scan
+        start
+          An absolute starting position for the scan.
+        stop
+          An absolute ending position for the scan
+        before
+          A relative starting position for the scan.
+        after
+          A relative ending position for the scan
+        count
+          The number of points to measure
+        gaps
+          The number of steps to take
+        step
+          The absolue step size.  The final position may be skipped if
+          it is not an integer number of steps from the starting
+          position.
+        stride
+          The approximate step size.  The scan may shrink this step size
+          to ensure that the final point is still included in the scan.
+
+        Returns
+        -------
+        Scan
+          A scan object that will run through the requested points.
 
         """
         if isinstance(motion, Motion):

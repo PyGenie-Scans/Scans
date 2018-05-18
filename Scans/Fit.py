@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """The Fit module holds the Fit class, which defines common parameters
 for fitting routines.  It also contains implementations of some common
 fits (i.e. Linear and Gaussian).
@@ -148,16 +149,26 @@ class PolyFit(Fit):
 
 
 class PeakFit(Fit):
-    """
-    A simple peak-finding fitter.
+    """A simple peak-finding fitter.
 
-    This is a simple class that finds the highest point in the data set.
-    It will not find secondary peaks.
+    This is a simple class that finds the highest point in the data
+    set.  It will not find secondary peaks.  It also requires a width
+    parameter to give the size of the peak.  For example,
+
+    >>> scan(TRANSLATION, start=-20, stop=20, step=1).Fit(PeakFit(5), uamps=1)
+
+    Will use all of the points within 5 mm of the peak when fitting
+    the quadratic.
+
     """
-    def __init__(self, window=0.5):
+    def __init__(self, window=None):
+        if window is None:
+            raise RuntimeError(
+                "PeakFit you to pass it requires a ± window size over which to"
+                " fit the quadratic.  For example, PeakFit(5)")
         self._window = window
         self._fit = np.zeros(3)
-        Fit.__init__(self, 2*window+1, "Peak")
+        Fit.__init__(self, 3, "Peak")
 
     def _make_window(self, x, center):
         return np.abs(x-center) < self._window
