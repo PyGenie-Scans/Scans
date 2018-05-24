@@ -176,7 +176,7 @@ class PeakFit(Fit):
     def fit(self, x, y):
         x = np.array(x)
         y = np.array(y)
-        base = np.argmax(y)
+        base = np.nanargmax(y)
         window = self._make_window(x, x[base])
         fit = np.polyfit(x[window], y[window], 2)
         self._fit = fit
