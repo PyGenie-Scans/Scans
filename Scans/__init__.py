@@ -19,8 +19,8 @@ _all = Fit.__all__[:]
 if "LARMOR" in host:
     from .Motion import populate
     populate()
-    from .Larmor import scan
-    _all += ["populate", "scan"]
+    from .Larmor import scan, pol_measure, fast_pol_measure
+    _all += ["populate", "scan", "pol_measure", "fast_pol_measure"]
 elif "ZOOM" in host:
     from .Motion import populate
     populate()
