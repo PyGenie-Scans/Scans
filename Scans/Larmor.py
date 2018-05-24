@@ -114,10 +114,10 @@ def pol_measure(**kwargs):
         for idx, slc in enumerate(slices):
             ups = Average(
                 np.sum(spec1["signal"][slc])*100.0,
-                np.sum(mon1["signal"][slc])*100.0)
+                np.sum(mon1["signal"])*100.0)
             down = Average(
                 np.sum(spec2["signal"][slc])*100.0,
-                np.sum(mon2["signal"][slc])*100.0)
+                np.sum(mon2["signal"])*100.0)
             pols[idx] += Polarisation(ups, down)
     return MonoidList(pols)
 
