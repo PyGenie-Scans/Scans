@@ -110,6 +110,7 @@ def pol_measure(**kwargs):
     return MonoidList(pols)
 
 
+@dae_periods()
 def fast_pol_measure(**kwargs):
     """
     Get a single polarisation measurement
@@ -134,7 +135,6 @@ def fast_pol_measure(**kwargs):
             ups = Average(
                 np.sum(spec1["signal"][slc])*100.0,
                 np.sum(mon1["signal"])*100.0)
-            # print(idx, slc, ups, down, ups.err(), down.err())
             pols[idx] += ups
     return MonoidList(pols)
 
