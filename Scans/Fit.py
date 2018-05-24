@@ -157,7 +157,7 @@ class PeakFit(Fit):
     def __init__(self, window=0.5):
         self._window = window
         self._fit = np.zeros(3)
-        Fit.__init__(self, 2*window+1, "Peak")
+        Fit.__init__(self, 3, "Peak")
 
     def _make_window(self, x, center):
         return np.abs(x-center) < self._window
@@ -165,7 +165,7 @@ class PeakFit(Fit):
     def fit(self, x, y):
         x = np.array(x)
         y = np.array(y)
-        base = np.argmax(y)
+        base = np.nanargmax(y)
         window = self._make_window(x, x[base])
         fit = np.polyfit(x[window], y[window], 2)
         self._fit = fit
