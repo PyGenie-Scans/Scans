@@ -121,6 +121,7 @@ def pol_measure(**kwargs):
             pols[idx] += Polarisation(ups, down)
     return MonoidList(pols)
 
+
 def fast_pol_measure(**kwargs):
     """
     Get a single polarisation measurement
@@ -148,6 +149,6 @@ def fast_pol_measure(**kwargs):
             # print(idx, slc, ups, down, ups.err(), down.err())
             pols[idx] += ups
     return MonoidList(pols)
- 
+
 
 scan = make_scan(Larmor())
