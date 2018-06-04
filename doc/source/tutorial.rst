@@ -286,21 +286,30 @@ Perform complex scans
   On the other hand, if the user is unsure about the proper sample
   alignment, they may want to investigate theta and two-theta separately
 
-  >>> th = scan(THETA, start=0, stop=1, stride=0.5)
-  >>> two_th = scan(TWO_THETA, start=0, stop=3, stride=1.0)
-  >>> (th * two_th).plot(frames=5, save="2d.png")
+  >>> th = scan(THETA, start=0, stop=12, stride=0.5)
+  >>> two_th = scan(TWO_THETA, start=0, stop=2, stride=0.5)
+  >>> (th * two_th).plot(frames=5, save="2d.png") # doctest: +ELLIPSIS
   Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.00 and two theta=0.50
   Taking a count at theta=0.00 and two theta=1.00
+  Taking a count at theta=0.00 and two theta=1.50
   Taking a count at theta=0.00 and two theta=2.00
-  Taking a count at theta=0.00 and two theta=3.00
   Taking a count at theta=0.50 and two theta=0.00
+  Taking a count at theta=0.50 and two theta=0.50
   Taking a count at theta=0.50 and two theta=1.00
+  Taking a count at theta=0.50 and two theta=1.50
   Taking a count at theta=0.50 and two theta=2.00
-  Taking a count at theta=0.50 and two theta=3.00
-  Taking a count at theta=1.00 and two theta=0.00
-  Taking a count at theta=1.00 and two theta=1.00
-  Taking a count at theta=1.00 and two theta=2.00
-  Taking a count at theta=1.00 and two theta=3.00
+  ...
+  Taking a count at theta=11.50 and two theta=0.00
+  Taking a count at theta=11.50 and two theta=0.50
+  Taking a count at theta=11.50 and two theta=1.00
+  Taking a count at theta=11.50 and two theta=1.50
+  Taking a count at theta=11.50 and two theta=2.00
+  Taking a count at theta=12.00 and two theta=0.00
+  Taking a count at theta=12.00 and two theta=0.50
+  Taking a count at theta=12.00 and two theta=1.00
+  Taking a count at theta=12.00 and two theta=1.50
+  Taking a count at theta=12.00 and two theta=2.00
 
   .. figure:: ../../2d.png
      :alt: 2D scan image
@@ -310,6 +319,7 @@ Perform complex scans
   performed twice and the results combined.  This can allow for
   iterative scanning to improve statistics.
 
+  >>> TWO_THETA(3.0)
   >>> th = scan(THETA, start=0, stop=1, stride=0.5)
   >>> (th + th + th).plot(frames=5)
   Taking a count at theta=0.00 and two theta=3.00
