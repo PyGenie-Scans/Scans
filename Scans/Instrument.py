@@ -23,6 +23,8 @@ class MockInstrument(Defaults):
     used for testing purposes.
     """
 
+    scan_count = 0
+
     @staticmethod
     def detector(**kwargs):
         from time import sleep
@@ -34,9 +36,9 @@ class MockInstrument(Defaults):
             g.cget("two_theta")["value"] ** 2 + \
             0.05 * np.random.rand()
 
-    @staticmethod
-    def log_file():
-        return "mock_scan.dat"
+    def log_file(self):
+        self.scan_count += 1
+        return "mock_scan_{:02}.dat".format(self.scan_count)
 
     def __repr__(self):
         return "MockInstrument()"

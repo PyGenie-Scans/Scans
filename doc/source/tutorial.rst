@@ -97,20 +97,23 @@ Plot Motor Scan
   .. image:: plot_example.png
 
   The results of all scans are saved to a log file.  The location of
-  the log is set by the instrument scientist.  In the case of the
-  example instrument being used in this example, the log is always
-  "mock_scan.dat".  On an actual instrument, the file name will change
-  for each scan, to ensure that all of the data is saved.
+  the log is set by the instrument scientist.  The data from the scan
+  above can be seen below.
 
-  >>> infile = open("mock_scan.dat", "r")
-  >>> lines = infile.readlines()
-  >>> infile.close()
-  >>> for line in lines: print(line.split("\t")[0])
-  0.0
-  0.5
-  1.0
-  1.5
-  2.0
+  .. literalinclude:: ../../mock_scan_01.dat
+     :caption: mock_scan_01.dat
+
+  .. test
+
+     >>> infile = open("mock_scan_01.dat", "r")
+     >>> lines = infile.readlines()
+     >>> infile.close()
+     >>> for line in lines: print(line.split("\t")[0])
+     0.0
+     0.5
+     1.0
+     1.5
+     2.0
 
 
   The ``stride`` option gives an appoximate step size, but forces ensures
