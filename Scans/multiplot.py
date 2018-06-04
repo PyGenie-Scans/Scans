@@ -41,6 +41,8 @@ class ProcessPlotter(object):
         self.axis = None
         self.rehome = rehome
 
+        self._colorbar = None
+
     def poll_draw(self):
         """
         Update the graph with the latest commands
@@ -61,6 +63,11 @@ class ProcessPlotter(object):
                 if command[0] == "clf":
                     self.axis.cla()
                     continue
+                elif command[0] == "pcolor":
+                    temp = self.axis.pcolor(*command[1], **command[2])
+                    if self._colorbar:
+                        self._colorbar.remove()
+                    self._colorbar = plt.colorbar(temp)
                 if hasattr(self.axis, command[0]):
                     getattr(self.axis, command[0])(*command[1], **command[2])
                 elif hasattr(self.fig, command[0]):
