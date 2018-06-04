@@ -102,11 +102,40 @@ def pol_measure(**kwargs):
         for idx, slc in enumerate(slices):
             ups = Average(
                 np.sum(spec1["signal"][slc])*100.0,
-                np.sum(mon1["signal"][slc])*100.0)
+                np.sum(mon1["signal"])*100.0)
             down = Average(
                 np.sum(spec2["signal"][slc])*100.0,
-                np.sum(mon2["signal"][slc])*100.0)
+                np.sum(mon2["signal"])*100.0)
             pols[idx] += Polarisation(ups, down)
+    return MonoidList(pols)
+
+
+@dae_periods()
+def fast_pol_measure(**kwargs):
+    """
+    Get a single polarisation measurement
+    """
+    slices = [slice(222, 666), slice(222, 370), slice(370, 518),
+              slice(518, 666)]
+
+    i = g.get_period()
+
+    g.change(period=i+1)
+    g.waitfor_move()
+    gfrm = g.get_frames()
+    g.resume()
+    g.waitfor(frames=gfrm+kwargs["frames"])
+    g.pause()
+
+    pols = [Average.zero() for _ in slices]
+    for channel in [11, 12]:
+        mon1 = g.get_spectrum(1, i+1)
+        spec1 = g.get_spectrum(channel, i+1)
+        for idx, slc in enumerate(slices):
+            ups = Average(
+                np.sum(spec1["signal"][slc])*100.0,
+                np.sum(mon1["signal"])*100.0)
+            pols[idx] += ups
     return MonoidList(pols)
 
 
