@@ -84,7 +84,7 @@ Plot Motor Scan
   0.3.
 
   >>> from Scans import *
-  >>> scan(THETA, start=0, stop=2, stride=0.6).plot(seconds=1)
+  >>> scan(THETA, start=0, stop=2, stride=0.6).plot(seconds=1, save="plot_example.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -94,7 +94,8 @@ Plot Motor Scan
   The ``save`` argument allows the figure to be saved to a file.
   Otherwise, the screen will show the plot interactively.
 
-  .. image:: plot_example.png
+  .. image:: ../../plot_example.png
+     :alt: Example plot
 
   The results of all scans are saved to a log file.  The location of
   the log is set by the instrument scientist.  The data from the scan
@@ -200,7 +201,7 @@ Perform Fits
   Performing a fit on a measurement is merely a modification of
   performing the plot
 
-  >>> fit = scan(THETA, start=0, stop=2, stride=0.6).fit(Linear, frames=5)
+  >>> fit = scan(THETA, start=0, stop=2, stride=0.6).fit(Linear, frames=5, save="linear.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -213,11 +214,11 @@ Perform Fits
   array with the slope and intercept.  The fit is also plotted over the
   original graph when finished.
 
-  [file:fitplot.png]
+  .. image:: ../../linear.png
 
   We can also plot the same scan against a Gaussian
 
-  >>> fit = scan(THETA, start=0, stop=2, count=11).fit(Gaussian, frames=5)
+  >>> fit = scan(THETA, start=0, stop=2, count=11).fit(Gaussian, frames=5, save="gaussian.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.20 and two theta=0.00
   Taking a count at theta=0.40 and two theta=0.00
@@ -232,12 +233,15 @@ Perform Fits
   >>> abs(fit["center"] - 1.0) < 0.2
   True
 
+  .. figure:: ../../gaussian.png
+     :alt: Fitting a gaussian
+
   There is a simple peak finder as well.  It finds the largest data
   point and then fits the local neighbourhood of points to a parabola
   to refine that point.  The width of that neighbourhood is the
   parameter to PeakFit.
 
-  >>> fit = scan(THETA, start=0, stop=2, count=11).fit(PeakFit(0.7), frames=5)
+  >>> fit = scan(THETA, start=0, stop=2, count=11).fit(PeakFit(0.7), frames=5, save="peak.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.20 and two theta=0.00
   Taking a count at theta=0.40 and two theta=0.00
@@ -251,6 +255,9 @@ Perform Fits
   Taking a count at theta=2.00 and two theta=0.00
   >>> abs(fit["peak"] - 1.0) < 0.1
   True
+
+  .. figure:: ../../peak.png
+     :alt: Fitting a peak
 
 
 Perform complex scans
@@ -266,19 +273,22 @@ Perform complex scans
 
   >>> th= scan(THETA, start=0, stop=1, stride=0.3)
   >>> two_th= scan(TWO_THETA, start=0, stop=2, stride=0.6)
-  >>> (th& two_th).plot(frames=10)
+  >>> (th& two_th).plot(frames=10, save="locked.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.25 and two theta=0.50
   Taking a count at theta=0.50 and two theta=1.00
   Taking a count at theta=0.75 and two theta=1.50
   Taking a count at theta=1.00 and two theta=2.00
 
+  .. figure:: ../../locked.png
+     :alt: Scan of th and two_th locked together
+
   On the other hand, if the user is unsure about the proper sample
   alignment, they may want to investigate theta and two-theta separately
 
   >>> th = scan(THETA, start=0, stop=1, stride=0.5)
   >>> two_th = scan(TWO_THETA, start=0, stop=3, stride=1.0)
-  >>> (th * two_th).plot(frames=5)
+  >>> (th * two_th).plot(frames=5, save="2d.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.00 and two theta=1.00
   Taking a count at theta=0.00 and two theta=2.00
@@ -291,6 +301,9 @@ Perform complex scans
   Taking a count at theta=1.00 and two theta=1.00
   Taking a count at theta=1.00 and two theta=2.00
   Taking a count at theta=1.00 and two theta=3.00
+
+  .. figure:: ../../2d.png
+     :alt: 2D scan image
 
   Two scans can also be run one after the other.  If there are any
   overlapping points, then the measurement at that location will be
