@@ -68,16 +68,13 @@ Examples
 
   These are examples of some basic scans that the user might perform
   on the high level interface.  The examples have run on a virtual
-  instrument defined in a later section.
+  instrument defined in a later section. This documentation also
+  serves as a testing basis to ensure that this the code always
+  matches the functionality declared here.
 
-  This documentation also serves as a testing basis to ensure that this
-  the code always matches the functionality declared here.  The lines
-  below are just some adminstative details to ensure that the tests
-  can run on a computer that isn't attached to a beam-line.
-
-  >>> import matplotlib
-  >>> # matplotlib.use("Agg")
-  >>> from Scans import *
+  .. comment
+     >>> import matplotlib
+     >>> # matplotlib.use("Agg")
 
 Plot Motor Scan
 ---------------
@@ -86,6 +83,7 @@ Plot Motor Scan
   intensity as the motor moves from 0 to 2 inclusively in steps /near/
   0.3.
 
+  >>> from Scans import *
   >>> scan(THETA, start=0, stop=2, stride=0.6).plot(seconds=1)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
