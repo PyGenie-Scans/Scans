@@ -212,7 +212,7 @@ Perform Fits
 
   [file:fitplot.png]
 
-  We can also plot the same scan against a gaussian
+  We can also plot the same scan against a Gaussian
 
   >>> fit = scan(THETA, start=0, stop=2, count=11).fit(Gaussian, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
