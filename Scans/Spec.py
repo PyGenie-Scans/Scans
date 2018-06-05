@@ -5,6 +5,15 @@ from . import scan
 
 def ascan(motor, start, end, intervals, time):
     """A reimplementations of ascan from spec
+    
+    Example
+    -------
+    >>> ascan(COARSEZ, -20, 20, 40, -0.1)
+    
+    Scan the CoarseZ motor from position -20 to position 20
+    (inclusive) in 1 mm steps.  At each point, take measure for
+    0.1 microamps (about nine seconds). After the plot, the CoarseZ
+    motor will be at position 20.
 
     Parameters
     ----------
@@ -30,6 +39,15 @@ def ascan(motor, start, end, intervals, time):
 
 def dscan(motor, start, end, intervals, time):
     """A reimplementations of dscan from spec
+    
+    Example
+    -------
+    >>> dscan(COARSEZ, -20, 20, 40, -0.1)
+    
+    Scan the CoarseZ motor from 20 mm below the current position 
+    to position 20 mm above the current position (inclusive) in 1 mm steps.
+    At each point, take measure for 0.1 microamps (about nine seconds).
+    After the plot, the CoarseZ motor will move back to its original position.
 
     Parameters
     ----------
