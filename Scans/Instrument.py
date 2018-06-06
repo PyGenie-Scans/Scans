@@ -12,7 +12,6 @@ import numpy as np
 from .Util import make_scan
 from .Defaults import Defaults
 from .Monoid import Polarisation, MonoidList
-from .Scans import estimate
 from .Motion import populate
 from .Mocks import g
 
@@ -23,10 +22,10 @@ class MockInstrument(Defaults):
     used for testing purposes.
     """
 
+    scan_count = 0
+
     @staticmethod
     def detector(**kwargs):
-        from time import sleep
-        sleep(estimate(**kwargs))
         print("Taking a count at theta=%0.2f and two theta=%0.2f" %
               (g.cget("theta")["value"], g.cget("two_theta")["value"]))
         return (1+np.cos(g.cget("theta")["value"])) * \
@@ -34,9 +33,9 @@ class MockInstrument(Defaults):
             g.cget("two_theta")["value"] ** 2 + \
             0.05 * np.random.rand()
 
-    @staticmethod
-    def log_file():
-        return "mock_scan.dat"
+    def log_file(self):
+        self.scan_count += 1
+        return "mock_scan_{:02}.dat".format(self.scan_count)
 
     def __repr__(self):
         return "MockInstrument()"
@@ -46,11 +45,10 @@ populate()
 scan = make_scan(MockInstrument())
 
 
-def pol_measure(**kwargs):
+def pol_measure(**_):
     """
     Get a single polarisation measurement
     """
-    from time import sleep
 
     results = []
     for freq, width in zip([4, 6, 8, 4], [9, 9, 9, 3]):
@@ -62,6 +60,5 @@ def pol_measure(**kwargs):
         ups += np.sqrt(ups)*(2*np.random.rand()-1)
         down += np.sqrt(down)*(2*np.random.rand()-1)
         results.append(Polarisation(ups, down))
-    sleep(0.01*kwargs["frames"])
 
     return MonoidList(results)

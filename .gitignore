@@ -4,5 +4,5 @@
 *.png
 *.pyc
 /TAGS
-/mock_scan.dat
+/mock_scan*.dat
 /doc/build

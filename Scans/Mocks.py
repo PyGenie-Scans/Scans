@@ -4,7 +4,6 @@ This module creates mocks to handle classes that may not be available
 on development or testing machines.
 """
 
-from time import sleep
 from mock import Mock
 import numpy as np
 
@@ -55,7 +54,6 @@ def fake_spectrum(channel, period):
     base *= 100000
     base += np.sqrt(base) * (2 * np.random.rand(1000) - 1)
     base /= x
-    sleep(0.1)
     return {"signal": base}
 
 
