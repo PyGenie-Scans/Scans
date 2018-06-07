@@ -49,7 +49,7 @@ class DaePeriods(DetectorManager):
         self.period_function = period_function
         DetectorManager.__init__(self, f)
 
-    def __call__(self, scan, save, **kwargs):
+    def __call__(self, scan, save=True, **kwargs):
         self._pre_init()
         self._save = save
         if "title" in kwargs:
