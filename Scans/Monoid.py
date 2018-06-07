@@ -184,9 +184,6 @@ class MonoidList(Monoid):
     def __init__(self, values):
         self.values = values
 
-    def __float__(self):
-        return [float(x) for x in self.values]
-
     def zero(self):
         return [x.zero() for x in self.values]
 
