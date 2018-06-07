@@ -126,7 +126,7 @@ class Polarisation(Monoid):
     This monoid calculates the polarisation from the total of all of
     the up and down counts.
     """
-    def __init__(self, ups, downs):
+    def __init__(self, ups, downs=0):
         self.ups = ups
         self.downs = downs
 
