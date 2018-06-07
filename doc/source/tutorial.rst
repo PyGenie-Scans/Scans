@@ -167,6 +167,33 @@ Plot Motor Scan
   Taking a count at theta=3.50 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
 
+Motor Objects
+-------------
+
+  We've been using the motor object ``THETA``, but we haven't
+  discussed how it works.
+
+  >>> THETA()
+  4.0
+
+  Calling the object with no parameters returns the current position.
+  This position can be changed by giving a new value in the function
+
+  >>> THETA(3.0)
+  >>> THETA
+  theta is at 3.0
+
+  We can also perform some relative changes with Python's in place
+  operators.
+
+  >>> THETA += 1.5
+  >>> THETA
+  theta is at 4.5
+  >>> THETA -= 4
+  >>> THETA *= 2
+  >>> THETA
+  theta is at 1.0
+
   Soft limits can be placed on motors with the `low` and `high`
   properties.  Scans that attempt to exceed these values will throw an
   error.
