@@ -22,7 +22,7 @@ class Fit(object):
         self._title = title
 
     @abstractmethod
-    def fit(self, x, y):
+    def fit(self, x, y):  # pragma: no cover
         """The fit function takes arrays of independent and depedentend
         variables.  It returns a set of parameters in a format that is
         convenient for this specific object.
@@ -31,7 +31,7 @@ class Fit(object):
         return lambda i, j: None
 
     @abstractmethod
-    def get_y(self, x, fit):
+    def get_y(self, x, fit):  # pragma: no cover
         """get_y takes an array of independent variables and a set of model
         parameters and returns the expected dependent variables for
         those parameters
@@ -40,7 +40,7 @@ class Fit(object):
         return lambda i, j: None
 
     @abstractmethod
-    def readable(self, fit):
+    def readable(self, fit):  # pragma: no cover
         """Readable turns the implementation specific set of fit parameters
         into a human readable dictionary.
 
@@ -208,7 +208,7 @@ class CurveFit(Fit):
 
     @staticmethod
     @abstractmethod
-    def _model(xs, *args):
+    def _model(xs, *args):  # pragma: no cover
         """
         This is the mathematical model to be fit by the subclass
         """

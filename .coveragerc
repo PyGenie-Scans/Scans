@@ -1,5 +1,5 @@
 [run]
-branch = True
+# branch = True
 
 omit =
   # We can't test the actual instruments
@@ -12,3 +12,6 @@ exclude_lines =
   if __name__ == __main__:
   pass
   np.nan
+  pragma: no cover
+  __repr__
+  forever

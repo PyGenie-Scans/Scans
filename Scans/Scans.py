@@ -141,7 +141,7 @@ class Scan(object):
         import warnings
         warnings.simplefilter("ignore", UserWarning)
 
-        if g and g.get_runstate() != "SETUP":
+        if g and g.get_runstate() != "SETUP":  # pragma: no cover
             raise RuntimeError("Cannot start scan while already in a run!" +
                                " Current state is: " + str(g.get_runstate()))
 
@@ -182,7 +182,7 @@ class Scan(object):
                     if action:
                         action_remainder = action(xs, ys,
                                                   axis)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # pragma: no cover
             pass
         if save:
             axis.savefig(save)
@@ -209,7 +209,7 @@ class Scan(object):
 
         """
 
-        if not isinstance(fit, Fit):
+        if not isinstance(fit, Fit):  # pragma: no cover
             raise TypeError("Cannot fit with {}. Perhaps you meant to call it"
                             " as a function?".format(fit))
 
@@ -488,7 +488,9 @@ class ParallelScan(Scan):
         return (self.first.max(), self.second.max())
 
 
-class ForeverScan(Scan):
+#We can't test the forever scan by definition, hence the no cover
+#pragma
+class ForeverScan(Scan):  # pragma: no cover
     """
     ForeverScan repeats the same scan over and over again to improve
     the statistics until the user manually halts the scan.

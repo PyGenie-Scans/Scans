@@ -43,7 +43,7 @@ def set_motion(name):
     return inner
 
 
-def fake_spectrum(channel, period):
+def fake_spectrum(channel, period): #pragma: no cover
     """Create a fake intensity spectrum."""
     if channel == 1:
         return {"signal": np.zeros(1000)+1}

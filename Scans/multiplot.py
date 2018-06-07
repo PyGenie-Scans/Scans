@@ -16,7 +16,8 @@ if sys.executable == '':
     sys.executable = "C:/Instrument/Apps/Python/python.exe"
 
 
-class ProcessPlotter(object):
+# Use a no cover pragma since coverage can't see the other process
+class ProcessPlotter(object):  # pragma: no cover
     """
     This object maintains a separate a separate process at the OS level
     which manages a matplotlib plot. This is an incredibly stupid way
