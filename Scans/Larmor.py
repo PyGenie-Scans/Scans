@@ -30,7 +30,7 @@ class Larmor(Defaults):
     """
 
     @staticmethod
-    @dae_periods()
+    @dae_periods(lm.setuplarmor_transmission)
     def detector(**kwargs):
         g.resume()
         g.waitfor(**kwargs)
