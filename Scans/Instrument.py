@@ -25,6 +25,7 @@ class MockInstrument(Defaults):
     scan_count = 0
 
     @staticmethod
+    @dae_periods()
     def detector(**kwargs):
         print("Taking a count at theta=%0.2f and two theta=%0.2f" %
               (g.cget("theta")["value"], g.cget("two_theta")["value"]))
