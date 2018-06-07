@@ -124,28 +124,3 @@ class NBPlot(object):
 
     def __del__(self):
         self.join()
-
-
-def main():
-    """A simple test function of NBPlot"""
-    plot = NBPlot(rehome=False)
-    boondoggle = np.arange(0, 5e6, dtype=np.int64)
-    xs = []
-    ys = []
-    for i in range(10):
-        xs.append(i)
-        ys.append(i**2)
-        plot.clear()
-        plot.set_xlim(0, 10)
-        plot.plot(xs, ys)
-        plot.errorbar(xs, [y + 3 for y in ys],
-                      [4 for y in ys], fmt="rd")
-        print(i)
-        for _ in range(30):
-            boondoggle = np.sin(boondoggle**2)
-    plot.savefig("meta_test.png")
-    return plot.join()
-
-
-if __name__ == '__main__':
-    main()
