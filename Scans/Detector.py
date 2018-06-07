@@ -47,17 +47,25 @@ class DaePeriods(DetectorManager):
         self._pre_init = pre_init
         self._save = True  # Default value should never be reachable
         self.period_function = period_function
+        self._scan = None
+        self._kwargs = {}
         DetectorManager.__init__(self, f)
 
     def __call__(self, scan, save=True, **kwargs):
         self._pre_init()
         self._save = save
+        self._kwargs = kwargs
+        self._scan = scan
+        return self
+
+    def __enter__(self):
+        kwargs = self._kwargs
         if "title" in kwargs:
             title = kwargs["title"]
         else:
             title = "Scan"
         g.change_title(title)
-        g.change(nperiods=self.period_function(scan))
+        g.change(nperiods=self.period_function(self._scan))
         g.begin(paused=1)
         return self._f
 
