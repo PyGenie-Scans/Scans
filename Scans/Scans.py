@@ -154,7 +154,7 @@ class Scan(object):
         action_remainder = None
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
-                 detector(self, **kwargs) as detect:
+                 detector(self, save, **kwargs) as detect:
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
@@ -387,7 +387,7 @@ class ProductScan(Scan):
         action_remainder = None
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
-                 detector(self) as detect:
+                 detector(self, save) as detect:
                 for x in self:
                     value = detect(**kwargs)
 
