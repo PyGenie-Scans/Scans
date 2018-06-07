@@ -175,12 +175,13 @@ class MonoidList(Monoid):
             y = self.zero()
         return MonoidList([a + b for a, b in zip(self.values, y)])
 
-
     def __str__(self):
-        return str([str(x) for x in self.values])
+        return "[{}]".format(
+            ", ".join([str(x) for x in self]))
 
     def __repr__(self):
-        return "MonoidList({})".format([repr(x) for x in self.values])
+        return "MonoidList([{}])".format(
+            ", ".join([repr(x) for x in self.values]))
 
     def __iter__(self):
         for x in self.values:
