@@ -45,6 +45,16 @@ class Monoid(object):
     def __radd__(self, x):
         return self + x
 
+    def pure(self, x):
+        return self.__class__(x)
+
+    def upgrade(self, x):
+        if x == 0 or x == 0.0:
+            return self.zero()
+        if not isinstance(x, self.__class__):
+            return self.pure(x)
+        return x
+
 
 class Average(Monoid):
     """
