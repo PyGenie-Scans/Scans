@@ -42,9 +42,8 @@ class Monoid(object):
     def __add__(self, x):
         pass
 
-    @abstractmethod
-    def __iadd__(self, x):
-        pass
+    def __radd__(self, x):
+        return self + x
 
 
 class Average(Monoid):
