@@ -51,7 +51,7 @@ class DaePeriods(DetectorManager):
         self._kwargs = {}
         DetectorManager.__init__(self, f)
 
-    def __call__(self, scan, save=True, **kwargs):
+    def __call__(self, scan, save, **kwargs):
         self._pre_init()
         self._save = save
         self._kwargs = kwargs
