@@ -27,8 +27,8 @@ elif "ZOOM" in host:
     _all += ["scan", "monitor1", "monitor2",
              "monitor3", "monitor4"]
 else:
-    from .Instrument import scan, pol_measure  # noqa: F403,F401,E501
-    _all += ["scan", "pol_measure"]
+    from .Instrument import scan  # noqa: F403,F401,E501
+    _all += ["scan"]
 
 # pylint: disable=wrong-import-position
 from .Spec import ascan, dscan  # noqa: F403,F401,E501

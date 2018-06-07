@@ -6,3 +6,5 @@
 /TAGS
 /mock_scan*.dat
 /doc/build
+htmlcov
+/.coverage

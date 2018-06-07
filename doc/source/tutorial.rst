@@ -158,7 +158,7 @@ Plot Motor Scan
   Taking a count at theta=3.00 and two theta=0.00
 
   For when relative scans make more sense, it's possible to request
-  them by replacing beign and end with before and after.
+  them by replacing start and stop with before and after.
 
   >>> scan(THETA, before=-1, after=1, stride=0.6).plot(frames=5)
   Taking a count at theta=2.00 and two theta=0.00
@@ -166,6 +166,33 @@ Plot Motor Scan
   Taking a count at theta=3.00 and two theta=0.00
   Taking a count at theta=3.50 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
+
+Motor Objects
+-------------
+
+  We've been using the motor object ``THETA``, but we haven't
+  discussed how it works.
+
+  >>> THETA()
+  4.0
+
+  Calling the object with no parameters returns the current position.
+  This position can be changed by giving a new value in the function
+
+  >>> THETA(3.0)
+  >>> THETA
+  theta is at 3.0
+
+  We can also perform some relative changes with Python's in place
+  operators.
+
+  >>> THETA += 1.5
+  >>> THETA
+  theta is at 4.5
+  >>> THETA -= 4
+  >>> THETA *= 2
+  >>> THETA
+  theta is at 1.0
 
   Soft limits can be placed on motors with the `low` and `high`
   properties.  Scans that attempt to exceed these values will throw an
@@ -371,9 +398,16 @@ Estimate time
   the point of completion is a simple convenience to prevent these
   user headaches.
 
-  >>> needed = scan(THETA, start=0, stop=2.0, step=0.6).calculate(hours=1, minutes=30)
-  >>> print(needed)
-  21600
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(frames=50)
+  20.0
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(uamps=0.1)
+  36.0
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(hours=1.0)
+  14400.0
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(minutes=1.0)
+  240.0
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(seconds=5.0)
+  20.0
 
   >>> needed = scan(THETA, start=0, stop=2.0, step=0.6).calculate(frames=1000, time=True) #doctest: +SKIP
   The run would finish at 2017-07-17 20:06:24.600802

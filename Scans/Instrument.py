@@ -12,7 +12,6 @@ import numpy as np
 from .Util import make_scan
 from .Defaults import Defaults
 from .Detector import dae_periods
-from .Monoid import Polarisation, MonoidList
 from .Motion import populate
 from .Mocks import g
 
@@ -39,28 +38,6 @@ class MockInstrument(Defaults):
         self.scan_count += 1
         return "mock_scan_{:02}.dat".format(self.scan_count)
 
-    def __repr__(self):
-        return "MockInstrument()"
-
 
 populate()
 scan = make_scan(MockInstrument())
-
-
-def pol_measure(**_):
-    """
-    Get a single polarisation measurement
-    """
-
-    results = []
-    for freq, width in zip([4, 6, 8, 4], [9, 9, 9, 3]):
-        x = g.cget("theta")["value"]
-        pol = np.exp(-((x - 1)/width)**2)*np.cos(freq * (x - 1))
-
-        ups = (1 + pol)*50
-        down = (1 - pol)*50
-        ups += np.sqrt(ups)*(2*np.random.rand()-1)
-        down += np.sqrt(down)*(2*np.random.rand()-1)
-        results.append(Polarisation(ups, down))
-
-    return MonoidList(results)

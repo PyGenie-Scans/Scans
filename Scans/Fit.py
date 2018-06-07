@@ -22,7 +22,7 @@ class Fit(object):
         self._title = title
 
     @abstractmethod
-    def fit(self, x, y):
+    def fit(self, x, y):  # pragma: no cover
         """The fit function takes arrays of independent and depedentend
         variables.  It returns a set of parameters in a format that is
         convenient for this specific object.
@@ -31,7 +31,7 @@ class Fit(object):
         return lambda i, j: None
 
     @abstractmethod
-    def get_y(self, x, fit):
+    def get_y(self, x, fit):  # pragma: no cover
         """get_y takes an array of independent variables and a set of model
         parameters and returns the expected dependent variables for
         those parameters
@@ -40,7 +40,7 @@ class Fit(object):
         return lambda i, j: None
 
     @abstractmethod
-    def readable(self, fit):
+    def readable(self, fit):  # pragma: no cover
         """Readable turns the implementation specific set of fit parameters
         into a human readable dictionary.
 
@@ -208,7 +208,7 @@ class CurveFit(Fit):
 
     @staticmethod
     @abstractmethod
-    def _model(xs, *args):
+    def _model(xs, *args):  # pragma: no cover
         """
         This is the mathematical model to be fit by the subclass
         """
@@ -270,79 +270,6 @@ class GaussianFit(CurveFit):
                 "/{sigma:.3g})+{background:.1g}").format(**params)
 
 
-class TrapezoidFit(CurveFit):
-    """
-    A fitting class for trapezoids
-    """
-    def __init__(self):
-        CurveFit.__init__(self, 5, "Trapezoid Fit")
-
-    @staticmethod
-    # pylint: disable=arguments-differ
-    def _model(xs, center, width, bottom_width, top, bottom):
-        ys = xs * 0
-        mask1 = np.abs(xs-center) <= width/2
-        ys[mask1] = top
-        mask2 = np.abs(xs-center) >= bottom_width/2
-        ys[mask2] = bottom
-        mask3 = np.logical_not(np.logical_or(mask1, mask2))
-
-        progress = (2.0*np.abs(xs[mask3]-center)-width)/(bottom_width-width)
-
-        ys[mask3] = top + (bottom-top) * progress
-
-        return ys
-
-    @staticmethod
-    def guess(x, y):
-        cen = len(x)//2
-        breadth = max(x)-min(x)
-        return [x[cen], breadth/3, 2*breadth/3, y[cen], (y[0]+y[-1])/2]
-
-    def readable(self, fit):
-        return {"center": fit[0], "FWHM": (fit[1]+fit[2])/2,
-                "top": fit[3], "bottom": fit[4]}
-
-    def title(self, params):
-        # pylint: disable=arguments-differ
-        params = self.readable(params)
-        return self._title + ": " + "Center @ {}".format(params["center"])
-
-
-class ErrorFit(CurveFit):
-    """
-    A fitting class for the error function
-    """
-    def __init__(self):
-        CurveFit.__init__(self, 4, "Erf Fit")
-
-    @staticmethod
-    # pylint: disable=arguments-differ
-    def _model(xs, center, sigma, bottom, top):
-        from scipy.special import erf  # pylint: disable=no-name-in-module
-        amplitude = (top-bottom)/2
-        height = (top+bottom)/2
-        return amplitude*erf((xs-center)/sigma) + height
-
-    @staticmethod
-    def guess(x, y):
-        return [np.mean(x), 1, y[0], y[-1]]
-
-    def readable(self, fit):
-        return {"center": fit[0], "sigma": fit[1],
-                "left": fit[2], "right": fit[3]}
-
-    def title(self, params):
-        # pylint: disable=arguments-differ
-        params = self.readable(params)
-        return (self._title + ": " +
-                "y={amplitude:.3g}*erf((x-{center:.3g})" +
-                "/{sigma:.3g})+{background:.1g}").format(
-                    amplitude=(params["right"]-params["left"])/2,
-                    background=(params["right"]+params["left"])/2,
-                    **params)
-
-
 class DampedOscillatorFit(CurveFit):
     """
     A class for fitting decaying cosine curves.
@@ -397,9 +324,4 @@ Gaussian = GaussianFit()
 
 DampedOscillator = DampedOscillatorFit()
 
-Erf = ErrorFit()
-
-Trapezoid = TrapezoidFit()
-
-__all__ = ["Linear", "Gaussian", "DampedOscillator", "Erf", "PeakFit",
-           "Trapezoid"]
+__all__ = ["Linear", "Gaussian", "DampedOscillator", "PeakFit"]

@@ -5,7 +5,6 @@ from multiprocessing import Process, Pipe
 from logging import warning
 import sys
 import threading
-import numpy as np
 
 import matplotlib.pyplot as plt
 
@@ -16,7 +15,8 @@ if sys.executable == '':
     sys.executable = "C:/Instrument/Apps/Python/python.exe"
 
 
-class ProcessPlotter(object):
+# Use a no cover pragma since coverage can't see the other process
+class ProcessPlotter(object):  # pragma: no cover
     """
     This object maintains a separate a separate process at the OS level
     which manages a matplotlib plot. This is an incredibly stupid way
@@ -124,28 +124,3 @@ class NBPlot(object):
 
     def __del__(self):
         self.join()
-
-
-def main():
-    """A simple test function of NBPlot"""
-    plot = NBPlot(rehome=False)
-    boondoggle = np.arange(0, 5e6, dtype=np.int64)
-    xs = []
-    ys = []
-    for i in range(10):
-        xs.append(i)
-        ys.append(i**2)
-        plot.clear()
-        plot.set_xlim(0, 10)
-        plot.plot(xs, ys)
-        plot.errorbar(xs, [y + 3 for y in ys],
-                      [4 for y in ys], fmt="rd")
-        print(i)
-        for _ in range(30):
-            boondoggle = np.sin(boondoggle**2)
-    plot.savefig("meta_test.png")
-    return plot.join()
-
-
-if __name__ == '__main__':
-    main()
