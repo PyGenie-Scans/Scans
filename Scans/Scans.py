@@ -189,12 +189,15 @@ class Scan(object):
 
         return action_remainder
 
-    def measure(self, title, measure=None, **kwargs):
+    def measure(self, title, measure=None, **kwargs):  # pragma: no cover
         """Perform a full measurement at each position indicated by the scan.
         The title parameter gives the run's title and allows for
         values to be interpolated into it.  For instance, the string
         "{theta}" will include the current value of the theta motor if
         it is being iterated over.
+
+        WARNING: This function is deprecated and will be removed in
+        the next release.
 
         """
         if not measure:
