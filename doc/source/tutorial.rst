@@ -371,9 +371,16 @@ Estimate time
   the point of completion is a simple convenience to prevent these
   user headaches.
 
-  >>> needed = scan(THETA, start=0, stop=2.0, step=0.6).calculate(hours=1, minutes=30)
-  >>> print(needed)
-  21600
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(frames=50)
+  20.0
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(uamps=0.1)
+  36.0
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(hours=1.0)
+  14400.0
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(minutes=1.0)
+  240.0
+  >>> scan(THETA, start=0, stop=2.0, step=0.6).calculate(seconds=5.0)
+  20.0
 
   >>> needed = scan(THETA, start=0, stop=2.0, step=0.6).calculate(frames=1000, time=True) #doctest: +SKIP
   The run would finish at 2017-07-17 20:06:24.600802
