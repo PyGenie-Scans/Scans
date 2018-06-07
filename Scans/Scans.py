@@ -491,8 +491,8 @@ class ParallelScan(Scan):
         return (self.first.max(), self.second.max())
 
 
-#We can't test the forever scan by definition, hence the no cover
-#pragma
+# We can't test the forever scan by definition, hence the no cover
+# pragma
 class ForeverScan(Scan):  # pragma: no cover
     """
     ForeverScan repeats the same scan over and over again to improve

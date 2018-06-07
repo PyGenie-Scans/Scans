@@ -46,9 +46,11 @@ class Monoid(object):
         return self + x
 
     def pure(self, x):
+        """Turn a number into a member of this monoid"""
         return self.__class__(x)
 
     def upgrade(self, x):
+        """Ensure that a value is a member of this monoid"""
         if x == 0 or x == 0.0:
             return self.zero()
         if not isinstance(x, self.__class__):

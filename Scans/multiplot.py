@@ -5,7 +5,6 @@ from multiprocessing import Process, Pipe
 from logging import warning
 import sys
 import threading
-import numpy as np
 
 import matplotlib.pyplot as plt
 
