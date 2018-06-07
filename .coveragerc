@@ -11,3 +11,4 @@ include = Scans/*
 exclude_lines =
   if __name__ == __main__:
   pass
+  np.nan
