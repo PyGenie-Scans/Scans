@@ -11,6 +11,7 @@ from __future__ import print_function
 import numpy as np
 from .Util import make_scan
 from .Defaults import Defaults
+from .Detector import dae_periods
 from .Monoid import Polarisation, MonoidList
 from .Motion import populate
 from .Mocks import g
