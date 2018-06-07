@@ -132,7 +132,7 @@ class Polarisation(Monoid):
 
     def __float__(self):
         if float(self.ups) + float(self.downs) == 0:
-            return 0.0
+            return np.nan
         return (float(self.ups) - float(self.downs)) / \
             (float(self.ups) + float(self.downs))
 
