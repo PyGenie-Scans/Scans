@@ -123,37 +123,37 @@ Monoid Examples
 Most of our monoids can be created fairly simply
 
 >>> from Scans.Monoid import *
->>> s = Sum(2)
->>> x = Average(1)
->>> p = Polarisation(ups=100, downs=0)
+>>> s = Sum(2.0)
+>>> x = Average(1.0)
+>>> p = Polarisation(ups=100.0, downs=0.0)
 >>> lst = MonoidList([p, x, s])
 
 The first rule of monoids is that we can always add to values together
 
 >>> s + 3
-Sum(5)
+Sum(5.0)
 >>> x + Average(5, count=2)
-Average(6, count=3)
+Average(6.0, count=3)
 >>> p + Polarisation(ups=100, downs=400)
-Polarisation(200, 400)
+Polarisation(200.0, 400.0)
 >>> lst + [300, 3, Sum(1)]
-MonoidList([Polarisation(400, 0), Average(4, count=2), Sum(3)])
+MonoidList([Polarisation(400.0, 0.0), Average(4.0, count=2), Sum(3.0)])
 
 The second rule of monoids is that adding zero to something *always*
 returns the original value.  This overrides other behaviours.
 
 >>> s + 0
-Sum(2)
+Sum(2.0)
 >>> x + 0
-Average(1, count=1)
+Average(1.0, count=1)
 >>> x + Average(0)
-Average(1, count=2)
+Average(1.0, count=2)
 >>> sum([x, x, 0, 0, 0, 8, Average(0), Average(0)])
-Average(10, count=5)
+Average(10.0, count=5)
 >>> p + 0
-Polarisation(100, 0)
+Polarisation(100.0, 0.0)
 >>> lst + 0
-MonoidList([Polarisation(100, 0), Average(1, count=1), Sum(2)])
+MonoidList([Polarisation(100.0, 0.0), Average(1.0, count=1), Sum(2.0)])
 
 Where appropriate, monoids can be cast into a float
 >>> float(s)
@@ -166,13 +166,13 @@ Where appropriate, monoids can be cast into a float
 Similarly, casting to a string is also available
 
 >>> str(s)
-'2'
+'2.0'
 >>> str(x)
-'1'
+'1.0'
 >>> str(p)
 '1.0'
 >>> str(lst)
-'[1.0, 1, 2]'
+'[1.0, 1.0, 2.0]'
 
 Every element has an associate uncertainty
 
@@ -180,7 +180,7 @@ Every element has an associate uncertainty
 1.4142135623730951
 >>> lst.err()
 [0.1414213562373095, 1.0, 1.4142135623730951]
->>> Polarisation(800, 800).err()
+>>> Polarisation(800.0, 800.0).err()
 0.025
 
 The MonoidList has a couple of extra list related functionality.  It
@@ -190,14 +190,14 @@ can be iterated, like a normal list.
 >>> for l in lst:
 ...    print(l)
 1.0
--1
-10
+-1.0
+10.0
 
 You can also find the minimum and maximum value
 >>> lst.min()
-Average(-2, count=2)
+Average(-2.0, count=2)
 >>> lst.max()
-Sum(10)
+Sum(10.0)
 
 
 Models
