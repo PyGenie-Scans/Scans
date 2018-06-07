@@ -1,0 +1,13 @@
+[run]
+branch = True
+
+omit =
+  # We can't test the actual instruments
+  Scans/Larmor.py
+  Scans/Zoom.py
+
+[report]
+include = Scans/*
+exclude_lines =
+  if __name__ == __main__:
+  pass
