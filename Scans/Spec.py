@@ -8,11 +8,11 @@ def ascan(motor, start, end, intervals, time):
 
     Example
     -------
-    >>> ascan(COARSEZ, -20, 20, 40, -0.1)
+    >>> ascan(COARSEZ, -20, 20, 40, -50)
 
     Scan the CoarseZ motor from position -20 to position 20
     (inclusive) in 1 mm steps.  At each point, take measure for
-    0.1 microamps (about nine seconds). After the plot, the CoarseZ
+    50 frames (about five seconds). After the plot, the CoarseZ
     motor will be at position 20.
 
     Parameters
@@ -27,14 +27,14 @@ def ascan(motor, start, end, intervals, time):
       How many steps to take between the initial and final position
     time
       If positive, the measurement time at each point in seconds.  If
-      negative, the measurement time at each point in microamp hours.
+      negative, the measurement frames at each point.
 
     """
     if time > 0:
         return scan(motor, start=start, stop=end,
                     gaps=intervals).plot(seconds=time)
     return scan(motor, start=start, stop=end,
-                gaps=intervals).plot(uamps=-time)
+                gaps=intervals).plot(frames=-time)
 
 
 def dscan(motor, start, end, intervals, time):
@@ -42,11 +42,11 @@ def dscan(motor, start, end, intervals, time):
 
     Example
     -------
-    >>> dscan(COARSEZ, -20, 20, 40, -0.1)
+    >>> dscan(COARSEZ, -20, 20, 40, -50)
 
     Scan the CoarseZ motor from 20 mm below the current position
     to position 20 mm above the current position (inclusive) in 1 mm steps.
-    At each point, take measure for 0.1 microamps (about nine seconds).
+    At each point, take measure for 50 frames (about five seconds).
     After the plot, the CoarseZ motor will move back to its original position.
 
     Parameters
@@ -61,7 +61,7 @@ def dscan(motor, start, end, intervals, time):
       How many steps to take between the initial and final position
     time
       If positive, the measurement time at each point in seconds.  If
-      negative, the measurement time at each point in microamp hours.
+      negative, the measurement frames at each point.
 
     """
     init = motor()
@@ -70,6 +70,6 @@ def dscan(motor, start, end, intervals, time):
             return scan(motor, before=start, after=end,
                         gaps=intervals).plot(seconds=time)
         return scan(motor, before=start, after=end,
-                    gaps=intervals).plot(uamps=-time)
+                    gaps=intervals).plot(frames=-time)
     finally:
         motor(init)
