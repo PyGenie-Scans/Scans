@@ -70,21 +70,10 @@ class Average(Monoid):
         return float(self.total) / float(self.count)
 
     def __add__(self, y):
-        if y == 0:
-            y = self.zero()
+        y = self.upgrade(y)
         return Average(
             self.total + y.total,
             self.count + y.count)
-
-    def __iadd__(self, y):
-        if y == 0:
-            y = self.zero()
-        self.total += y.total
-        self.count += y.count
-        return self
-
-    def __radd__(self, y):
-        return self + y
 
     @staticmethod
     def zero():
@@ -114,15 +103,8 @@ class Sum(Monoid):
     def __float__(self):
         return float(self.total)
 
-    def __iadd__(self, y):
-        if y == 0:
-            y = self.zero()
-        self.total += y.total
-        return self
-
     def __add__(self, y):
-        if y == 0:
-            y = self.zero()
+        y = self.upgrade(y)
         return Sum(self.total + y.total)
 
     @staticmethod
@@ -154,16 +136,8 @@ class Polarisation(Monoid):
         return (float(self.ups) - float(self.downs)) / \
             (float(self.ups) + float(self.downs))
 
-    def __iadd__(self, y):
-        if y == 0 or y == 0.0:
-            y = self.zero()
-        self.ups += y.ups
-        self.downs += y.downs
-        return self
-
     def __add__(self, y):
-        if y == 0:
-            y = self.zero()
+        y = self.upgrade(y)
         return Polarisation(
             self.ups + y.ups,
             self.downs + y.downs)
@@ -201,12 +175,6 @@ class MonoidList(Monoid):
             y = self.zero()
         return MonoidList([a + b for a, b in zip(self.values, y)])
 
-    def __iadd__(self, y):
-        if y == 0:
-            y = self.zero()
-        for value, update in zip(self.values, y):
-            value += update
-        return self
 
     def __str__(self):
         return str([str(x) for x in self.values])
