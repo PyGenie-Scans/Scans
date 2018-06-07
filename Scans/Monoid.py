@@ -145,9 +145,25 @@ class Polarisation(Monoid):
     def err(self):
         if float(self.ups) + float(self.downs) == 0:
             return 0.0
-        return float(self)*np.sqrt(self.downs.err()**2+self.ups.err()**2) \
-            * np.sqrt((float(self.ups)-float(self.downs))**-2 +
-                      (float(self.ups)+float(self.downs))**-2)
+        if isinstance(self.ups, Monoid):
+            ups = self.ups
+        else:
+            ups = Sum(self.ups)
+        if isinstance(self.downs, Monoid):
+            downs = self.downs
+        else:
+            downs = Sum(self.downs)
+
+        # If ups=downs, then the numerator has an infinite relative
+        # error, so the relative error of the denominator can be
+        # ignored
+        if float(ups) == float(downs):
+            return np.sqrt(
+                downs.err()**2+ups.err()**2)/(float(ups)+float(downs))
+
+        return float(self)*np.sqrt(downs.err()**2+ups.err()**2) \
+            * np.sqrt((float(ups)-float(downs))**-2 +
+                      (float(ups)+float(downs))**-2)
 
     @staticmethod
     def zero():
