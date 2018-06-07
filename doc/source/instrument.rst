@@ -180,8 +180,8 @@ Every element has an associate uncertainty
 1.4142135623730951
 >>> lst.err()
 [0.1414213562373095, 1.0, 1.4142135623730951]
->>> Polarisation(800.0, 800.0).err()
-0.025
+>>> Polarisation(8.0, 8.0).err()
+0.25
 
 The MonoidList has a couple of extra list related functionality.  It
 can be iterated, like a normal list.
