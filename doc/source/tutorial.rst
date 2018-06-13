@@ -132,32 +132,20 @@ Plot Motor Scan
      1.5
      2.0
 
-  >>> s = scan(theta, 0, 2, 0.6)
-  >>> s.plot(frames=50)
-  Taking a count at theta=0.00 and two theta=0.00
-  Taking a count at theta=0.60 and two theta=0.00
-  Taking a count at theta=1.20 and two theta=0.00
-  Taking a count at theta=1.80 and two theta=0.00
-
-  Above, we've split the creation of the scan into two parts.  First,
-  we defined the scan in position s by a series of motions.  In the
-  second line, we then performed the plot on this scan.  This can be
-  useful when scanning over the same points repeatedly or combining
-  simpler scans into more complicated measurements, as will be seen
-  later.
-
-  >>> s.plot(seconds=1, save="plot_example.png")
+  >>> s = scan(theta, 0, 2, 0.6, seconds=1, save="plot_example.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
 
   The ``save`` argument allows the figure to be saved to a file.
-  Otherwise, the screen will show the plot interactively.
+  Otherwise, the screen will show the plot interactively.  Also,
+  notice we've given the time for each measuremnt in ``seconds``
+  instead of frames.  The values or ``minutes``, ``hours``, and
+  ``uamps`` are also accepted.
 
   .. image:: ../../plot_example.png
      :alt: Example plot
-
 
   There are many possibilities beyond the ``start``, ``stop``,
   ``step``, and ``stride`` that have been introduced thus far.  For
@@ -294,7 +282,7 @@ Perform Fits
 
   We can also plot the same scan against a Gaussian
 
-  >>> fit = scan(theta, start=0, stop=2, count=11).fit(Gaussian, frames=5, save="gaussian.png")
+  >>> fit = scan(theta, start=0, stop=2, count=11, fit=Gaussian, frames=5, save="gaussian.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.20 and two theta=0.00
   Taking a count at theta=0.40 and two theta=0.00
@@ -317,7 +305,7 @@ Perform Fits
   to refine that point.  The width of that neighbourhood is the
   parameter to PeakFit.
 
-  >>> fit = scan(theta, start=0, stop=2, count=11).fit(PeakFit(0.7), frames=5, save="peak.png")
+  >>> fit = scan(theta, start=0, stop=2, count=11, fit=PeakFit(0.7), frames=5, save="peak.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.20 and two theta=0.00
   Taking a count at theta=0.40 and two theta=0.00
@@ -344,10 +332,15 @@ Perform complex scans
   initial coaching from the beamline scientist, but should be simple
   enough for the user to modify them without assistance.
 
+  >>> th= scan(theta, start=0, stop=1, stride=0.3)
+
+  The above command does not contain a time command, so it does not
+  run the full scan command.  Instead, it merely creates a scan
+  object, which is then stored in the ``th`` variable.
+
   To start with, a user may want to scan theta and two theta together in
   lock step.
 
-  >>> th= scan(theta, start=0, stop=1, stride=0.3)
   >>> two_th= scan(two_theta, start=0, stop=2, stride=0.6)
   >>> (th& two_th).plot(frames=10, save="locked.png")
   Taking a count at theta=0.00 and two theta=0.00
