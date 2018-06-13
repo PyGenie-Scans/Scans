@@ -206,13 +206,11 @@ def make_scan(defaults):
         for point in points:
             motion.require(point)
 
-        s = SimpleScan(motion, points, defaults)
+        scn = SimpleScan(motion, points, defaults)
         if any([x in kwargs for x in
                 ["frames", "uamps", "seconds", "minutes", "hours"]]):
             if "fit" in kwargs:
-                return s.fit(**kwargs)
-            else:
-                return s.plot(**kwargs)
-        else:
-            return s
+                return scn.fit(**kwargs)
+            return scn.plot(**kwargs)
+        return scn
     return scan
