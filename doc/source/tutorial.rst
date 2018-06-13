@@ -79,9 +79,9 @@ Examples
 Plot Motor Scan
 ---------------
 
-  Our first, simple example is the user plotting a scan of the detector
-  intensity as the motor moves from 0 to 2 inclusively in steps /near/
-  0.3.
+  Our first, simplest example is the user plotting a scan of the
+  detector intensity as the motor moves from 0 to 2 exclusively in
+  steps of 0.6.
 
   >>> from Scans import *
   >>> scan(theta, 0, 2, 0.6, 50)
@@ -90,18 +90,28 @@ Plot Motor Scan
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
 
-  >>> scan(theta, start=0, stop=2, stride=0.6).plot(seconds=1, save="plot_example.png")
+  The above is the simplest possible kind of default scan.  The first
+  parameter is the starting point, the second is the stopping point,
+  the third is the step size, and the final parameter is the number of
+  frames to measure at each point.  For most cases, it should be
+  sufficient, but there are many more options that can be layered on
+  top.
+
+  >>> scan(theta, 0, 2, stride=0.6, frames=10)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
   Taking a count at theta=1.50 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
 
-  The ``save`` argument allows the figure to be saved to a file.
-  Otherwise, the screen will show the plot interactively.
+  Above, we've not used the default ``step`` parameter, but did use
+  the ``stride`` parameter instead.  Setting the ``stride`` instead of
+  setting the ``step`` allow the instrument to slightly adjust the
+  step size to ensure that the end point is included in the scan.  In
+  this example, the step size was decrease from 0.6 mm to 0.5 mm.
 
-  .. image:: ../../plot_example.png
-     :alt: Example plot
+  .. note:: Since we skipped the ``step`` parameter, we had to give
+	    the ``frames`` parameter by name.
 
   The results of all scans are saved to a log file.  The location of
   the log is set by the instrument scientist.  The data from the scan
@@ -122,24 +132,44 @@ Plot Motor Scan
      1.5
      2.0
 
-
-  The ``stride`` option gives an appoximate step size, but forces ensures
-  that the beginning and final points are measured.  ``step`` forces the
-  exact spacing, but may not measure the final point.  ``count`` and
-  ``gaps`` allow the user to specify the number of measurements and the
-  number of gaps, respectively.
-
-  >>> scan(theta, start=0, stop=2, step=0.6).plot(frames=5)
+  >>> s = scan(theta, 0, 2, 0.6)
+  >>> s.plot(frames=50)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
-  >>> scan(theta, start=0, stop=2, count=4).plot(frames=5)
+
+  Above, we've split the creation of the scan into two parts.  First,
+  we defined the scan in position s by a series of motions.  In the
+  second line, we then performed the plot on this scan.  This can be
+  useful when scanning over the same points repeatedly or combining
+  simpler scans into more complicated measurements, as will be seen
+  later.
+
+  >>> s.plot(seconds=1, save="plot_example.png")
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+
+  The ``save`` argument allows the figure to be saved to a file.
+  Otherwise, the screen will show the plot interactively.
+
+  .. image:: ../../plot_example.png
+     :alt: Example plot
+
+
+  There are many possibilities beyond the ``start``, ``stop``,
+  ``step``, and ``stride`` that have been introduced thus far.  For
+  example, ``count`` and ``gaps`` allow the user to specify the number
+  of measurements and the number of gaps, respectively.
+
+  >>> scan(theta, start=0, stop=2, count=4, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.67 and two theta=0.00
   Taking a count at theta=1.33 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
-  >>> scan(theta, start=0, stop=2, gaps=4).plot(frames=5)
+  >>> scan(theta, start=0, stop=2, gaps=4, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00
@@ -149,13 +179,13 @@ Plot Motor Scan
   The user also has the option of fixing the steps size and number of
   measurements or gaps while leaving the ending position open.
 
-  >>> scan(theta, start=0, step=0.6, count=5).plot(frames=5)
+  >>> scan(theta, start=0, step=0.6, count=5, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
   Taking a count at theta=1.80 and two theta=0.00
   Taking a count at theta=2.40 and two theta=0.00
-  >>> scan(theta, start=0, stride=0.6, gaps=5).plot(frames=5)
+  >>> scan(theta, start=0, stride=0.6, gaps=5, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.60 and two theta=0.00
   Taking a count at theta=1.20 and two theta=0.00
@@ -164,9 +194,9 @@ Plot Motor Scan
   Taking a count at theta=3.00 and two theta=0.00
 
   For when relative scans make more sense, it's possible to request
-  them by replacing start and stop with before and after.
+  them by replacing start and stop with ``before`` and ``after``.
 
-  >>> scan(theta, before=-1, after=1, stride=0.6).plot(frames=5)
+  >>> scan(theta, before=-1, after=1, stride=0.6, frames=5)
   Taking a count at theta=2.00 and two theta=0.00
   Taking a count at theta=2.50 and two theta=0.00
   Taking a count at theta=3.00 and two theta=0.00
@@ -225,14 +255,14 @@ Motor Objects
   Motion object, the scan will fail.  Also, the string must be the
   same case as in the IBEX block.
 
-  >>> scan("Theta", start=0, stop=10, stride=2).plot(frames=5)
+  >>> scan("Theta", start=0, stop=10, stride=2, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=2.00 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
   Taking a count at theta=6.00 and two theta=0.00
   Taking a count at theta=8.00 and two theta=0.00
   Taking a count at theta=10.00 and two theta=0.00
-  >>> scan("theta", start=0, stop=10, stride=2).plot(frames=5)
+  >>> scan("theta", start=0, stop=10, stride=2, frames=5)
   Traceback (most recent call last):
       ...
   KeyError: 'theta'
@@ -247,7 +277,7 @@ Perform Fits
   Performing a fit on a measurement is merely a modification of
   performing the plot
 
-  >>> fit = scan(theta, start=0, stop=2, stride=0.6).fit(Linear, frames=5, save="linear.png")
+  >>> fit = scan(theta, start=0, stop=2, stride=0.6, fit=Linear, frames=5)
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
   Taking a count at theta=1.00 and two theta=0.00

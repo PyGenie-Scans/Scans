@@ -107,11 +107,18 @@ def make_scan(defaults):
     The main python environment will then import scan from that module
 
     """
-    def scan(motion, *args, **kwargs):
+    def scan(motion, start=None, stop=None, step=None, frames=None, **kwargs):
+        # def scan(motion, **kwargs):
         """scan establishes the setup for performing a measurement scan.
 
         Examples
         --------
+
+        >>> scan(translation, -5, 5, 0.1, 50)
+
+        This will run a scan on the translation axis from -5 to 5
+        (exclusive) in steps of 0.1, measuring for 50 frames at each
+        point and taking a plot
 
         >>> scan(translation, start=-5, stop=5, stride=0.1).plot(frames=50)
 
@@ -151,6 +158,13 @@ def make_scan(defaults):
           An absolute starting position for the scan.
         stop
           An absolute ending position for the scan
+        step
+          The absolue step size.  The final position may be skipped if
+          it is not an integer number of steps from the starting
+          position.
+        frames
+          How many frames the measurement should be performed for.  If
+          set to None or 0, then no automatic plot will be started.
         before
           A relative starting position for the scan.
         after
@@ -159,10 +173,6 @@ def make_scan(defaults):
           The number of points to measure
         gaps
           The number of steps to take
-        step
-          The absolue step size.  The final position may be skipped if
-          it is not an integer number of steps from the starting
-          position.
         stride
           The approximate step size.  The scan may shrink this step size
           to ensure that the final point is still included in the scan.
@@ -173,8 +183,15 @@ def make_scan(defaults):
           A scan object that will run through the requested points.
 
         """
-        if len(args) == 4:
-            return scan(motion, start=args[0], stop=args[1], step=args[2]).plot(frames=args[3])
+        if start is not None:
+            kwargs["start"] = start
+        if stop is not None:
+            kwargs["stop"] = stop
+        if step:
+            kwargs["step"] = step
+        if frames:
+            kwargs["frames"] = frames
+
         if isinstance(motion, Motion):
             pass
         elif isinstance(motion, str):
@@ -189,5 +206,13 @@ def make_scan(defaults):
         for point in points:
             motion.require(point)
 
-        return SimpleScan(motion, points, defaults)
+        s = SimpleScan(motion, points, defaults)
+        if any([x in kwargs for x in
+                ["frames", "uamps", "seconds", "minutes", "hours"]]):
+            if "fit" in kwargs:
+                return s.fit(**kwargs)
+            else:
+                return s.plot(**kwargs)
+        else:
+            return s
     return scan
