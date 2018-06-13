@@ -107,7 +107,7 @@ def make_scan(defaults):
     The main python environment will then import scan from that module
 
     """
-    def scan(motion, **kwargs):
+    def scan(motion, *args, **kwargs):
         """scan establishes the setup for performing a measurement scan.
 
         Examples
@@ -173,6 +173,8 @@ def make_scan(defaults):
           A scan object that will run through the requested points.
 
         """
+        if len(args) == 4:
+            return scan(motion, start=args[0], stop=args[1], step=args[2]).plot(frames=args[3])
         if isinstance(motion, Motion):
             pass
         elif isinstance(motion, str):

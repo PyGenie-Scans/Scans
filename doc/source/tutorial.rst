@@ -84,6 +84,12 @@ Plot Motor Scan
   0.3.
 
   >>> from Scans import *
+  >>> scan(theta, 0, 2, 0.6, 50)
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+
   >>> scan(theta, start=0, stop=2, stride=0.6).plot(seconds=1, save="plot_example.png")
   Taking a count at theta=0.00 and two theta=0.00
   Taking a count at theta=0.50 and two theta=0.00
@@ -101,12 +107,12 @@ Plot Motor Scan
   the log is set by the instrument scientist.  The data from the scan
   above can be seen below.
 
-  .. literalinclude:: ../../mock_scan_01.dat
-     :caption: mock_scan_01.dat
+  .. literalinclude:: ../../mock_scan_02.dat
+     :caption: mock_scan_02.dat
 
   .. test
 
-     >>> infile = open("mock_scan_01.dat", "r")
+     >>> infile = open("mock_scan_02.dat", "r")
      >>> lines = infile.readlines()
      >>> infile.close()
      >>> for line in lines: print(line.split("\t")[0])
