@@ -28,7 +28,7 @@ g.cget = cget
 g.cset = cset
 
 
-instrument = {"theta": 0, "two_theta": 0}
+instrument = {"Theta": 0, "Two_Theta": 0}
 
 g.get_blocks = instrument.keys
 
@@ -48,7 +48,7 @@ def fake_spectrum(channel, period):  # pragma: no cover
     if channel == 1:
         return {"signal": np.zeros(1000)+1}
     x = np.arange(1000)
-    base = np.cos(0.01*(instrument["theta"]+1.05)*x)+1
+    base = np.cos(0.01*(instrument["Theta"]+1.05)*x)+1
     if period % 2 == 0:
         base = 2 - base
     base *= 100000

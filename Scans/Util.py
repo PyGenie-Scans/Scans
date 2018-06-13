@@ -113,7 +113,7 @@ def make_scan(defaults):
         Examples
         --------
 
-        >>> scan(TRANSLATION, start=-5, stop=5, stride=0.1).plot(frames=50)
+        >>> scan(translation, start=-5, stop=5, stride=0.1).plot(frames=50)
 
         This will scan the translation access from -5 to 5 inclusive
         in steps of 0.1.  At each point, the a measurement will be
@@ -121,7 +121,7 @@ def make_scan(defaults):
 
         As a different example,
 
-        >>> s = scan(COARSEZ, before=-50, step=5, gaps=20)
+        >>> s = scan(coarsez, before=-50, step=5, gaps=20)
 
         This will create a scan on the CoarseZ axis, starting at 50 mm
         below the current position and continuing in 5 mm increments
