@@ -35,16 +35,6 @@ instrument = {"Theta": 0, "Two_Theta": 0}
 g.get_blocks = instrument.keys
 
 
-def set_motion(name):
-    """Create a function to update the dictionary of the mock instrument
-
-    Python won't let you update a dict in a lambda."""
-    def inner(x):
-        """Actually update the dictionary"""
-        instrument[name] = x
-    return inner
-
-
 def fake_spectrum(channel, period):  # pragma: no cover
     """Create a fake intensity spectrum."""
     if channel == 1:
