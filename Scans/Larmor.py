@@ -8,6 +8,7 @@ environment.
 
 """
 from __future__ import print_function
+import os.path
 import numpy as np
 try:
     # pylint: disable=import-error
@@ -52,17 +53,16 @@ class Larmor(Defaults):
 
 def get_user_dir():
     """Move to the current user directory"""
-    import os
-    import os.path
-    import six
     base = r"U:/Users/"
-    while True:
-        user = six.moves.input("Enter the name of the user directory: ")
-        if os.path.isdir(os.path.join(base, user)):
-            break
-        print("""Directory {} not found.  Please create the directory or name
-        a different directory.""".format(os.path.join(base, user)))
-    os.chdir(os.path.join(base, user))
+    dirs = [[d for d in os.listdir(x)
+             if os.path.isdir(d)]
+            for x in os.listdir(base)
+            if os.path.isdir(x)]
+    result = max([max(x, key=os.path.getmtime)
+                  for x in dirs],
+                 key=os.path.getmtime)
+    print("Setting path to {}".format(result))
+    os.chdir(result)
 
 
 get_user_dir()
