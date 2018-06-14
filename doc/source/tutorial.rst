@@ -437,10 +437,36 @@ SPEC compatibility
   Theta is at 2.5
 
 
-Class setup
-===========
+Position Commands
+-----------------
 
-  [file:classes.pdf]
+  The user needs to give three of the following keyword arguments to
+  create a scan.
+
+  :start: This is the initial position of the scan. Fnord
+  :stop: This is the final position of the scan.  The type of step
+	 chosen determines whether or not this final value is guaranteed
+	 to be included in the final measurement.
+  :before: This sets the initial position relative to the current position.
+  :after: This sets the final position relative to the current position.
+  :count: The total number of measurements to perform.  This parameter
+	  always take precedence over "gaps"
+  :gaps: The number steps to take.  The total number of measurements is
+	 always one greater than the number of gaps.
+  :stride: A *requested*, but not *mandatory*, step size.  Users often know
+	   the range over which they wish to scan and their desired
+	   scanning resolution.  ``stride`` measured the entire range, but
+	   may increase the resolution to give equally spaced measurements.
+	   ``stride`` always take precedence over ``step``
+  :step: A mandatory step size.  If the request measurement range is not an
+	 integer number of steps, the measurement will stop before the
+	 requested end.
+
+  See the :meth:`Scans.Util.get_points` function for more information on the parameters.
+
+
+Class setup
+-----------
 
   The base class for the low level code is the ``Scan`` class.  This
   ensures that any functionality added to this class or bugs fixed in
@@ -502,52 +528,8 @@ Class setup
 	      completion.
 
 
-High Level interface
-====================
-
-  I've included an example of a possible high level interface in the
-  ``scan`` function.  It takes a motor name followed by a plethora of
-  keyword arguments to easily create scans for the users.
-
-
-pv
---
-
-  The first parameter for scan is the name of the motor the be scanned.
-  This string is passed onto cset for the actual motor movements.  It's
-  also used as the label for the scan when doing string interpolation
-  for the run titles.
-
-
-Position Commands
------------------
-
-  The user needs to give three of the following keyword arguments to
-  create a scan.
-
-  :start: This is the initial position of the scan. Fnord
-  :stop: This is the final position of the scan.  The type of step
-	 chosen determines whether or not this final value is guaranteed
-	 to be included in the final measurement.
-  :before: This sets the initial position relative to the current position.
-  :after: This sets the final position relative to the current position.
-  :count: The total number of measurements to perform.  This parameter
-	  always take precedence over "gaps"
-  :gaps: The number steps to take.  The total number of measurements is
-	 always one greater than the number of gaps.
-  :stride: A *requested*, but not *mandatory*, step size.  Users often know
-	   the range over which they wish to scan and their desired
-	   scanning resolution.  ``stride`` measured the entire range, but
-	   may increase the resolution to give equally spaced measurements.
-	   ``stride`` always take precedence over ``step``
-  :step: A mandatory step size.  If the request measurement range is not an
-	 integer number of steps, the measurement will stop before the
-	 requested end.
-
-  See the :py:func:``Scans.Util.get_points`` function for more informatoin on the parameters.
-
 Design Goals
-============
+------------
 
   This is a proposal for an improved system for running scans on the
   instrument.  The idea is to use ``Scan`` objects to represent the parts
@@ -560,7 +542,7 @@ Design Goals
 
 
 User simplicity
----------------
+===============
 
   The users need to be able to perform simple scans without thinking
   about object orient programming or algebraic data types.  Performing a
@@ -575,7 +557,7 @@ User simplicity
 
 
 Composability
--------------
+=============
 
   The code should trivially allow combining smaller scripts into a
   larger script.  This ensures that, as long as the smaller scripts are
@@ -584,7 +566,7 @@ Composability
 
 
 Functionality
--------------
+=============
 
   The code should be able to perform all of the tasks that might involve
   scanning on the beamline, from the common place to the irregular.
