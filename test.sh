@@ -8,3 +8,5 @@ PERCENT=`coverage report | awk '/TOTAL/ {print $4}'`
 sed -r "s/-[0-9]+%25-/-${PERCENT}25-/" readme.md > readme.md.tmp
 mv readme.md.tmp readme.md
 coverage html
+pylint Scans
+flake8 Scans

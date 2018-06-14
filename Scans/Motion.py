@@ -133,6 +133,10 @@ class BlockMotion(Motion):
             from genie_python import genie as g
         except ImportError:
             from .Mocks import g
+        if block not in g.get_blocks():
+            raise RuntimeError(
+                "Unknown block {}.  Does the capitalisation "
+                "match IBEX?".format(block))
         Motion.__init__(self,
                         lambda: g.cget(block)["value"],
                         lambda x: g.cset(block, x),
