@@ -399,7 +399,9 @@ SPEC compatibility
 
   As a convenience to users with an x-ray background, the `ascan` and
   dscan from SPEC have been implemented on top of the scanning
-  interface.
+  interface.  The only major change is that negative times now
+  represent a number of frames instead of a monitor count, since
+  waiting for a monitor count is currently unsupported.
 
   >>> ascan(theta, 0, 2, 10, 1)
   Taking a count at theta=0.00 and two theta=3.00
@@ -414,12 +416,12 @@ SPEC compatibility
   Taking a count at theta=1.80 and two theta=3.00
   Taking a count at theta=2.00 and two theta=3.00
   >>> theta(0.5)
-  >>> dscan(theta, -1, 1, 10, -0.1)
+  >>> dscan(theta, -1, 1, 10, -50)
   Traceback (most recent call last):
       ...
   RuntimeError: Position -0.5 is below lower limit 0 of motor Theta
   >>> theta(2.5)
-  >>> dscan(theta, -1, 1, 10, -0.01)
+  >>> dscan(theta, -1, 1, 10, -50)
   Taking a count at theta=1.50 and two theta=3.00
   Taking a count at theta=1.70 and two theta=3.00
   Taking a count at theta=1.90 and two theta=3.00
