@@ -127,6 +127,16 @@ Plot Motor Scan
   Taking a count at theta=3.50 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
 
+  .. note:: Some combinations of values do not provide enough
+	    information to create a scan.  A :class:`RuntimeError`
+	    will be thrown if a scan cannot be constructed
+
+	    >>> scan(theta, start=0, stop=0.6, after=2)
+	    Traceback (most recent call last):
+	    ...
+	    RuntimeError: Unable to build a scan with that set of options.
+
+
 Motor Objects
 -------------
 
@@ -217,6 +227,19 @@ Perform Fits
   original graph when finished.
 
   .. image:: ../../linear.png
+
+  >>> fit = scan(theta, start=0, stop=2, stride=0.6, fit=PolyFit(3), frames=5)
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.50 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.50 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  >>> abs(fit["x^0"]) < 0.1
+  True
+
+  Higher order polynomials are also supported
+
+  .. image:: ../../cubic.png
 
   We can also plot the same scan against a Gaussian
 

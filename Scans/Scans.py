@@ -239,7 +239,9 @@ class Scan(object):
         """
         from datetime import timedelta, datetime
         total = len(self) * (pad + estimate(**kwargs))
-        if time:
+        # We can't test the time printing code since the result would
+        # always change.
+        if time:  # pragma: no cover
             delta = timedelta(0, total)
             print("The run would finish at {}".format(delta + datetime.now()))
         return total
