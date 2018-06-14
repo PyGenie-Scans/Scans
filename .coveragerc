@@ -5,6 +5,8 @@ omit =
   # We can't test the actual instruments
   Scans/Larmor.py
   Scans/Zoom.py
+  # We don't want to test the mock instrument
+  Scans/Mocks.py
 
 [report]
 include = Scans/*
@@ -15,4 +17,3 @@ exclude_lines =
   pragma: no cover
   __repr__
   forever
-omit = Scans/Mocks.py
