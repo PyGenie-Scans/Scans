@@ -151,8 +151,6 @@ def populate():
         from genie_python import genie as g
     except ImportError:
         from .Mocks import g
-    if g and g.get_blocks() is None:
-        return
     for i in g.get_blocks():
         temp = BlockMotion(i)
         __builtins__[i.upper()] = temp
