@@ -134,10 +134,10 @@ class PolyFit(Fit):
     def readable(self, fit):
         if self.degree == 2:
             return {"slope": fit[0], "intercept": fit[1]}
-        orders = np.arange(self.degree, 0, -1)
+        orders = np.arange(self.degree, 0, -1) - 1
         results = {}
         for key, value in zip(orders, fit):
-            results["^{}".format(key)] = value
+            results["x^{}".format(key)] = value
         return results
 
     def title(self, params):
@@ -324,4 +324,4 @@ Gaussian = GaussianFit()
 
 DampedOscillator = DampedOscillatorFit()
 
-__all__ = ["Linear", "Gaussian", "DampedOscillator", "PeakFit"]
+__all__ = ["PolyFit", "Linear", "Gaussian", "DampedOscillator", "PeakFit"]

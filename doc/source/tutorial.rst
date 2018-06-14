@@ -228,6 +228,19 @@ Perform Fits
 
   .. image:: ../../linear.png
 
+  >>> fit = scan(theta, start=0, stop=2, stride=0.6, fit=PolyFit(3), frames=5)
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.50 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.50 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  >>> abs(fit["x^0"]) < 0.1
+  True
+
+  Higher order polynomials are also supported
+
+  .. image:: ../../cubic.png
+
   We can also plot the same scan against a Gaussian
 
   >>> fit = scan(theta, start=0, stop=2, count=11, fit=Gaussian, frames=5, save="gaussian.png")
