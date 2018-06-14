@@ -15,3 +15,4 @@ exclude_lines =
   pragma: no cover
   __repr__
   forever
+omit = Scans/Mocks.py
