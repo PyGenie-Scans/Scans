@@ -73,3 +73,47 @@ def dscan(motor, start, end, intervals, time):
                     gaps=intervals).plot(frames=-time)
     finally:
         motor(init)
+
+
+def rscan(motor, before=None, after=None, step=None, frames=None, **kwargs):
+    """An ISIS specific relative scan function
+
+    This function is identical to the normal scan function, but it
+    defaults to using relative positions, instead of absolute.
+
+    Example
+    -------
+    >>> rscan(coarsez, -20, 20, 1, 50)
+
+    Scan the CoarseZ motor from 20 mm below the current position
+    to position 20 mm above the current position (exclusive) in 1 mm steps.
+    At each point, take measure for 50 frames (about five seconds).
+    After the plot, the CoarseZ motor will move back to its original position.
+
+    Parameters
+    ----------
+    motor
+      The axis to scan
+    before
+      The initial position as an offset from the current position
+    after
+      The ending position as an offset from the current position
+    step
+      The absolute step size
+    frames
+      The number of pulse frames to measure at each point
+    """
+    init = motor()
+    try:
+        if before:
+            kwargs["before"] = before
+        if after:
+            kwargs["after"] = after
+        if step:
+            kwargs["step"] = step
+        if frames:
+            kwargs["frames"] = frames
+
+        return scan(motor, **kwargs)
+    finally:
+        motor(init)

@@ -32,5 +32,5 @@ else:
     _all += ["scan"]
 
 # pylint: disable=wrong-import-position
-from .Spec import ascan, dscan  # noqa: F403,F401,E501
-_all += ["ascan", "dscan"]
+from .Spec import ascan, dscan, rscan  # noqa: F403,F401,E501
+_all += ["ascan", "dscan", "rscan"]

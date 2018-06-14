@@ -39,6 +39,11 @@ Scans.Scans
 .. automodule:: Scans.Scans
    :members:
 
+Scans.Spec
+-----------
+.. automodule:: Scans.Spec
+   :members:
+
 Scans.Util
 ----------
 .. automodule:: Scans.Util

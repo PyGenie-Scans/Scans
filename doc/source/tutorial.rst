@@ -127,6 +127,18 @@ Plot Motor Scan
   Taking a count at theta=3.50 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
 
+  Since relative scans are fairly common, there's a built in
+  :meth:`Scans.Spec.rscan` method which defaults to a relative scan,
+  instead of an absolute.
+
+  >>> rscan(theta, -1, 1, 0.5, 5)
+  Taking a count at theta=3.00 and two theta=0.00
+  Taking a count at theta=3.50 and two theta=0.00
+  Taking a count at theta=4.00 and two theta=0.00
+  Taking a count at theta=4.50 and two theta=0.00
+  >>> theta
+  Theta is at 4.0
+
   .. note:: Some combinations of values do not provide enough
 	    information to create a scan.  A :class:`RuntimeError`
 	    will be thrown if a scan cannot be constructed
