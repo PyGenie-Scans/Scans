@@ -16,7 +16,9 @@ g.get_frames = lambda: g.frames
 
 def cget(block):
     """Fake cget for the fake genie_python"""
-    return {"value": instrument[block]}
+    if block in instrument:
+        return {"value": instrument[block]}
+    return None
 
 
 def cset(block, value):
