@@ -199,7 +199,7 @@ Motor Objects
   >>> scan("theta", start=0, stop=10, stride=2, frames=5)
   Traceback (most recent call last):
       ...
-  KeyError: 'theta'
+  RuntimeError: Unknown block theta.  Does the capitalisation match IBEX?
   >>> scan(True, start=0, stop=10, count=5) # doctest: +NORMALIZE_WHITESPACE
   Traceback (most recent call last):
       ...
