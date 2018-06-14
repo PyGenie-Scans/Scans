@@ -150,4 +150,7 @@ def populate():
     if g and g.get_blocks() is None:
         return
     for i in g.get_blocks():
-        __builtins__[i.upper()] = BlockMotion(i)
+        temp = BlockMotion(i)
+        __builtins__[i.upper()] = temp
+        __builtins__[i] = temp
+        __builtins__[i.lower()] = temp
