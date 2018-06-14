@@ -1,70 +1,6 @@
 Tutorial
 ********
 
-Introduction
-============
-
-  This is a proposal for an improved system for running scans on the
-  instrument.  The idea is to use ``Scan`` objects to represent the parts
-  of the scan.  These scan objects form an algebra, making them easier
-  to compose than using ``for`` loops.  These scan objects are mainly
-  intended as tools for the instrument scientists for creating a higher
-  level interface that the users will interact with.
-
-
-Design Goals
-============
-
-  We desire the following traits in the Scanning system
-
-
-User simplicity
----------------
-
-  The users need to be able to perform simple scans without thinking
-  about object orient programming or algebraic data types.  Performing a
-  basic scan should always be a one liner.  Making modified versions of
-  that scan should require learning a modification of that command and
-  not an entirely new structure.  Common, sensible user options should
-  be available and sane defaults given.
-
-  The code should also take advantage of Python's built in documentation
-  system to allow for discoverability of all of the functionality of
-  these scripts.
-
-
-Composability
--------------
-
-  The code should trivially allow combining smaller scripts into a
-  larger script.  This ensures that, as long as the smaller scripts are
-  bug free, the larger scripts will also be free of bugs by
-  construction.
-
-
-Functionality
--------------
-
-  The code should be able to perform all of the tasks that might involve
-  scanning on the beamline, from the common place to the irregular.
-
-  Plotting: It should be possible to plot any readback value as a function
-	    of any set of motor positions.  Scans of multiple axes should
-	    be able to either plot multiple labelled lines or a 2D heatmap
-  Measuring: Performing a full series of measurements should only be a
-	     minor modification of the plotting command
-  Fitting: The user should be capable of performing fits on curves to
-	   extract values of interest.  Common fitting routines should be
-	   a simple string while still accepting custom functions for
-	   exceptional circumstances
-  Spacing: It should be possible to space points both linearly and
-	   logarithmically.
-  Prediction: It should be possible to estimate the time needed for a scan
-	      before the scan is performed.
-
-
-Examples
-========
 
   These are examples of some basic scans that the user might perform
   on the high level interface.  The examples have run on a virtual
@@ -254,10 +190,12 @@ Motor Objects
   Traceback (most recent call last):
       ...
   KeyError: 'theta'
-  >>> scan(True, start=0, stop=10, count=5)
+  >>> scan(True, start=0, stop=10, count=5) # doctest: +NORMALIZE_WHITESPACE
   Traceback (most recent call last):
       ...
-  TypeError: Cannot run scan on axis True. Try a string or a motion object instead.
+  TypeError: Cannot run scan on axis True. Try a string or a motion
+  object instead.  It's also possible that you may need to rerun
+  populate() to recreate your motion axes.
 
 Perform Fits
 ------------
@@ -461,7 +399,9 @@ SPEC compatibility
 
   As a convenience to users with an x-ray background, the `ascan` and
   dscan from SPEC have been implemented on top of the scanning
-  interface.
+  interface.  The only major change is that negative times now
+  represent a number of frames instead of a monitor count, since
+  waiting for a monitor count is currently unsupported.
 
   >>> ascan(theta, 0, 2, 10, 1)
   Taking a count at theta=0.00 and two theta=3.00
@@ -476,12 +416,12 @@ SPEC compatibility
   Taking a count at theta=1.80 and two theta=3.00
   Taking a count at theta=2.00 and two theta=3.00
   >>> theta(0.5)
-  >>> dscan(theta, -1, 1, 10, -0.1)
+  >>> dscan(theta, -1, 1, 10, -50)
   Traceback (most recent call last):
       ...
   RuntimeError: Position -0.5 is below lower limit 0 of motor Theta
   >>> theta(2.5)
-  >>> dscan(theta, -1, 1, 10, -0.01)
+  >>> dscan(theta, -1, 1, 10, -50)
   Taking a count at theta=1.50 and two theta=3.00
   Taking a count at theta=1.70 and two theta=3.00
   Taking a count at theta=1.90 and two theta=3.00
@@ -595,13 +535,70 @@ Position Commands
 	  always take precedence over "gaps"
   :gaps: The number steps to take.  The total number of measurements is
 	 always one greater than the number of gaps.
-  :stride: A /requested/, but not /mandatory/, step size.  Users often know
+  :stride: A *requested*, but not *mandatory*, step size.  Users often know
 	   the range over which they wish to scan and their desired
 	   scanning resolution.  ``stride`` measured the entire range, but
 	   may increase the resolution to give equally spaced measurements.
-	   ``stride` always take precedence over `step``
+	   ``stride`` always take precedence over ``step``
   :step: A mandatory step size.  If the request measurement range is not an
 	 integer number of steps, the measurement will stop before the
 	 requested end.
 
   See the :py:func:``Scans.Util.get_points`` function for more informatoin on the parameters.
+
+Design Goals
+============
+
+  This is a proposal for an improved system for running scans on the
+  instrument.  The idea is to use ``Scan`` objects to represent the parts
+  of the scan.  These scan objects form an algebra, making them easier
+  to compose than using ``for`` loops.  These scan objects are mainly
+  intended as tools for the instrument scientists for creating a higher
+  level interface that the users will interact with.
+
+  We desire the following traits in the Scanning system
+
+
+User simplicity
+---------------
+
+  The users need to be able to perform simple scans without thinking
+  about object orient programming or algebraic data types.  Performing a
+  basic scan should always be a one liner.  Making modified versions of
+  that scan should require learning a modification of that command and
+  not an entirely new structure.  Common, sensible user options should
+  be available and sane defaults given.
+
+  The code should also take advantage of Python's built in documentation
+  system to allow for discoverability of all of the functionality of
+  these scripts.
+
+
+Composability
+-------------
+
+  The code should trivially allow combining smaller scripts into a
+  larger script.  This ensures that, as long as the smaller scripts are
+  bug free, the larger scripts will also be free of bugs by
+  construction.
+
+
+Functionality
+-------------
+
+  The code should be able to perform all of the tasks that might involve
+  scanning on the beamline, from the common place to the irregular.
+
+  Plotting: It should be possible to plot any readback value as a function
+	    of any set of motor positions.  Scans of multiple axes should
+	    be able to either plot multiple labelled lines or a 2D heatmap
+  Measuring: Performing a full series of measurements should only be a
+	     minor modification of the plotting command
+  Fitting: The user should be capable of performing fits on curves to
+	   extract values of interest.  Common fitting routines should be
+	   a simple string while still accepting custom functions for
+	   exceptional circumstances
+  Spacing: It should be possible to space points both linearly and
+	   logarithmically.
+  Prediction: It should be possible to estimate the time needed for a scan
+	      before the scan is performed.
