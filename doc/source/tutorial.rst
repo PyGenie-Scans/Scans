@@ -127,6 +127,16 @@ Plot Motor Scan
   Taking a count at theta=3.50 and two theta=0.00
   Taking a count at theta=4.00 and two theta=0.00
 
+  .. note:: Some combinations of values do not provide enough
+	    information to create a scan.  A :class:`RuntimeError`
+	    will be thrown if a scan cannot be constructed
+
+	    >>> scan(theta, start=0, stop=0.6, after=2)
+	    Traceback (most recent call last):
+	    ...
+	    RuntimeError: Unable to build a scan with that set of options.
+
+
 Motor Objects
 -------------
 
