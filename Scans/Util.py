@@ -198,8 +198,10 @@ def make_scan(defaults):
             motion = BlockMotion(motion)
         else:
             raise TypeError(
-                "Cannot run scan on axis {}. Try a string or a "
-                "motion object instead.".format(motion))
+                "Cannot run scan on axis {}. Try a string or a motion "
+                "object instead.  It's also possible that you may "
+                "need to rerun populate() to recreate your motion "
+                "axes." .format(motion))
 
         points = get_points(motion(), **kwargs)
 

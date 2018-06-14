@@ -254,10 +254,12 @@ Motor Objects
   Traceback (most recent call last):
       ...
   KeyError: 'theta'
-  >>> scan(True, start=0, stop=10, count=5)
+  >>> scan(True, start=0, stop=10, count=5) # doctest: +NORMALIZE_WHITESPACE
   Traceback (most recent call last):
       ...
-  TypeError: Cannot run scan on axis True. Try a string or a motion object instead.
+  TypeError: Cannot run scan on axis True. Try a string or a motion
+  object instead.  It's also possible that you may need to rerun
+  populate() to recreate your motion axes.
 
 Perform Fits
 ------------
