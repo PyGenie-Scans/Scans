@@ -19,10 +19,11 @@ _all = Fit.__all__[:]
 
 populate()
 _all += ["populate"]
-if "LARMOR" in host:
+# Cannot test actual instrument loading
+if "LARMOR" in host:  # pragma: no cover
     from .Larmor import scan, pol_measure, fast_pol_measure  # noqa: F401
     _all += ["populate", "scan", "pol_measure", "fast_pol_measure"]
-elif "ZOOM" in host:
+elif "ZOOM" in host:  # pragma: no cover
     from .Zoom import scan, monitor1, monitor2, monitor3, monitor4  # noqa: F403,F401,E501
     _all += ["scan", "monitor1", "monitor2",
              "monitor3", "monitor4"]
