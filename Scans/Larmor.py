@@ -54,10 +54,12 @@ class Larmor(Defaults):
 def get_user_dir():
     """Move to the current user directory"""
     base = r"U:/Users/"
-    dirs = [[d for d in os.listdir(x)
-             if os.path.isdir(d)]
+    dirs = [[os.path.join(base,x,d)
+             for d in os.listdir(os.path.join(base,x))
+             if os.path.isdir(os.path.join(base,x,d))]
             for x in os.listdir(base)
-            if os.path.isdir(x)]
+            if os.path.isdir(os.path.join(base,x))]
+    dirs = [x for x in dirs if x]
     result = max([max(x, key=os.path.getmtime)
                   for x in dirs],
                  key=os.path.getmtime)
