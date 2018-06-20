@@ -10,8 +10,8 @@ import numpy as np
 g = Mock()
 g.period = 0
 g.frames = 0
-g.get_period = lambda: g.period
-g.get_frames = lambda: g.frames
+g.get_period.side_effect = lambda: g.period
+g.get_frames.side_effect = lambda: g.frames
 
 
 def cget(block):
@@ -26,13 +26,13 @@ def cset(block, value):
     instrument[block] = value
 
 
-g.cget = cget
-g.cset = cset
+g.cget.side_effect = cget
+g.cset.side_effect = cset
 
 
 instrument = {"Theta": 0, "Two_Theta": 0}
 
-g.get_blocks = instrument.keys
+g.get_blocks.side_effect = instrument.keys
 
 
 def fake_spectrum(channel, period):  # pragma: no cover
@@ -49,7 +49,7 @@ def fake_spectrum(channel, period):  # pragma: no cover
     return {"signal": base}
 
 
-g.get_spectrum = fake_spectrum
+g.get_spectrum.side_effect = fake_spectrum
 
 lm = Mock()
 
