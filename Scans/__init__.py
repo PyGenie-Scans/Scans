@@ -12,12 +12,14 @@ from socket import gethostname
 from .Fit import *  # noqa: F403,F401
 from . import Fit
 from .Motion import populate
+from multiprocessing import current_process
 
 host = gethostname().upper()
 
 _all = Fit.__all__[:]
 
-populate()
+if current_process().name == "MainProcess":
+    populate()
 _all += ["populate"]
 # Cannot test actual instrument loading
 if "LARMOR" in host:  # pragma: no cover
