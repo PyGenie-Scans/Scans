@@ -9,6 +9,7 @@ from .Motion import Motion, BlockMotion
 
 TIME_KEYS = ["frames", "uamps", "seconds", "minutes", "hours"]
 
+
 def get_points(
         current,
         start=None, stop=None,
