@@ -17,6 +17,9 @@ class DetectorManager(object):
         return self
 
     def __enter__(self):
+        if g.get_runstate() != "SETUP":  # pragma: no cover
+            raise RuntimeError("Cannot start scan while already in a run!" +
+                               " Current state is: " + str(g.get_runstate()))
         return self._f
 
     def __exit__(self, typ, value, traceback):
@@ -59,6 +62,9 @@ class DaePeriods(DetectorManager):
         return self
 
     def __enter__(self):
+        if g.get_runstate() != "SETUP":  # pragma: no cover
+            raise RuntimeError("Cannot start scan while already in a run!" +
+                               " Current state is: " + str(g.get_runstate()))
         kwargs = self._kwargs
         if "title" in kwargs:
             title = kwargs["title"]

@@ -141,10 +141,6 @@ class Scan(object):
         import warnings
         warnings.simplefilter("ignore", UserWarning)
 
-        if g and g.get_runstate() != "SETUP":  # pragma: no cover
-            raise RuntimeError("Cannot start scan while already in a run!" +
-                               " Current state is: " + str(g.get_runstate()))
-
         detector = self._normalise_detector(detector)
         axis = NBPlot()
 
