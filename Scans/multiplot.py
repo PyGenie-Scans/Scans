@@ -94,9 +94,6 @@ class NBPlot(object):
     """
     def __init__(self, **kwargs):
         self.plot_pipe, plotter_pipe = Pipe()
-        warning("Python will soon give an Error message about get_block_names."
-                " Please ignore that error message.  Everything is working as"
-                " expected.")
         self.plotter = ProcessPlotter(**kwargs)
         self.plot_process = Process(target=self.plotter,
                                     args=(plotter_pipe,))
