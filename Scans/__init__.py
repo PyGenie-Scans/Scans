@@ -9,10 +9,10 @@ from __future__ import absolute_import
 # understand, so we need to turn off some warnings
 # pylint: disable=wildcard-import, unused-import, unused-wildcard-import
 from socket import gethostname
+from multiprocessing import current_process
 from .Fit import *  # noqa: F403,F401
 from . import Fit
 from .Motion import populate
-from multiprocessing import current_process
 
 host = gethostname().upper()
 
