@@ -52,3 +52,13 @@ def fake_spectrum(channel, period):  # pragma: no cover
 g.get_spectrum = fake_spectrum
 
 lm = Mock()
+
+RUNSTATE = "SETUP"
+
+
+def get_runstate():
+    """Get the run state of the instrument"""
+    return RUNSTATE
+
+
+g.get_runstate.side_effect = get_runstate
