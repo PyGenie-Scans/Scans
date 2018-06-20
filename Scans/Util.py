@@ -7,6 +7,7 @@ import numpy as np
 from .Scans import SimpleScan
 from .Motion import Motion, BlockMotion
 
+TIME_KEYS = ["frames", "uamps", "seconds", "minutes", "hours"]
 
 def get_points(
         current,
@@ -210,7 +211,7 @@ def make_scan(defaults):
 
         scn = SimpleScan(motion, points, defaults)
         if any([x in kwargs for x in
-                ["frames", "uamps", "seconds", "minutes", "hours"]]):
+                TIME_KEYS]):
             if "fit" in kwargs:
                 return scn.fit(**kwargs)
             return scn.plot(**kwargs)

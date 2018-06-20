@@ -27,6 +27,11 @@ except ImportError:
 from .multiplot import NBPlot
 from .Monoid import Average
 
+TIME_KEYS = ["frames", "uamps", "seconds", "minutes", "hours"]
+
+def just_times(kwargs):
+    return {x: kwargs[x] for x in kwargs
+            if x in TIME_KEYS}
 
 def merge_dicts(x, y):
     """Given two dicts, merge them into a new dict as a shallow copy."""
@@ -154,7 +159,7 @@ class Scan(object):
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
-                    value = detect(**kwargs)
+                    value = detect(**just_times(kwargs))
                     if isinstance(value, float):
                         value = Average(value)
                     if position in xs:
