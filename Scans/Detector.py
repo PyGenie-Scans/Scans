@@ -73,7 +73,12 @@ class DaePeriods(DetectorManager):
         g.change_title(title)
         g.change(nperiods=self.period_function(self._scan))
         g.begin(paused=1)
-        return self._f
+        def wrap(*args, **kwargs):
+            x = self._f(*args, **kwargs)
+            g.change_period(1+g.get_period())
+            return x
+
+        return wrap
 
     def __exit__(self, typ, value, traceback):
         if self._save:

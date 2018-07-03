@@ -33,11 +33,17 @@ class Larmor(Defaults):
     @staticmethod
     @dae_periods(lm.setuplarmor_transmission)
     def detector(**kwargs):
+        local_kwargs = {}
+        if "frames" in kwargs:
+            local_kwargs["frames"] = kwargs["frames"] + g.get_frames()
+        if "uamps" in kwargs:
+            local_kwargs["uamps"] = kwargs["uamps"] + g.get_uamps()
         g.resume()
-        g.waitfor(**kwargs)
-        temp = sum(g.get_spectrum(4)["signal"])
-        base = sum(g.get_spectrum(1)["signal"])
+
+        g.waitfor(**local_kwargs)
         g.pause()
+        temp = sum(g.get_spectrum(4, period=g.get_period())["signal"])
+        base = sum(g.get_spectrum(1, period=g.get_period())["signal"])
         return Average(temp*100, count=base)
 
     @staticmethod
