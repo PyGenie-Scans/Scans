@@ -18,7 +18,7 @@ host = gethostname().upper()
 
 _all = Fit.__all__[:]
 
-if current_process().name == "MainProcess":
+if callable(current_process) and current_process().name == "MainProcess":
     populate()
 _all += ["populate"]
 # Cannot test actual instrument loading
