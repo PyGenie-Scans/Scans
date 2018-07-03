@@ -1,4 +1,5 @@
 """This module adds a helper class for detectors."""
+from functools import wraps
 try:
     # pylint: disable=import-error
     from genie_python import genie as g
@@ -73,7 +74,10 @@ class DaePeriods(DetectorManager):
         g.change_title(title)
         g.change(nperiods=self.period_function(self._scan))
         g.begin(paused=1)
+
+        @wraps(self._f)
         def wrap(*args, **kwargs):
+            """Wrapped function to change periods"""
             x = self._f(*args, **kwargs)
             g.change_period(1+g.get_period())
             return x
