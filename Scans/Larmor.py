@@ -25,13 +25,20 @@ from .Monoid import Polarisation, Average, MonoidList
 from .Util import make_scan
 
 
+def _trans_mode():
+    """Setup the instrument for a simple transmission measurement."""
+    lm.setuplarmor_transmission()
+    g.cset(m4trans=0)
+    g.waitfor_move()
+
+
 class Larmor(Defaults):
     """
     This class represents the default functions for the Larmor instrument.
     """
 
     @staticmethod
-    @dae_periods(lm.setuplarmor_transmission)
+    @dae_periods(_trans_mode)
     def detector(**kwargs):
         local_kwargs = {}
         if "frames" in kwargs:
