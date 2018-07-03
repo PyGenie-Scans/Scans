@@ -7,7 +7,7 @@ utilities a user could be expected to need at a beamline.
 from __future__ import absolute_import
 # We are doing some trickery with the imports that pylint doesn't
 # understand, so we need to turn off some warnings
-# pylint: disable=wildcard-import, unused-import, unused-wildcard-import
+# pylint: disable=wildcard-import, unused-import, unused-wildcard-import, not-callable
 from socket import gethostname
 from multiprocessing import current_process
 from .Fit import *  # noqa: F403,F401
@@ -18,7 +18,7 @@ host = gethostname().upper()
 
 _all = Fit.__all__[:]
 
-if callable(current_process) and current_process().name == "MainProcess":
+if current_process().name == "MainProcess":
     populate()
 _all += ["populate"]
 # Cannot test actual instrument loading
