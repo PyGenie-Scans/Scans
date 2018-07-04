@@ -42,9 +42,20 @@ class Monoid(object):
     def __add__(self, x):
         pass
 
-    @abstractmethod
-    def __iadd__(self, x):
-        pass
+    def __radd__(self, x):
+        return self + x
+
+    def pure(self, x):
+        """Turn a number into a member of this monoid"""
+        return self.__class__(x)
+
+    def upgrade(self, x):
+        """Ensure that a value is a member of this monoid"""
+        if x == 0 or x == 0.0:
+            return self.zero()
+        if not isinstance(x, self.__class__):
+            return self.pure(x)
+        return x
 
 
 class Average(Monoid):
@@ -61,21 +72,10 @@ class Average(Monoid):
         return float(self.total) / float(self.count)
 
     def __add__(self, y):
-        if y == 0:
-            y = self.zero()
+        y = self.upgrade(y)
         return Average(
             self.total + y.total,
             self.count + y.count)
-
-    def __iadd__(self, y):
-        if y == 0:
-            y = self.zero()
-        self.total += y.total
-        self.count += y.count
-        return self
-
-    def __radd__(self, y):
-        return self + y
 
     @staticmethod
     def zero():
@@ -105,15 +105,8 @@ class Sum(Monoid):
     def __float__(self):
         return float(self.total)
 
-    def __iadd__(self, y):
-        if y == 0:
-            y = self.zero()
-        self.total += y.total
-        return self
-
     def __add__(self, y):
-        if y == 0:
-            y = self.zero()
+        y = self.upgrade(y)
         return Sum(self.total + y.total)
 
     @staticmethod
@@ -135,26 +128,18 @@ class Polarisation(Monoid):
     This monoid calculates the polarisation from the total of all of
     the up and down counts.
     """
-    def __init__(self, ups, downs):
+    def __init__(self, ups, downs=0):
         self.ups = ups
         self.downs = downs
 
     def __float__(self):
         if float(self.ups) + float(self.downs) == 0:
-            return 0.0
+            return np.nan
         return (float(self.ups) - float(self.downs)) / \
             (float(self.ups) + float(self.downs))
 
-    def __iadd__(self, y):
-        if y == 0 or y == 0.0:
-            y = self.zero()
-        self.ups += y.ups
-        self.downs += y.downs
-        return self
-
     def __add__(self, y):
-        if y == 0:
-            y = self.zero()
+        y = self.upgrade(y)
         return Polarisation(
             self.ups + y.ups,
             self.downs + y.downs)
@@ -162,9 +147,25 @@ class Polarisation(Monoid):
     def err(self):
         if float(self.ups) + float(self.downs) == 0:
             return 0.0
-        return float(self)*np.sqrt(self.downs.err()**2+self.ups.err()**2) \
-            * np.sqrt((float(self.ups)-float(self.downs))**-2 +
-                      (float(self.ups)+float(self.downs))**-2)
+        if isinstance(self.ups, Monoid):
+            ups = self.ups
+        else:
+            ups = Sum(self.ups)
+        if isinstance(self.downs, Monoid):
+            downs = self.downs
+        else:
+            downs = Sum(self.downs)
+
+        # If ups=downs, then the numerator has an infinite relative
+        # error, so the relative error of the denominator can be
+        # ignored
+        if float(ups) == float(downs):
+            return np.sqrt(
+                downs.err()**2+ups.err()**2)/(float(ups)+float(downs))
+
+        return float(self)*np.sqrt(downs.err()**2+ups.err()**2) \
+            * np.sqrt((float(ups)-float(downs))**-2 +
+                      (float(ups)+float(downs))**-2)
 
     @staticmethod
     def zero():
@@ -184,9 +185,6 @@ class MonoidList(Monoid):
     def __init__(self, values):
         self.values = values
 
-    def __float__(self):
-        return [float(x) for x in self.values]
-
     def zero(self):
         return [x.zero() for x in self.values]
 
@@ -195,18 +193,13 @@ class MonoidList(Monoid):
             y = self.zero()
         return MonoidList([a + b for a, b in zip(self.values, y)])
 
-    def __iadd__(self, y):
-        if y == 0:
-            y = self.zero()
-        for value, update in zip(self.values, y):
-            value += update
-        return self
-
     def __str__(self):
-        return str([str(x) for x in self.values])
+        return "[{}]".format(
+            ", ".join([str(x) for x in self]))
 
     def __repr__(self):
-        return "MonoidList({})".format([repr(x) for x in self.values])
+        return "MonoidList([{}])".format(
+            ", ".join([repr(x) for x in self.values]))
 
     def __iter__(self):
         for x in self.values:

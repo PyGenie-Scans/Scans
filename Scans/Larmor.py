@@ -8,6 +8,7 @@ environment.
 
 """
 from __future__ import print_function
+import os.path
 import numpy as np
 try:
     # pylint: disable=import-error
@@ -18,9 +19,17 @@ try:
     import LSS.SANSroutines as lm  # pylint: disable=import-error
 except ImportError:
     from .Mocks import lm
-from .Util import make_scan, make_estimator
 from .Defaults import Defaults
+from .Detector import dae_periods
 from .Monoid import Polarisation, Average, MonoidList
+from .Util import make_scan
+
+
+def _trans_mode():
+    """Setup the instrument for a simple transmission measurement."""
+    lm.setuplarmor_transmission()
+    g.cset(m4trans=0)
+    g.waitfor_move()
 
 
 class Larmor(Defaults):
@@ -29,58 +38,52 @@ class Larmor(Defaults):
     """
 
     @staticmethod
-    def measure(title, position, **kwargs):
-        g.change_title(title.format(**position))
-        g.begin()
-        g.waitfor(**kwargs)
-        g.end()
-
-    @staticmethod
+    @dae_periods(_trans_mode)
     def detector(**kwargs):
-        g.begin()
-        g.waitfor(**kwargs)
-        temp = sum(g.get_spectrum(4)["signal"])
-        base = sum(g.get_spectrum(1)["signal"])
-        g.abort()
-        return Average(temp*100, count=base)
+        local_kwargs = {}
+        if "frames" in kwargs:
+            local_kwargs["frames"] = kwargs["frames"] + g.get_frames()
+        if "uamps" in kwargs:
+            local_kwargs["uamps"] = kwargs["uamps"] + g.get_uamps()
+        g.resume()
 
-    @staticmethod
-    def time_estimator(**kwargs):
-        return make_estimator(1e6)(**kwargs)
+        g.waitfor(**local_kwargs)
+        g.pause()
+        temp = sum(g.get_spectrum(4, period=g.get_period())["signal"])
+        base = sum(g.get_spectrum(1, period=g.get_period())["signal"])
+        return Average(temp*100, count=base)
 
     @staticmethod
     def log_file():
         from datetime import datetime
         now = datetime.now()
-        return "U:/larmor_scan_{}_{}_{}_{}_{}_{}.dat".format(
+        return "larmor_scan_{}_{}_{}_{}_{}_{}.dat".format(
             now.year, now.month, now.day, now.hour, now.minute, now.second)
 
     def __repr__(self):
         return "Larmor()"
 
 
-def full_pol(**kwargs):
-    """
-    Get the up and down counts as a function of the
-    time of flight channel
-    """
-    lm.flipper1(1)
-    g.waitfor_move()
-    g.begin()
-    g.waitfor(**kwargs)
-    ups = sum(g.get_spectrum(11, 1)["signal"])
-    ups += sum(g.get_spectrum(12, 1)["signal"])
-    g.abort()
-    lm.flipper1(0)
-    g.waitfor_move()
-    g.begin()
-    g.waitfor(**kwargs)
-    down = sum(g.get_spectrum(11, 2)["signal"])
-    down += sum(g.get_spectrum(12, 2)["signal"])
-    g.abort()
-    return (ups, down)
+def get_user_dir():
+    """Move to the current user directory"""
+    base = r"U:/Users/"
+    dirs = [[os.path.join(base, x, d)
+             for d in os.listdir(os.path.join(base, x))
+             if os.path.isdir(os.path.join(base, x, d))]
+            for x in os.listdir(base)
+            if os.path.isdir(os.path.join(base, x))]
+    dirs = [x for x in dirs if x]
+    result = max([max(x, key=os.path.getmtime)
+                  for x in dirs],
+                 key=os.path.getmtime)
+    print("Setting path to {}".format(result))
+    os.chdir(result)
 
 
+get_user_dir()
+
+
+@dae_periods(lm.setuplarmor_echoscan, lambda x: 2*len(x))
 def pol_measure(**kwargs):
     """
     Get a single polarisation measurement
@@ -122,6 +125,7 @@ def pol_measure(**kwargs):
     return MonoidList(pols)
 
 
+@dae_periods()
 def fast_pol_measure(**kwargs):
     """
     Get a single polarisation measurement
@@ -146,7 +150,6 @@ def fast_pol_measure(**kwargs):
             ups = Average(
                 np.sum(spec1["signal"][slc])*100.0,
                 np.sum(mon1["signal"])*100.0)
-            # print(idx, slc, ups, down, ups.err(), down.err())
             pols[idx] += ups
     return MonoidList(pols)
 

@@ -13,7 +13,10 @@ from abc import ABCMeta, abstractmethod
 from collections import Iterable, OrderedDict
 import numpy as np
 from six import add_metaclass
+import six
 from .Monoid import ListOfMonoids, Monoid
+from .Detector import DetectorManager
+from .Fit import Fit
 
 try:
     # pylint: disable=import-error
@@ -23,6 +26,14 @@ except ImportError:
     g = None
 from .multiplot import NBPlot
 from .Monoid import Average
+
+TIME_KEYS = ["frames", "uamps", "seconds", "minutes", "hours"]
+
+
+def just_times(kwargs):
+    """Filter a dict down to just the waitfor members"""
+    return {x: kwargs[x] for x in kwargs
+            if x in TIME_KEYS}
 
 
 def merge_dicts(x, y):
@@ -43,6 +54,27 @@ def _plot_range(array):
             high + 0.05 * diff)
 
 
+def estimate(seconds=None, minutes=None, hours=None,
+             uamps=None, frames=None, **_):
+    """Estimate takes a measurement specification and predicts how long
+    the measurement will take in seconds.
+
+    """
+    if seconds or minutes or hours:
+        if not seconds:
+            seconds = 0
+        if not minutes:
+            minutes = 0
+        if not hours:
+            hours = 0
+        return seconds + 60 * minutes + 3600 * hours
+    elif frames:
+        return frames / 10.0
+    elif uamps:
+        return 90 * uamps
+    return 0
+
+
 @add_metaclass(ABCMeta)
 class Scan(object):
     """The virtual class that represents all controlled scans.  This class
@@ -50,6 +82,13 @@ class Scan(object):
     subclasses."""
 
     defaults = None
+
+    def _normalise_detector(self, detector):
+        if not detector:
+            detector = self.defaults.detector
+        if not isinstance(detector, DetectorManager):
+            detector = DetectorManager(detector)
+        return detector
 
     @abstractmethod
     def map(self, func):
@@ -110,12 +149,7 @@ class Scan(object):
         import warnings
         warnings.simplefilter("ignore", UserWarning)
 
-        if g and g.get_runstate() != "SETUP":
-            raise RuntimeError("Cannot start scan while already in a run!" +
-                               " Current state is: " + str(g.get_runstate()))
-
-        if not detector:
-            detector = self.defaults.detector
+        detector = self._normalise_detector(detector)
         axis = NBPlot()
 
         xs = []
@@ -123,11 +157,12 @@ class Scan(object):
 
         action_remainder = None
         try:
-            with open(self.defaults.log_file(), "w") as logfile:
+            with open(self.defaults.log_file(), "w") as logfile, \
+                 detector(self, save, **kwargs) as detect:
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
-                    value = detector(**kwargs)
+                    value = detect(**just_times(kwargs))
                     if isinstance(value, float):
                         value = Average(value)
                     if position in xs:
@@ -138,8 +173,12 @@ class Scan(object):
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
                     axis.clear()
                     axis.set_xlabel(label)
-                    rng = [1.05*self.min() - 0.05 * self.max(),
-                           1.05*self.max() - 0.05 * self.min()]
+                    if isinstance(self.min(), tuple):
+                        rng = [1.05*self.min()[0] - 0.05 * self.max()[0],
+                               1.05*self.max()[0] - 0.05 * self.min()[0]]
+                    else:
+                        rng = [1.05*self.min() - 0.05 * self.max(),
+                               1.05*self.max() - 0.05 * self.min()]
                     axis.set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
                     axis.set_ylim(rng[0], rng[1])
@@ -147,19 +186,22 @@ class Scan(object):
                     if action:
                         action_remainder = action(xs, ys,
                                                   axis)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # pragma: no cover
             pass
         if save:
             axis.savefig(save)
 
         return action_remainder
 
-    def measure(self, title, measure=None, **kwargs):
+    def measure(self, title, measure=None, **kwargs):  # pragma: no cover
         """Perform a full measurement at each position indicated by the scan.
         The title parameter gives the run's title and allows for
         values to be interpolated into it.  For instance, the string
         "{theta}" will include the current value of the theta motor if
         it is being iterated over.
+
+        WARNING: This function is deprecated and will be removed in
+        the next release.
 
         """
         if not measure:
@@ -173,6 +215,10 @@ class Scan(object):
         the scan and the fitting parameters are returned.
 
         """
+
+        if not isinstance(fit, Fit):  # pragma: no cover
+            raise TypeError("Cannot fit with {}. Perhaps you meant to call it"
+                            " as a function?".format(fit))
 
         result = self.plot(action=fit.fit_plot_action(), **kwargs)
 
@@ -196,9 +242,10 @@ class Scan(object):
 
         """
         from datetime import timedelta, datetime
-        est = self.defaults.time_estimator
-        total = len(self) * (pad + est(**kwargs))
-        if time:
+        total = len(self) * (pad + estimate(**kwargs))
+        # We can't test the time printing code since the result would
+        # always change.
+        if time:  # pragma: no cover
             delta = timedelta(0, total)
             print("The run would finish at {}".format(delta + datetime.now()))
         return total
@@ -336,8 +383,7 @@ class ProductScan(Scan):
             raise RuntimeError("Cannot start scan while already in a run!" +
                                " Current state is: " + str(g.get_runstate()))
 
-        if not detector:
-            detector = self.defaults.detector
+        detector = self._normalise_detector(detector)
         axis = NBPlot()
 
         xs = []
@@ -349,9 +395,10 @@ class ProductScan(Scan):
 
         action_remainder = None
         try:
-            with open(self.defaults.log_file(), "w") as logfile:
+            with open(self.defaults.log_file(), "w") as logfile, \
+                 detector(self, save) as detect:
                 for x in self:
-                    value = detector(**kwargs)
+                    value = detect(**kwargs)
 
                     keys = list(x.keys())
                     keys[1] = keys[1]
@@ -380,14 +427,13 @@ class ProductScan(Scan):
                     rng = [1.05*miny - 0.05 * maxy,
                            1.05*maxy - 0.05 * miny]
                     axis.set_ylim(rng[0], rng[1])
-                    nvalues = np.array([[float(z) for z in row]
-                                        for row in values])
                     axis.pcolor(
                         self._estimate_locations(xs, len(self.inner),
                                                  minx, maxx),
                         self._estimate_locations(ys, len(self.outer),
                                                  miny, maxy),
-                        nvalues)
+                        np.array([[float(z) for z in row]
+                                  for row in values]))
                     if action:
                         action_remainder = action(xs, values,
                                                   axis)
@@ -422,7 +468,7 @@ class ParallelScan(Scan):
         self.defaults = self.first.defaults
 
     def __iter__(self):
-        for x, y in zip(self.first, self.second):
+        for x, y in six.moves.zip(self.first, self.second):
             yield merge_dicts(x, y)
 
     def __repr__(self):
@@ -451,7 +497,9 @@ class ParallelScan(Scan):
         return (self.first.max(), self.second.max())
 
 
-class ForeverScan(Scan):
+# We can't test the forever scan by definition, hence the no cover
+# pragma
+class ForeverScan(Scan):  # pragma: no cover
     """
     ForeverScan repeats the same scan over and over again to improve
     the statistics until the user manually halts the scan.

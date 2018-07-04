@@ -1,0 +1,19 @@
+[run]
+# branch = True
+
+omit =
+  # We can't test the actual instruments
+  Scans/Larmor.py
+  Scans/Zoom.py
+  # We don't want to test the mock instrument
+  Scans/Mocks.py
+
+[report]
+include = Scans/*
+exclude_lines =
+  if __name__ == __main__:
+  pass
+  np.nan
+  pragma: no cover
+  __repr__
+  forever

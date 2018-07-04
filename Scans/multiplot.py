@@ -4,7 +4,6 @@ from __future__ import print_function
 from multiprocessing import Process, Pipe
 import sys
 import threading
-import numpy as np
 
 import matplotlib.pyplot as plt
 
@@ -15,7 +14,8 @@ if sys.executable == '':
     sys.executable = "C:/Instrument/Apps/Python/python.exe"
 
 
-class ProcessPlotter(object):
+# Use a no cover pragma since coverage can't see the other process
+class ProcessPlotter(object):  # pragma: no cover
     """
     This object maintains a separate a separate process at the OS level
     which manages a matplotlib plot. This is an incredibly stupid way
@@ -40,6 +40,8 @@ class ProcessPlotter(object):
         self.axis = None
         self.rehome = rehome
 
+        self._colorbar = None
+
     def poll_draw(self):
         """
         Update the graph with the latest commands
@@ -60,6 +62,11 @@ class ProcessPlotter(object):
                 if command[0] == "clf":
                     self.axis.cla()
                     continue
+                elif command[0] == "pcolor":
+                    temp = self.axis.pcolor(*command[1], **command[2])
+                    if self._colorbar:
+                        self._colorbar.remove()
+                    self._colorbar = plt.colorbar(temp)
                 if hasattr(self.axis, command[0]):
                     getattr(self.axis, command[0])(*command[1], **command[2])
                 elif hasattr(self.fig, command[0]):
@@ -113,28 +120,3 @@ class NBPlot(object):
 
     def __del__(self):
         self.join()
-
-
-def main():
-    """A simple test function of NBPlot"""
-    plot = NBPlot(rehome=False)
-    boondoggle = np.arange(0, 5e6, dtype=np.int64)
-    xs = []
-    ys = []
-    for i in range(10):
-        xs.append(i)
-        ys.append(i**2)
-        plot.clear()
-        plot.set_xlim(0, 10)
-        plot.plot(xs, ys)
-        plot.errorbar(xs, [y + 3 for y in ys],
-                      [4 for y in ys], fmt="rd")
-        print(i)
-        for _ in range(30):
-            boondoggle = np.sin(boondoggle**2)
-    plot.savefig("meta_test.png")
-    return plot.join()
-
-
-if __name__ == '__main__':
-    main()

@@ -11,22 +11,24 @@ try:
 except ImportError:
     g = None
 from .Defaults import Defaults
+from .Detector import dae_periods
 from .Motion import populate
 from .Monoid import Sum
-from .Util import make_scan, make_estimator
+from .Util import make_scan
 
 
 def zoom_monitor(spectrum):
     """A generating function for detectors for monitor spectra"""
+    @dae_periods()
     def monitor(**kwargs):
         """A simple detector for monitor number {}""".format(spectrum)
-        g.begin()
+        g.resume()
         g.waitfor(**kwargs)
         spec = g.get_spectrum(spectrum)
         while not spec:
             spec = g.get_spectrum(spectrum)
         temp = sum(spec["signal"])
-        g.abort()
+        g.pause()
         return Sum(temp)
     return monitor
 
@@ -36,20 +38,7 @@ class Zoom(Defaults):
     This class represents the default functions for the Zoom instrument.
     """
 
-    @staticmethod
-    def measure(title, position, **kwargs):
-        g.change_title(title.format(**position))
-        g.begin()
-        g.waitfor(**kwargs)
-        g.end()
-
     detector = zoom_monitor(4)
-
-    @staticmethod
-    def time_estimator(**kwargs):
-        # Double check this value
-        monitor_count_rate = 1e6
-        return make_estimator(monitor_count_rate)(**kwargs)
 
     @staticmethod
     def log_file():

@@ -1,3 +1,25 @@
+v0.3
+----
+
+- Detectors
+  - time estimation is now universal and doesn't need to be
+	reimplemented for each beamline.
+  - The `measure` function of the detector class has been removed,
+	as it was both unused and superceded by the generic detector facility.
+- Documentation
+  - Updated Guide for Instrument Scientists.
+- Interface
+  - Added SPEC compatability layer with functions ascan and dscan.
+- Plotting
+  - Fix plotting of Parallel Scans
+- Larmor
+  - Save user logs in proper user directory
+  - Set user directory on Load
+- Scanning
+  - Add support for scanning on blocks given in strings
+- Mocks
+  - Add cget and cset to mock genie_python
+
 v0.2
 ----
 

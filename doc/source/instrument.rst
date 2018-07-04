@@ -4,24 +4,23 @@ Guide for Instrument Scientists
 Introduction
 ============
 
-The instrument scientist is responsible for writing a single function,
-``scan``, which will create the necessary scan objects for the user.
-So as to minimize the work required of the instrument scientists, a
-set of utility functions exist to remove most of the boilerplate from
-this task.  The main point of entry will be the
+In theory, the instrument scientist is responsible for writing a
+single function, ``scan``, which will create the necessary scan
+objects for the user.  In practice, the writing this scan function is
+tricky and much of this project is about creating a generic scan
+function that minimises the boilerplate required from the instrument
+scientist.
+The main point of entry will be the
 :meth:`Scans.Util.make_scan` function.  Given a set of defaults
 defined by the instrument scientist, the ``make_scan`` function will
 create the necessary function. For example, on the Zoom instrument,
 the scanning function is simply defined by:
 
->>> from .Util import make_scan
->>> scan = make_scan(Zoom())
-
-Then, at the user's scripting prompt, all that is needed is a single import
-
->>> from Scans.Zoom import scan
+>>> from .Util import make_scan  #doctest: +SKIP
+>>> scan = make_scan(Zoom())  #doctest: +SKIP
 
 All that remains for the instrument scientist is to create a subclass
+(such as the `Zoom` class in the example above)
 of the :class:`Scans.Defaults.Defaults` to provide ``make_scan`` with
 the information that it needs.
 
@@ -29,31 +28,16 @@ Defaults
 ========
 
 The ``Defaults`` class requires the instrument scientist to implement
-four class methods.  If any of the four methods are missing, the class
+four class methods.  If either of the two methods are missing, the class
 will immediately throw an error on the first attempt to instantiate
 it.  This helps finding errors quickly, instead of in the middle of a
 measurement when the missing function is first needed.
-
-measure
--------
-
-The :meth:`Scans.Defaults.Defaults.measure` function should start a
-full measurement on the instrument.  It will take two positional
-arguments:
-
-:title: A string containing the title of the measurement
-:position: The current position of the instrument in the scan
-
-The function may also take additional keyword arguments that were
-passed by the user.
-
-This function is deprecated and may be removed in the future.
 
 detector
 --------
 
 The :meth:`Scans.Defaults.Defaults.detector` function should return
-the result of a single valued measurement.  This will most likely be
+the result of a measurement in a Monoid_.  This will most likely be
 either a total number of counts on a detector or transmission monitor.
 However, it is possible to provide more complicated measurements and
 values, such as taking a flipping measurement and returning a
@@ -61,34 +45,8 @@ polarisation.
 
 The value returned by the function should either be a raw count
 represented by a number or an instance of the
-:class:`Scans.Monoids.Monoid` class.  The Monoid_ class allows for
+:class:`Scans.Monoid.Monoid` class.  The Monoid_ class allows for
 multiple measurements to be combined correctly.
-
-time_estimator
---------------
-
-The :meth:`Scans.Defaults.Defaults.time_estimator` function calculates
-the expected number of seconds for a given measurement delay.  For
-example
-
->>> Zoom.time_estimator(frames=50)
-5.0
->>>
-
-As there is a large amount of boilerplate involved in all of the
-various parameter options available to ``time_estimator``,
-:meth:`Scans.Util.make_estimator` exists to generate more
-``time_estimator`` functions.  ``make_estimator`` takes a single
-parameter, which is a floating point number representing the neutron
-flux per second on the beam monitor.  It returns a function to
-calculate the time from the user's parameters.  The monitor count rate
-is necessary since that value is instrument dependent, unlike the
-length of a minute or the frame frequency.
-
-If no one is using the monitor count for specifying their scans, this
-may be removed in a later version and the time_estimator function
-could have a default value.  This would allow the ``Defaults`` class
-to provide a baseline version of the function.
 
 log_file
 --------
@@ -97,7 +55,7 @@ The :meth:`Scans.Defaults.Defaults.log_file` returns the path to a
 file where the results of the current scan should be stored.  This
 function should return a unique value for each scan, to ensure that
 previous results are not overwritten.  This can easily be achieved by
-appending the current date and time onto the filename.
+appending the current date and time onto the file name.
 
 Monoid
 ======
@@ -108,7 +66,7 @@ Mathematically, a monoid is a collection with the following properties:
 2) a ⊙ (b ⊙ c) = (a ⊙ b) ⊙ c
 3) There exists a zero element Z such that, a ⊙ Z = Z ⊙ a = a
 
-The more intuitive explanation is that a monoid promises use that we
+The more intuitive explanation is that a monoid promises us that we
 can combine many elements together and get back a single element.  Many common structures form monoids.
 
 Count
@@ -126,11 +84,14 @@ Unit Monoid
   value is that element and the operator just returns its first
   value.  For example, the set {🌲} is a monoid with zero element
   🌲 and a combining operator 🌲 ⊙ 🌲 = 🌲.
+Minimum
+  ∞ is the zero elemenent and the ⊙ operator simply returns the smallest of its operands
+A pair of monoids (m, n)
+  The zero element is (0ₘ, 0ₙ) and our ⊙ operator is defined so that (xₘ, xₙ) ⊙ (yₘ, yₙ) = (xₘ ⊙ yₘ, xₙ ⊙ yₙ)
 
-As a more complicated example, the collections of monoids is, in and
-of itself, a monoid.  The zero element is the unit monoid and the
-operator is the cartesian product (basically, just putting the two
-values together).  For example, since the Sum and Count are both
+The ability of a pair of monoids to form another monoid allows for the
+development of surprisingly deep structures.
+For example, since the Sum and Count are both
 monoids, then the combination (Sum, Count) is also a monoid.  We know
 that dividing the sum by the count will give us the average.  What the
 monoid convention provides, however, is a way to combine two averages
@@ -139,24 +100,110 @@ average of 6 and the other has an average of 4, I don't know what the
 average of the combined sets should be.  On the other hand, if I know
 that one set has a sum and count of (60, 10) and the other has (160,
 40), I know that the combined set has a sum and count of (220, 50) and
-the total average is 4.4.
+the total average is 4.4.  In a similar fashion, it is also possible
+to express the standard deviation as a monoid, allowing for a standard
+deviation that can be live updated as each data point arrives.
 
 Uncertainties
 -------------
 
 Although monoids do not natively contain a notion of uncertainty [#]_,
 the monoids used in this project could allow for the calculation of
-uncertainty.  Additionally, the initial design decision was that
+uncertainty.  The design decision was that
 adding that uncertainty calculation into the monoid provided enough
-utility and simplified the value enough to warrant its inclusion.
+utility and simplified the value enough to warrant its inclusion,
+despite the mathematical issues.  We may re-examine this issue in the future.
 
 .. [#] Returning to the Unit monoid example, there is no obvious
        implementation of uncertainty for {🌲}.
 
+Monoid Examples
+---------------
+
+Most of our monoids can be created fairly simply
+
+>>> from Scans.Monoid import *
+>>> s = Sum(2.0)
+>>> x = Average(1.0)
+>>> p = Polarisation(ups=100.0, downs=0.0)
+>>> lst = MonoidList([p, x, s])
+
+The first rule of monoids is that we can always add to values together
+
+>>> s + 3
+Sum(5.0)
+>>> x + Average(5, count=2)
+Average(6.0, count=3)
+>>> p + Polarisation(ups=100, downs=400)
+Polarisation(200.0, 400.0)
+>>> lst + [300, 3, Sum(1)]
+MonoidList([Polarisation(400.0, 0.0), Average(4.0, count=2), Sum(3.0)])
+
+The second rule of monoids is that adding zero to something *always*
+returns the original value.  This overrides other behaviours.
+
+>>> s + 0
+Sum(2.0)
+>>> x + 0
+Average(1.0, count=1)
+>>> x + Average(0)
+Average(1.0, count=2)
+>>> sum([x, x, 0, 0, 0, 8, Average(0), Average(0)])
+Average(10.0, count=5)
+>>> p + 0
+Polarisation(100.0, 0.0)
+>>> lst + 0
+MonoidList([Polarisation(100.0, 0.0), Average(1.0, count=1), Sum(2.0)])
+
+Where appropriate, monoids can be cast into a float
+>>> float(s)
+2.0
+>>> float(x)
+1.0
+>>> float(p)
+1.0
+
+Similarly, casting to a string is also available
+
+>>> str(s)
+'2.0'
+>>> str(x)
+'1.0'
+>>> str(p)
+'1.0'
+>>> str(lst)
+'[1.0, 1.0, 2.0]'
+
+Every element has an associate uncertainty
+
+>>> s.err()
+1.4142135623730951
+>>> lst.err()
+[0.1414213562373095, 1.0, 1.4142135623730951]
+>>> Polarisation(8.0, 8.0).err()
+0.25
+
+The MonoidList has a couple of extra list related functionality.  It
+can be iterated, like a normal list.
+
+>>> lst += [0, -3, 8]
+>>> for l in lst:
+...    print(l)
+1.0
+-1.0
+10.0
+
+You can also find the minimum and maximum value
+>>> lst.min()
+Average(-2.0, count=2)
+>>> lst.max()
+Sum(10.0)
+
+
 Models
 ======
 
-All models for fitting should deriving from the :class:`Scans.Fit.Fit`
+All models for fitting should derive from the :class:`Scans.Fit.Fit`
 class.  However, this class is likely too generic for common use, as
 it expects the instrument scientist to implement their own fitting
 procedures.  While this is useful for implementing classes like
@@ -164,14 +211,14 @@ procedures.  While this is useful for implementing classes like
 knowledge of the model to get an exact fitting procedure, most models
 will not need this level of control.  For this reason, there is a
 subclass :class:`Scans.Fit.CurveFit` which simplifies this work as
-much as possible.  Implementing a new model for fitting requires
-implementing three functions.
+much as possible.  Implementing a new model with `CurveFit` for fitting
+requires implementing three functions.
 
 _model
   This function should take a list of x coordinates as its first
   parameter.  The remaining function parameters should be the
   parameters of the model.  This function should return the value of
-  the model at those x-coordinates for the model with those parameters
+  the model at those x-coordinates for the model with the given parameters
 
 guess
   This function takes two parameters - the lists of x and y
@@ -185,3 +232,15 @@ readable
   returned by ``guess``.  It returns a dictionary with each parameter
   given a human readable name.  The purpose is to make it easier for
   users to understand the results of the fit.
+
+As of the current version, there is a nasty bug with `CurveFit`.
+Specifically, `CurveFit` relies on scipy.optimize, which load the
+Intel Math Kernel Library.  This library adds an operating system hook
+that crashes when the user presses Ctrl-C.  Since the hook is at a
+much lower level than Python, there is nothing that can be done at the
+Python level to handle the issue.  The result is that, while the
+fitting functions run properly, the python session will be permanently
+tainted so that Ctrl-C will now crash Python.  The system environment
+variable `FOR_DISABLE_CONSOLE_CTRL_HANDLER` is the official way of
+bypassing this issue, but I have not had luck with getting this to
+work within the genie-python environment.

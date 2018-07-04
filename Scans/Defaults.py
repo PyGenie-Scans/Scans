@@ -20,37 +20,12 @@ class Defaults(object):
 
     @staticmethod
     @abstractmethod
-    def measure(title, position, **kwargs):
-        """Perform a full measurement.
-
-        Parameters
-        ----------
-        title
-          The title for the run.
-        position
-          The current position in the scan
-
-        """
-        pass
-
-    @staticmethod
-    @abstractmethod
     def detector(**kwargs):
         """
         The default function for pulling a count off the detector.
         Takes the standard time settings (e.g. seconds, frames, uamps)
         as keyword arguments.
 
-        """
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def time_estimator(**kwargs):
-        """
-        The default function for estimating the number of seconds
-        needed by a time settings (e.g. seconds, frames, uamps) as
-        keyword arguments.
         """
         pass
 
