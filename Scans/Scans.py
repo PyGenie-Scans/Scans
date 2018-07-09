@@ -283,7 +283,7 @@ class SimpleScan(Scan):
         for i in self.values:
             self.action(i)
             dic = OrderedDict()
-            dic[self.name] = i
+            dic[self.name] = self.action()
             yield dic
 
     def __len__(self):
