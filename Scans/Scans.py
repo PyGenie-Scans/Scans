@@ -152,6 +152,7 @@ class Scan(object):
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
                  detector(self, save, **kwargs) as detect:
+                plt.clf()
                 plt.show(block=False)
                 for x in self:
                     # FIXME: Handle multidimensional plots
@@ -367,7 +368,7 @@ class ProductScan(Scan):
         return (self.outer.max(), self.inner.max())
 
     def plot(self, detector=None, save=None,
-             action=None, **kwargs):
+             action=None, cmap="viridis", **kwargs):
         """An overloading of Scan.plot to handle multidimensional
         scans."""
         import warnings
@@ -390,7 +391,9 @@ class ProductScan(Scan):
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
                  detector(self, save) as detect:
+                plt.clf()
                 plt.show(block=False)
+                cbar = None
                 for x in self:
                     value = detect(**kwargs)
 
@@ -421,13 +424,17 @@ class ProductScan(Scan):
                     rng = [1.05*miny - 0.05 * maxy,
                            1.05*maxy - 0.05 * miny]
                     plt.gca().set_ylim(rng[0], rng[1])
-                    plt.pcolor(
+                    temp = plt.pcolor(
                         self._estimate_locations(xs, len(self.inner),
                                                  minx, maxx),
                         self._estimate_locations(ys, len(self.outer),
                                                  miny, maxy),
                         np.array([[float(z) for z in row]
-                                  for row in values]))
+                                  for row in values]),
+                        cmap=cmap)
+                    if cbar:
+                        cbar.remove()
+                    cbar = plt.colorbar(temp)
                     if action:
                         action_remainder = action(xs, values, plt)
                     plt.draw()
