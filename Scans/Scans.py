@@ -367,6 +367,7 @@ class ProductScan(Scan):
     def max(self):
         return (self.outer.max(), self.inner.max())
 
+    # pylint: disable=arguments-differ
     def plot(self, detector=None, save=None,
              action=None, cmap="viridis", **kwargs):
         """An overloading of Scan.plot to handle multidimensional
@@ -398,8 +399,6 @@ class ProductScan(Scan):
                     value = detect(**kwargs)
 
                     keys = list(x.keys())
-                    keys[1] = keys[1]
-                    keys[0] = keys[0]
                     y = x[keys[0]]
                     x = x[keys[1]]
                     if isinstance(value, float):
@@ -416,19 +415,19 @@ class ProductScan(Scan):
                     plt.gca().cla()
                     plt.gca().set_xlabel(keys[1])
                     plt.gca().set_ylabel(keys[0])
-                    miny, minx = self.min()
-                    maxy, maxx = self.max()
-                    rng = [1.05*minx - 0.05 * maxx,
-                           1.05*maxx - 0.05 * minx]
-                    plt.gca().set_xlim(rng[0], rng[1])
-                    rng = [1.05*miny - 0.05 * maxy,
-                           1.05*maxy - 0.05 * miny]
-                    plt.gca().set_ylim(rng[0], rng[1])
+                    mins = self.min()
+                    maxs = self.max()
+                    plt.gca().set_xlim(
+                        1.05*mins[1] - 0.05 * maxs[1],
+                        1.05*maxs[1] - 0.05 * mins[1])
+                    plt.gca().set_ylim(
+                        1.05*mins[0] - 0.05 * maxs[0],
+                        1.05*maxs[0] - 0.05 * mins[0])
                     temp = plt.pcolor(
                         self._estimate_locations(xs, len(self.inner),
-                                                 minx, maxx),
+                                                 mins[1], maxs[1]),
                         self._estimate_locations(ys, len(self.outer),
-                                                 miny, maxy),
+                                                 mins[0], maxs[0]),
                         np.array([[float(z) for z in row]
                                   for row in values]),
                         cmap=cmap)
