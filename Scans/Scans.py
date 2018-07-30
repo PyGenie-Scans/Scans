@@ -165,7 +165,7 @@ class Scan(object):
                         xs.append(position)
                         ys.append(value)
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
-                    plt.cla()
+                    plt.gca().clear()
                     plt.gca().set_xlabel(label)
                     if isinstance(self.min(), tuple):
                         rng = [1.05*self.min()[0] - 0.05 * self.max()[0],
@@ -179,6 +179,7 @@ class Scan(object):
                     ys.plot(plt, xs)
                     if action:
                         action_remainder = action(xs, ys, plt)
+                    plt.draw()
         except KeyboardInterrupt:  # pragma: no cover
             pass
         if save:
@@ -408,7 +409,7 @@ class ProductScan(Scan):
                     else:
                         values[ys.index(y)][xs.index(x)] = value
                     logfile.write("{}\t{}\n".format(xs[-1], str(values[-1])))
-                    plt.cla()
+                    plt.gca().cla()
                     plt.gca().set_xlabel(keys[1])
                     plt.gca().set_ylabel(keys[0])
                     miny, minx = self.min()
@@ -429,6 +430,7 @@ class ProductScan(Scan):
                     if action:
                         action_remainder = action(xs, values,
                                                   axis)
+                    plt.draw()
         except KeyboardInterrupt:
             pass
         if save:
