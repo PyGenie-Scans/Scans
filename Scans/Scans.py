@@ -17,14 +17,7 @@ import six
 from .Monoid import ListOfMonoids, Monoid
 from .Detector import DetectorManager
 from .Fit import Fit
-
-try:
-    # pylint: disable=import-error
-    from genie_python import genie as g
-except ImportError:
-    # We must be in a test environment
-    g = None
-from .multiplot import NBPlot
+from .genie import g
 from .Monoid import Average
 
 TIME_KEYS = ["frames", "uamps", "seconds", "minutes", "hours"]

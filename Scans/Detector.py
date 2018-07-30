@@ -1,10 +1,6 @@
 """This module adds a helper class for detectors."""
 from functools import wraps
-try:
-    # pylint: disable=import-error
-    from genie_python import genie as g
-except ImportError:
-    from .Mocks import g
+from .genie import g
 
 
 class DetectorManager(object):
