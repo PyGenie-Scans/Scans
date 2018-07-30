@@ -14,6 +14,7 @@ from collections import Iterable, OrderedDict
 import numpy as np
 from six import add_metaclass
 import six
+import matplotlib.pyplot as plt
 from .Monoid import ListOfMonoids, Monoid
 from .Detector import DetectorManager
 from .Fit import Fit
@@ -143,7 +144,6 @@ class Scan(object):
         warnings.simplefilter("ignore", UserWarning)
 
         detector = self._normalise_detector(detector)
-        axis = NBPlot()
 
         xs = []
         ys = ListOfMonoids()
@@ -152,6 +152,7 @@ class Scan(object):
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
                  detector(self, save, **kwargs) as detect:
+                plt.show()
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
@@ -164,25 +165,24 @@ class Scan(object):
                         xs.append(position)
                         ys.append(value)
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
-                    axis.clear()
-                    axis.set_xlabel(label)
+                    plt.cla()
+                    plt.gca().set_xlabel(label)
                     if isinstance(self.min(), tuple):
                         rng = [1.05*self.min()[0] - 0.05 * self.max()[0],
                                1.05*self.max()[0] - 0.05 * self.min()[0]]
                     else:
                         rng = [1.05*self.min() - 0.05 * self.max(),
                                1.05*self.max() - 0.05 * self.min()]
-                    axis.set_xlim(rng[0], rng[1])
+                    plt.gca().set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
-                    axis.set_ylim(rng[0], rng[1])
-                    ys.plot(axis, xs)
+                    plt.gca().set_ylim(rng[0], rng[1])
+                    ys.plot(plt, xs)
                     if action:
-                        action_remainder = action(xs, ys,
-                                                  axis)
+                        action_remainder = action(xs, ys, plt)
         except KeyboardInterrupt:  # pragma: no cover
             pass
         if save:
-            axis.savefig(save)
+            plt.savefig(save)
 
         return action_remainder
 
@@ -377,7 +377,6 @@ class ProductScan(Scan):
                                " Current state is: " + str(g.get_runstate()))
 
         detector = self._normalise_detector(detector)
-        axis = NBPlot()
 
         xs = []
         ys = []
@@ -409,18 +408,18 @@ class ProductScan(Scan):
                     else:
                         values[ys.index(y)][xs.index(x)] = value
                     logfile.write("{}\t{}\n".format(xs[-1], str(values[-1])))
-                    axis.clear()
-                    axis.set_xlabel(keys[1])
-                    axis.set_ylabel(keys[0])
+                    plt.cla()
+                    plt.gca().set_xlabel(keys[1])
+                    plt.gca().set_ylabel(keys[0])
                     miny, minx = self.min()
                     maxy, maxx = self.max()
                     rng = [1.05*minx - 0.05 * maxx,
                            1.05*maxx - 0.05 * minx]
-                    axis.set_xlim(rng[0], rng[1])
+                    plt.gca().set_xlim(rng[0], rng[1])
                     rng = [1.05*miny - 0.05 * maxy,
                            1.05*maxy - 0.05 * miny]
-                    axis.set_ylim(rng[0], rng[1])
-                    axis.pcolor(
+                    plt.gca().set_ylim(rng[0], rng[1])
+                    plt.pcolor(
                         self._estimate_locations(xs, len(self.inner),
                                                  minx, maxx),
                         self._estimate_locations(ys, len(self.outer),
@@ -433,7 +432,7 @@ class ProductScan(Scan):
         except KeyboardInterrupt:
             pass
         if save:
-            axis.savefig(save)
+            plt.savefig(save)
 
         return action_remainder
 
