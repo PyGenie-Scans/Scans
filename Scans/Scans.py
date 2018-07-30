@@ -14,17 +14,11 @@ from collections import Iterable, OrderedDict
 import numpy as np
 from six import add_metaclass
 import six
+import matplotlib.pyplot as plt
 from .Monoid import ListOfMonoids, Monoid
 from .Detector import DetectorManager
 from .Fit import Fit
-
-try:
-    # pylint: disable=import-error
-    from genie_python import genie as g
-except ImportError:
-    # We must be in a test environment
-    g = None
-from .multiplot import NBPlot
+from .genie import g
 from .Monoid import Average
 
 TIME_KEYS = ["frames", "uamps", "seconds", "minutes", "hours"]
@@ -150,7 +144,6 @@ class Scan(object):
         warnings.simplefilter("ignore", UserWarning)
 
         detector = self._normalise_detector(detector)
-        axis = NBPlot()
 
         xs = []
         ys = ListOfMonoids()
@@ -159,6 +152,8 @@ class Scan(object):
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
                  detector(self, save, **kwargs) as detect:
+                plt.clf()
+                plt.show(block=False)
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
@@ -171,25 +166,25 @@ class Scan(object):
                         xs.append(position)
                         ys.append(value)
                     logfile.write("{}\t{}\n".format(xs[-1], str(ys[-1])))
-                    axis.clear()
-                    axis.set_xlabel(label)
+                    plt.gca().clear()
+                    plt.gca().set_xlabel(label)
                     if isinstance(self.min(), tuple):
                         rng = [1.05*self.min()[0] - 0.05 * self.max()[0],
                                1.05*self.max()[0] - 0.05 * self.min()[0]]
                     else:
                         rng = [1.05*self.min() - 0.05 * self.max(),
                                1.05*self.max() - 0.05 * self.min()]
-                    axis.set_xlim(rng[0], rng[1])
+                    plt.gca().set_xlim(rng[0], rng[1])
                     rng = _plot_range(ys)
-                    axis.set_ylim(rng[0], rng[1])
-                    ys.plot(axis, xs)
+                    plt.gca().set_ylim(rng[0], rng[1])
+                    ys.plot(plt, xs)
                     if action:
-                        action_remainder = action(xs, ys,
-                                                  axis)
+                        action_remainder = action(xs, ys, plt)
+                    plt.draw()
         except KeyboardInterrupt:  # pragma: no cover
             pass
         if save:
-            axis.savefig(save)
+            plt.savefig(save)
 
         return action_remainder
 
@@ -372,8 +367,9 @@ class ProductScan(Scan):
     def max(self):
         return (self.outer.max(), self.inner.max())
 
+    # pylint: disable=arguments-differ
     def plot(self, detector=None, save=None,
-             action=None, **kwargs):
+             action=None, cmap="viridis", **kwargs):
         """An overloading of Scan.plot to handle multidimensional
         scans."""
         import warnings
@@ -384,7 +380,6 @@ class ProductScan(Scan):
                                " Current state is: " + str(g.get_runstate()))
 
         detector = self._normalise_detector(detector)
-        axis = NBPlot()
 
         xs = []
         ys = []
@@ -397,12 +392,13 @@ class ProductScan(Scan):
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
                  detector(self, save) as detect:
+                plt.clf()
+                plt.show(block=False)
+                cbar = None
                 for x in self:
                     value = detect(**kwargs)
 
                     keys = list(x.keys())
-                    keys[1] = keys[1]
-                    keys[0] = keys[0]
                     y = x[keys[0]]
                     x = x[keys[1]]
                     if isinstance(value, float):
@@ -416,31 +412,35 @@ class ProductScan(Scan):
                     else:
                         values[ys.index(y)][xs.index(x)] = value
                     logfile.write("{}\t{}\n".format(xs[-1], str(values[-1])))
-                    axis.clear()
-                    axis.set_xlabel(keys[1])
-                    axis.set_ylabel(keys[0])
-                    miny, minx = self.min()
-                    maxy, maxx = self.max()
-                    rng = [1.05*minx - 0.05 * maxx,
-                           1.05*maxx - 0.05 * minx]
-                    axis.set_xlim(rng[0], rng[1])
-                    rng = [1.05*miny - 0.05 * maxy,
-                           1.05*maxy - 0.05 * miny]
-                    axis.set_ylim(rng[0], rng[1])
-                    axis.pcolor(
+                    plt.gca().cla()
+                    plt.gca().set_xlabel(keys[1])
+                    plt.gca().set_ylabel(keys[0])
+                    mins = self.min()
+                    maxs = self.max()
+                    plt.gca().set_xlim(
+                        1.05*mins[1] - 0.05 * maxs[1],
+                        1.05*maxs[1] - 0.05 * mins[1])
+                    plt.gca().set_ylim(
+                        1.05*mins[0] - 0.05 * maxs[0],
+                        1.05*maxs[0] - 0.05 * mins[0])
+                    temp = plt.pcolor(
                         self._estimate_locations(xs, len(self.inner),
-                                                 minx, maxx),
+                                                 mins[1], maxs[1]),
                         self._estimate_locations(ys, len(self.outer),
-                                                 miny, maxy),
+                                                 mins[0], maxs[0]),
                         np.array([[float(z) for z in row]
-                                  for row in values]))
+                                  for row in values]),
+                        cmap=cmap)
+                    if cbar:
+                        cbar.remove()
+                    cbar = plt.colorbar(temp)
                     if action:
-                        action_remainder = action(xs, values,
-                                                  axis)
+                        action_remainder = action(xs, values, plt)
+                    plt.draw()
         except KeyboardInterrupt:
             pass
         if save:
-            axis.savefig(save)
+            plt.savefig(save)
 
         return action_remainder
 

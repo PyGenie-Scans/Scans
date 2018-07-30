@@ -128,11 +128,7 @@ class BlockMotion(Motion):
       A string containing the name of the ibex block to control
     """
     def __init__(self, block):
-        try:
-            # pylint: disable=import-error
-            from genie_python import genie as g
-        except ImportError:
-            from .Mocks import g
+        from .genie import g
         if block not in g.get_blocks():
             raise RuntimeError(
                 "Unknown block {}.  Does the capitalisation "
@@ -146,11 +142,7 @@ class BlockMotion(Motion):
 def populate():
     """Create Motion objects in the GLOBAL namespace for each
     block registered with IBEX."""
-    try:
-        # pylint: disable=import-error
-        from genie_python import genie as g
-    except ImportError:
-        from .Mocks import g
+    from .genie import g
     for i in g.get_blocks():
         temp = BlockMotion(i)
         __builtins__[i.upper()] = temp

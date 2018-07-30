@@ -5,13 +5,9 @@ contained in this module
 
 """
 from __future__ import print_function
-try:
-    # pylint: disable=import-error
-    from genie_python import genie as g
-except ImportError:
-    g = None
 from .Defaults import Defaults
 from .Detector import dae_periods
+from .genie import g
 from .Motion import populate
 from .Monoid import Sum
 from .Util import make_scan
