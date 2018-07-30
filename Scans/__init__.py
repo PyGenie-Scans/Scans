@@ -18,6 +18,7 @@ host = gethostname().upper()
 _all = Fit.__all__[:]
 
 _all += ["populate"]
+populate()
 # Cannot test actual instrument loading
 if "LARMOR" in host:  # pragma: no cover
     from .Larmor import scan, pol_measure, fast_pol_measure  # noqa: F401

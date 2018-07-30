@@ -152,7 +152,7 @@ class Scan(object):
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
                  detector(self, save, **kwargs) as detect:
-                plt.show()
+                plt.show(block=False)
                 for x in self:
                     # FIXME: Handle multidimensional plots
                     (label, position) = next(iter(x.items()))
@@ -390,6 +390,7 @@ class ProductScan(Scan):
         try:
             with open(self.defaults.log_file(), "w") as logfile, \
                  detector(self, save) as detect:
+                plt.show(block=False)
                 for x in self:
                     value = detect(**kwargs)
 
@@ -428,8 +429,7 @@ class ProductScan(Scan):
                         np.array([[float(z) for z in row]
                                   for row in values]))
                     if action:
-                        action_remainder = action(xs, values,
-                                                  axis)
+                        action_remainder = action(xs, values, plt)
                     plt.draw()
         except KeyboardInterrupt:
             pass
