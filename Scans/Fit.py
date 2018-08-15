@@ -5,8 +5,37 @@ fits (i.e. Linear and Gaussian).
 
 """
 from abc import ABCMeta, abstractmethod
+from sys import platform
+import ctypes
+import os
 import numpy as np
 from six import add_metaclass
+
+if platform == "win32":
+    def handler(_):
+        """Basic handler for KeyboardInterrupt
+
+    This handler bypasses the Intel handler and prevents Python from
+    completely crashing on a Ctrl+C
+
+        """
+        try:
+            import _thread
+        except ImportError:
+            import thread as _thread
+        _thread.interrupt_main()
+        return 1
+
+    BASEPATH = r"C:\Instrument\Apps\Python\Lib\site-packages\numpy\core"
+    ctypes.CDLL(os.path.join(BASEPATH, "libmmd.dll"))
+    ctypes.CDLL(os.path.join(BASEPATH, "libifcoremd.dll"))
+    routine = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_uint)(handler)
+    ctypes.windll.kernel32.SetConsoleCtrlHandler(routine, 1)
+
+else:
+    os.environ['FOR_DISABLE_CONSOLE_CTRL_HANDLER'] = "T"
+# pylint: disable=wrong-import-position
+from scipy.optimize import curve_fit, OptimizeWarning  # noqa: E402
 
 
 @add_metaclass(ABCMeta)
@@ -119,6 +148,7 @@ class PolyFit(Fit):
     """
     A fitting class for polynomials
     """
+
     def __init__(self, degree,
                  title=None):
         if title is None:
@@ -161,6 +191,7 @@ class PeakFit(Fit):
     the quadratic.
 
     """
+
     def __init__(self, window=None):
         if window is None:
             raise RuntimeError(
@@ -203,6 +234,7 @@ class CurveFit(Fit):
     """
     A class for fitting models based on the scipy curve_fit optimizer
     """
+
     def __init__(self, degree, title):
         Fit.__init__(self, degree, title)
 
@@ -224,7 +256,6 @@ class CurveFit(Fit):
         pass
 
     def fit(self, x, y):
-        from scipy.optimize import curve_fit
         return curve_fit(self._model, x, y, self.guess(x, y))[0]
 
     def get_y(self, x, fit):
@@ -235,11 +266,11 @@ class GaussianFit(CurveFit):
     """
     A fitting class for handling gaussian peaks
     """
+
     def __init__(self):
         CurveFit.__init__(self, 4, "Gaussian Fit")
-        # import warnings
-        # from scipy.optimize import OptimizeWarning
-        # warnings.simplefilter("ignore", OptimizeWarning)
+        import warnings
+        warnings.simplefilter("ignore", OptimizeWarning)
 
     @staticmethod
     # pylint: disable=arguments-differ
@@ -274,6 +305,7 @@ class DampedOscillatorFit(CurveFit):
     """
     A class for fitting decaying cosine curves.
     """
+
     def __init__(self):
         CurveFit.__init__(self, 4, "Damped Oscillator")
 
