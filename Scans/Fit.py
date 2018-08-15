@@ -394,6 +394,49 @@ class ErfFit(CurveFit):
         return "Edge at {center:.3g}".format(**params)
 
 
+class TopHatFit(CurveFit):
+    """A simple top hat finder.
+
+    y = abs(x-center) < width/2 ? amplitude : background
+
+    >>> scan(TRANSLATION, start=-20, stop=20, step=1).Fit(Erf, uamps=1)
+    """
+
+    def __init__(self):
+        CurveFit.__init__(self, 5, "Top Hat Fit")
+        import warnings
+        warnings.simplefilter("ignore", OptimizeWarning)
+
+    @staticmethod
+    # pylint: disable=arguments-differ
+    def _model(xs, cen, width, height, background):
+        """
+        This is the model for a top hat function centered at cen with
+        a full width of width and a height of height over a base of
+        background.
+        """
+        ys = xs * 0
+        ys[np.abs(xs-cen) < width/2] = height
+        return background + ys
+
+    @staticmethod
+    def guess(x, y):
+        return [
+            np.mean(x),  # center
+            (max(x)-min(x))/2,  # stretch
+            (max(y)-min(y))/2,  # scale
+            min(y)]  # background
+
+    def readable(self, fit):
+        return {"center": fit[0], "width": fit[1],
+                "height": fit[2], "background": fit[3]}
+
+    def title(self, fit):
+        # pylint: disable=arguments-differ
+        params = self.readable(fit)
+        return "Top Hat at {center:.3g} of width {width:.3g}".format(**params)
+
+
 #: A linear regression
 Linear = PolyFit(1, title="Linear")
 
@@ -404,5 +447,7 @@ DampedOscillator = DampedOscillatorFit()
 
 Erf = ErfFit()
 
+TopHat = TopHatFit()
+
 __all__ = ["PolyFit", "Linear", "Gaussian", "DampedOscillator", "PeakFit",
-           "Erf"]
+           "Erf", "TopHat"]
