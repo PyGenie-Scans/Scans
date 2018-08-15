@@ -10,6 +10,7 @@ import ctypes
 import os
 import numpy as np
 from six import add_metaclass
+from scipy.special import erf  # pylint: disable=no-name-in-module
 
 if platform == "win32":
     def handler(_):
@@ -348,6 +349,51 @@ class DampedOscillatorFit(CurveFit):
                 "cos({frequency:.3g}*(x-{center:.3g}))").format(**params)
 
 
+class ErfFit(CurveFit):
+    """A simple Erf edge fitter.
+
+    y = background + scale * erf(-stretch*(x-center))
+
+    >>> scan(TRANSLATION, start=-20, stop=20, step=1).Fit(Erf, uamps=1)
+
+    Will use all of the points within 5 mm of the peak when fitting
+    the quadratic.
+
+    """
+
+    def __init__(self):
+        CurveFit.__init__(self, 4, "Erf Fit")
+        import warnings
+        warnings.simplefilter("ignore", OptimizeWarning)
+
+    @staticmethod
+    # pylint: disable=arguments-differ
+    def _model(xs, cen, stretch, scale, background):
+        """
+        This is the model for an error function centered at cen with
+        an xscale of stretch and a yscale of scale over a base of
+        background.
+        """
+        return background + scale * erf(stretch*(xs-cen))
+
+    @staticmethod
+    def guess(x, y):
+        return [
+            np.mean(x),  # center
+            (max(x)-min(x))/2,  # stretch
+            (max(y)-min(y))/2,  # scale
+            min(y)]  # background
+
+    def readable(self, fit):
+        return {"center": fit[0], "stretch": fit[1],
+                "scale": fit[2], "background": fit[3]}
+
+    def title(self, fit):
+        # pylint: disable=arguments-differ
+        params = self.readable(fit)
+        return "Edge at {center:.3g}".format(**params)
+
+
 #: A linear regression
 Linear = PolyFit(1, title="Linear")
 
@@ -356,4 +402,7 @@ Gaussian = GaussianFit()
 
 DampedOscillator = DampedOscillatorFit()
 
-__all__ = ["PolyFit", "Linear", "Gaussian", "DampedOscillator", "PeakFit"]
+Erf = ErfFit()
+
+__all__ = ["PolyFit", "Linear", "Gaussian", "DampedOscillator", "PeakFit",
+           "Erf"]
