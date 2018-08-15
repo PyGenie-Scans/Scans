@@ -5,8 +5,35 @@ fits (i.e. Linear and Gaussian).
 
 """
 from abc import ABCMeta, abstractmethod
+import ctypes
+import os
 import numpy as np
 from six import add_metaclass
+
+
+def handler(_):
+    """Basic handler for KeyboardInterrupt
+
+This handler bypasses the Intel handler and prevents Python from
+completely crashing on a Ctrl+C
+
+    """
+    try:
+        import _thread
+    except ImportError:
+        import thread as _thread
+    _thread.interrupt_main()
+    return 1
+
+
+BASEPATH = r"C:\Instrument\Apps\Python\Lib\site-packages\numpy\core"
+ctypes.CDLL(os.path.join(BASEPATH, "libmmd.dll"))
+ctypes.CDLL(os.path.join(BASEPATH, "libifcoremd.dll"))
+routine = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_uint)(handler)
+ctypes.windll.kernel32.SetConsoleCtrlHandler(routine, 1)
+
+# pylint: disable=wrong-import-position
+from scipy.optimize import curve_fit, OptimizeWarning  # noqa: E402
 
 
 @add_metaclass(ABCMeta)
@@ -224,7 +251,6 @@ class CurveFit(Fit):
         pass
 
     def fit(self, x, y):
-        from scipy.optimize import curve_fit
         return curve_fit(self._model, x, y, self.guess(x, y))[0]
 
     def get_y(self, x, fit):
@@ -237,9 +263,8 @@ class GaussianFit(CurveFit):
     """
     def __init__(self):
         CurveFit.__init__(self, 4, "Gaussian Fit")
-        # import warnings
-        # from scipy.optimize import OptimizeWarning
-        # warnings.simplefilter("ignore", OptimizeWarning)
+        import warnings
+        warnings.simplefilter("ignore", OptimizeWarning)
 
     @staticmethod
     # pylint: disable=arguments-differ
