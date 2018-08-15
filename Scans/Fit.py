@@ -146,6 +146,7 @@ class PolyFit(Fit):
     """
     A fitting class for polynomials
     """
+
     def __init__(self, degree,
                  title=None):
         if title is None:
@@ -188,6 +189,7 @@ class PeakFit(Fit):
     the quadratic.
 
     """
+
     def __init__(self, window=None):
         if window is None:
             raise RuntimeError(
@@ -230,6 +232,7 @@ class CurveFit(Fit):
     """
     A class for fitting models based on the scipy curve_fit optimizer
     """
+
     def __init__(self, degree, title):
         Fit.__init__(self, degree, title)
 
@@ -261,6 +264,7 @@ class GaussianFit(CurveFit):
     """
     A fitting class for handling gaussian peaks
     """
+
     def __init__(self):
         CurveFit.__init__(self, 4, "Gaussian Fit")
         import warnings
@@ -299,6 +303,7 @@ class DampedOscillatorFit(CurveFit):
     """
     A class for fitting decaying cosine curves.
     """
+
     def __init__(self):
         CurveFit.__init__(self, 4, "Damped Oscillator")
 
