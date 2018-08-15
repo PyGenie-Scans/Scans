@@ -310,10 +310,8 @@ Perform Fits
   Taking a count at theta=2.60 and two theta=0.00
   Taking a count at theta=2.80 and two theta=0.00
   Taking a count at theta=3.00 and two theta=0.00
-  >>> abs(fit["center"] - 1.0) < 3
+  >>> abs(fit["center"] - 2.05433545) < 1e-6
   True
-  >>> fit
-  {'stretch': 1.1742509808622272, 'scale': -0.8423675453392782, 'center': 2.0543354525059354, 'background': 0.78913113175193}
 
   .. figure:: ../../erf.png
      :alt: Fitting an edge
