@@ -230,85 +230,6 @@ class PeakFit(Fit):
         return "Peak at {}".format(center)
 
 
-class ErfFit(Fit):
-    """A simple Erf edge fitter.
-
-    y = background + scale * erf(-stretch*(x-center)^2)
-
-    >>> scan(TRANSLATION, start=-20, stop=20, step=1).Fit(PeakFit(5), uamps=1)
-
-    Will use all of the points within 5 mm of the peak when fitting
-    the quadratic.
-
-    """
-
-    def __init__(self):
-        self._fit = np.zeros(3)
-        Fit.__init__(self, 3, "Erf")
-
-    def fit(self, x, y):
-        x = np.array(x)
-        y = np.array(y)
-
-        # dy = scale * 2/sqrt(pi) exp(-stretch*(x-center)^2)
-        # log(dy) = log(2*scale/sqrt(pi)) - stretch * (x-center)^2
-        # log(dy) = -stretch * x^2 + 2 * stretch * center * x +
-        #           log(2*scale/sqrt(pi)) - stretch*center^2
-        # stretch = -a
-        # -b/2/a = center
-        # scale = exp(c - b^2/4/a)*sqrt(pi)/2
-        # dy = (y[1:]-y[:-1]) / (x[1:]-x[:-1])
-        # background = y[np.argmin(x)]
-        # if y[np.argmax(x)] < background:
-        #     dy *= -1
-
-        # x = (x[1:]+x[:-1])/2
-
-        # dy = np.log(dy)
-
-        # mask = np.argwhere(np.isnan(dy))
-        # x = np.delete(x, mask)
-        # dy = np.delete(dy, mask)
-
-        # fit = np.polyfit(x, dy, 2)
-        # stretch = -fit[0]
-        # center = -fit[1]/2/fit[0]
-        # scale = np.exp(fit[2] - fit[2]**2/4/fit[0])*np.sqrt(np.pi)
-
-        # if y[np.argmax(x)] < background:
-        #     scale *= -1
-
-        background = y[np.argmin(x)]
-        scale = y[np.argmax(x)] - background
-        deltay = (y[1:]-y[:-1]) / (x[1:]-x[:-1])
-        idx = np.argmax(np.abs(deltay))
-        center = (x[idx]+x[idx]+1)/2
-        # stretch = 2/(np.max(x)-np.min(x))**-2
-        stretch = 4
-
-        return np.array([stretch, center, scale, background])
-
-    def get_y(self, x, fit):
-        stretch = fit[0]
-        center = fit[1]
-        scale = fit[2]
-        background = fit[3]
-
-        result = 1+erf(np.sqrt(stretch) * (x-center))
-        result *= scale / np.sqrt(np.pi)
-        result += background
-
-        return result
-
-    def readable(self, fit):
-        return {"stretch": fit[0], "center": fit[1],
-                "scale": fit[2], "background": fit[3]}
-
-    def title(self, fit):
-        # pylint: disable=arguments-differ
-        return "Edge at {}".format(fit[1])
-
-
 @add_metaclass(ABCMeta)
 class CurveFit(Fit):
     """
@@ -426,6 +347,51 @@ class DampedOscillatorFit(CurveFit):
                 "y={amplitude:.3g}*exp(-((x-{center:.3g})" +
                 "/{width:.3g})$^2$)*" +
                 "cos({frequency:.3g}*(x-{center:.3g}))").format(**params)
+
+
+class ErfFit(CurveFit):
+    """A simple Erf edge fitter.
+
+    y = background + scale * erf(-stretch*(x-center))
+
+    >>> scan(TRANSLATION, start=-20, stop=20, step=1).Fit(Erf, uamps=1)
+
+    Will use all of the points within 5 mm of the peak when fitting
+    the quadratic.
+
+    """
+
+    def __init__(self):
+        CurveFit.__init__(self, 4, "Erf Fit")
+        import warnings
+        warnings.simplefilter("ignore", OptimizeWarning)
+
+    @staticmethod
+    # pylint: disable=arguments-differ
+    def _model(xs, cen, stretch, scale, background):
+        """
+        This is the model for an error function centered at cen with
+        an xscale of stretch and a yscale of scale over a base of
+        background.
+        """
+        return background + scale * erf(stretch*(xs-cen))
+
+    @staticmethod
+    def guess(x, y):
+        return [
+            np.mean(x),  # center
+            (max(x)-min(x))/2,  # stretch
+            (max(y)-min(y))/2,  # scale
+            min(y)]  # background
+
+    def readable(self, fit):
+        return {"center": fit[0], "stretch": fit[1],
+                "scale": fit[2], "background": fit[3]}
+
+    def title(self, fit):
+        # pylint: disable=arguments-differ
+        params = self.readable(fit)
+        return "Edge at {center:.3g}".format(**params)
 
 
 #: A linear regression

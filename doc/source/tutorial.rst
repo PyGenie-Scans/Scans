@@ -313,6 +313,7 @@ Perform Fits
   >>> abs(fit["center"] - 1.0) < 3
   True
   >>> fit
+  {'stretch': 1.1742509808622272, 'scale': -0.8423675453392782, 'center': 2.0543354525059354, 'background': 0.78913113175193}
 
   .. figure:: ../../erf.png
      :alt: Fitting an edge
