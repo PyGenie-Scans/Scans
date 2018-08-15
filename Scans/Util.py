@@ -89,7 +89,8 @@ def get_points(
             return np.linspace(start, stop, count)
         elif step:
             return np.arange(start, stop, step)
-    elif start is not None and count and (stride or step):
+
+    if start is not None and count and (stride or step):
         if stride:
             step = stride
         return np.linspace(start, start + (count - 1) * step, count)
