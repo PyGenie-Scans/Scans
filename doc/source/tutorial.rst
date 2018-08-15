@@ -296,6 +296,26 @@ Perform Fits
   .. figure:: ../../peak.png
      :alt: Fitting a peak
 
+  There is a similar fit model for the error function, which helps to approximate an edge.
+
+  >>> fit = scan(theta, start=1, stop=3, count=11, fit=Erf, frames=5, save="erf.png")
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  Taking a count at theta=2.20 and two theta=0.00
+  Taking a count at theta=2.40 and two theta=0.00
+  Taking a count at theta=2.60 and two theta=0.00
+  Taking a count at theta=2.80 and two theta=0.00
+  Taking a count at theta=3.00 and two theta=0.00
+  >>> abs(fit["center"] - 2.05433545) < 1e-6
+  True
+
+  .. figure:: ../../erf.png
+     :alt: Fitting an edge
+
 
 Perform complex scans
 ---------------------
