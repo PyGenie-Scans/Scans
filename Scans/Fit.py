@@ -7,6 +7,7 @@ fits (i.e. Linear and Gaussian).
 from abc import ABCMeta, abstractmethod
 import numpy as np
 from six import add_metaclass
+from scipy.special import erf  # pylint: disable=no-name-in-module
 
 
 @add_metaclass(ABCMeta)
@@ -198,6 +199,85 @@ class PeakFit(Fit):
         return "Peak at {}".format(center)
 
 
+class ErfFit(Fit):
+    """A simple Erf edge fitter.
+
+    y = background + scale * erf(-stretch*(x-center)^2)
+
+    >>> scan(TRANSLATION, start=-20, stop=20, step=1).Fit(PeakFit(5), uamps=1)
+
+    Will use all of the points within 5 mm of the peak when fitting
+    the quadratic.
+
+    """
+
+    def __init__(self):
+        self._fit = np.zeros(3)
+        Fit.__init__(self, 3, "Erf")
+
+    def fit(self, x, y):
+        x = np.array(x)
+        y = np.array(y)
+
+        # dy = scale * 2/sqrt(pi) exp(-stretch*(x-center)^2)
+        # log(dy) = log(2*scale/sqrt(pi)) - stretch * (x-center)^2
+        # log(dy) = -stretch * x^2 + 2 * stretch * center * x +
+        #           log(2*scale/sqrt(pi)) - stretch*center^2
+        # stretch = -a
+        # -b/2/a = center
+        # scale = exp(c - b^2/4/a)*sqrt(pi)/2
+        # dy = (y[1:]-y[:-1]) / (x[1:]-x[:-1])
+        # background = y[np.argmin(x)]
+        # if y[np.argmax(x)] < background:
+        #     dy *= -1
+
+        # x = (x[1:]+x[:-1])/2
+
+        # dy = np.log(dy)
+
+        # mask = np.argwhere(np.isnan(dy))
+        # x = np.delete(x, mask)
+        # dy = np.delete(dy, mask)
+
+        # fit = np.polyfit(x, dy, 2)
+        # stretch = -fit[0]
+        # center = -fit[1]/2/fit[0]
+        # scale = np.exp(fit[2] - fit[2]**2/4/fit[0])*np.sqrt(np.pi)
+
+        # if y[np.argmax(x)] < background:
+        #     scale *= -1
+
+        background = y[np.argmin(x)]
+        scale = y[np.argmax(x)] - background
+        deltay = (y[1:]-y[:-1]) / (x[1:]-x[:-1])
+        idx = np.argmax(np.abs(deltay))
+        center = (x[idx]+x[idx]+1)/2
+        # stretch = 2/(np.max(x)-np.min(x))**-2
+        stretch = 4
+
+        return np.array([stretch, center, scale, background])
+
+    def get_y(self, x, fit):
+        stretch = fit[0]
+        center = fit[1]
+        scale = fit[2]
+        background = fit[3]
+
+        result = 1+erf(np.sqrt(stretch) * (x-center))
+        result *= scale / np.sqrt(np.pi)
+        result += background
+
+        return result
+
+    def readable(self, fit):
+        return {"stretch": fit[0], "center": fit[1],
+                "scale": fit[2], "background": fit[3]}
+
+    def title(self, fit):
+        # pylint: disable=arguments-differ
+        return "Edge at {}".format(fit[1])
+
+
 @add_metaclass(ABCMeta)
 class CurveFit(Fit):
     """
@@ -324,4 +404,7 @@ Gaussian = GaussianFit()
 
 DampedOscillator = DampedOscillatorFit()
 
-__all__ = ["PolyFit", "Linear", "Gaussian", "DampedOscillator", "PeakFit"]
+Erf = ErfFit()
+
+__all__ = ["PolyFit", "Linear", "Gaussian", "DampedOscillator", "PeakFit",
+           "Erf"]
