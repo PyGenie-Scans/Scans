@@ -123,6 +123,46 @@ class Sum(Monoid):
         return "Sum({})".format(self.total)
 
 
+class StdDev(Monoid):
+    """
+    This monoid calculates the standard deviation of values presented.
+    """
+    def __init__(self, x, count=1, avg=None):
+        if isinstance(x, Average):
+            self.squared = x
+            self.count = count
+            self.avg = avg
+        else:
+            self.squared = Average(x**2, count)
+            self.avg = Average(x, count)
+            self.count = count
+
+    def __float__(self):
+        return np.sqrt(float(self.squared) - float(self.avg)**2)
+
+    def __add__(self, y):
+        return StdDev(
+            self.squared+y.squared,
+            count=self.count+y.count,
+            avg=self.avg+y.avg)
+
+    @staticmethod
+    def zero():
+        return StdDev(Average.zero(), 0, Average.zero())
+
+    def err(self):
+        # I'm not really sure how to handle the uncertainty on a
+        # stnadard deviation right now.
+        raise NotImplementedError(
+            "Uncertainty on Standard deviation is not currently handled")
+
+    def __str__(self):
+        return str(float(self))
+
+    def __repr__(self):
+        return "StdDev({},{},{})".format(self.squared, self.count, self.avg)
+
+
 class Polarisation(Monoid):
     """
     This monoid calculates the polarisation from the total of all of
