@@ -296,6 +296,45 @@ Perform Fits
   .. figure:: ../../peak.png
      :alt: Fitting a peak
 
+  There is a similar fit model for the error function, which helps to approximate an edge.
+
+  >>> fit = scan(theta, start=1, stop=3, count=11, fit=Erf, frames=5, save="erf.png")
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  Taking a count at theta=2.20 and two theta=0.00
+  Taking a count at theta=2.40 and two theta=0.00
+  Taking a count at theta=2.60 and two theta=0.00
+  Taking a count at theta=2.80 and two theta=0.00
+  Taking a count at theta=3.00 and two theta=0.00
+  >>> abs(fit["center"] - 2.05433545) < 1e-6
+  True
+
+  .. figure:: ../../erf.png
+     :alt: Fitting an edge
+
+  Similarly, there's a top hat to simulate two edges
+
+  >>> fit = scan(theta, start=0, stop=2, count=11, fit=TopHat, frames=5, save="tophat.png")
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.20 and two theta=0.00
+  Taking a count at theta=0.40 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=0.80 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  >>> abs(fit["center"] - 1.0) < 0.1
+  True
+
+  .. figure:: ../../tophat.png
+     :alt: Fitting an tophat
 
 Perform complex scans
 ---------------------

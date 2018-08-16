@@ -199,6 +199,17 @@ Average(-2.0, count=2)
 >>> lst.max()
 Sum(10.0)
 
+As an example of a less intuitive but highly relevant monoid is the
+standard deviation.
+
+>>> std = StdDev(3.0)
+>>> float(std + StdDev(3.0))
+0.0
+>>> float(std + StdDev(4.0))
+0.5
+>>> float(sum(map(StdDev, [2, 4, 4, 4, 5, 5, 7, 9]), StdDev.zero()))
+2.0
+
 
 Models
 ======
