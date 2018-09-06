@@ -62,10 +62,13 @@ def estimate(seconds=None, minutes=None, hours=None,
         if not hours:
             hours = 0
         return seconds + 60 * minutes + 3600 * hours
-    elif frames:
+
+    if frames:
         return frames / 10.0
-    elif uamps:
+
+    if uamps:
         return 90 * uamps
+
     return 0
 
 
