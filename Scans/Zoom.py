@@ -9,23 +9,38 @@ from .Defaults import Defaults
 from .Detector import dae_periods
 from .genie import g
 from .Motion import populate
-from .Monoid import Sum
+from .Monoid import Sum, Average
 from .Util import make_scan
+from SansScripting import setup_dae_transmission
 
+def _trans_mode():
+    """Setup the instrument for a simple transmission measurement."""
+    setup_dae_transmission()
+    g.set_pv("IN:ZOOM:VACUUM:MONITOR:4:INSERT", "INSERT")
+    g.waitfor_move()
 
 def zoom_monitor(spectrum):
     """A generating function for detectors for monitor spectra"""
-    @dae_periods()
+    @dae_periods(_trans_mode)
     def monitor(**kwargs):
         """A simple detector for monitor number {}""".format(spectrum)
+        #spec = g.get_spectrum(spectrum, i)
+        #while not spec:
+        #    spec = g.get_spectrum(spectrum, i)
+        local_kwargs = {}
+        if "frames" in kwargs:
+            local_kwargs["frames"] = kwargs["frames"] + g.get_frames()
+        if "uamps" in kwargs:
+            local_kwargs["uamps"] = kwargs["uamps"] + g.get_uamps()
         g.resume()
-        g.waitfor(**kwargs)
-        spec = g.get_spectrum(spectrum)
-        while not spec:
-            spec = g.get_spectrum(spectrum)
-        temp = sum(spec["signal"])
+
+        g.waitfor(**local_kwargs)
         g.pause()
-        return Sum(temp)
+        temp = sum(g.get_spectrum(spectrum, period=g.get_period())["signal"])
+        base = sum(g.get_spectrum(1, period=g.get_period())["signal"])
+        if spectrum == 1:
+            return Average(base*100)
+        return Average(temp*100, count=base)
     return monitor
 
 
