@@ -26,7 +26,7 @@ if "LARMOR" in host:  # pragma: no cover
 elif "ZOOM" in host:  # pragma: no cover
     from .Zoom import scan, monitor1, monitor2, monitor3, monitor4  # noqa: F403,F401,E501
     _all += ["scan", "monitor1", "monitor2",
-             "monitor3", "monitor4"]
+             "monitor3", "monitor4", "monitor5"]
 else:
     from .Instrument import scan  # noqa: F403,F401,E501
     _all += ["scan"]

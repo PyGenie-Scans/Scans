@@ -336,6 +336,24 @@ Perform Fits
   .. figure:: ../../tophat.png
      :alt: Fitting an tophat
 
+  If you need to do something really tricky, it's possible to pull out the exact points.
+
+  >>> fit = scan(theta, start=0, stop=2, count=11, fit=ExactPoints, frames=5, save="exactpoints.png")
+  Taking a count at theta=0.00 and two theta=0.00
+  Taking a count at theta=0.20 and two theta=0.00
+  Taking a count at theta=0.40 and two theta=0.00
+  Taking a count at theta=0.60 and two theta=0.00
+  Taking a count at theta=0.80 and two theta=0.00
+  Taking a count at theta=1.00 and two theta=0.00
+  Taking a count at theta=1.20 and two theta=0.00
+  Taking a count at theta=1.40 and two theta=0.00
+  Taking a count at theta=1.60 and two theta=0.00
+  Taking a count at theta=1.80 and two theta=0.00
+  Taking a count at theta=2.00 and two theta=0.00
+  >>> fit["x"][-1]
+  2.0
+
+
 Perform complex scans
 ---------------------
 
