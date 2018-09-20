@@ -88,8 +88,6 @@ def pol_measure(**kwargs):
               slice(518, 666)]
 
     i = g.get_period()
-
-    g.change(period=i+1)
     lm.flipper1(1)
     g.waitfor_move()
     gfrm = g.get_frames()
@@ -98,7 +96,7 @@ def pol_measure(**kwargs):
     g.pause()
 
     lm.flipper1(0)
-    g.change(period=i+2)
+    g.change(period=1+i)
     gfrm = g.get_frames()
     g.resume()
     g.waitfor(frames=gfrm+kwargs["frames"])
@@ -106,10 +104,10 @@ def pol_measure(**kwargs):
 
     pols = [Polarisation.zero() for _ in slices]
     for channel in [11, 12]:
-        mon1 = g.get_spectrum(1, i+1)
-        spec1 = g.get_spectrum(channel, i+1)
-        mon2 = g.get_spectrum(1, i+2)
-        spec2 = g.get_spectrum(channel, i+2)
+        mon1 = g.get_spectrum(1, i)
+        spec1 = g.get_spectrum(channel, i)
+        mon2 = g.get_spectrum(1, i+1)
+        spec2 = g.get_spectrum(channel, i+1)
         for idx, slc in enumerate(slices):
             ups = Average(
                 np.sum(spec1["signal"][slc])*100.0,

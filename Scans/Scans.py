@@ -17,7 +17,7 @@ import six
 import matplotlib.pyplot as plt
 from .Monoid import ListOfMonoids, Monoid
 from .Detector import DetectorManager
-from .Fit import Fit
+from .Fit import Fit, ExactFit
 from .genie import g
 from .Monoid import Average
 
@@ -220,7 +220,7 @@ class Scan(object):
 
         result = self.plot(action=fit.fit_plot_action(), **kwargs)
 
-        if isinstance(result[0], Iterable):
+        if isinstance(result[0], Iterable) and not isinstance(fit, ExactFit):
             result = np.array([x for x in result if x is not None])
             result = np.median(result, axis=0)
 
@@ -280,6 +280,7 @@ class SimpleScan(Scan):
     def __iter__(self):
         for i in self.values:
             self.action(i)
+            g.waitfor_move()
             dic = OrderedDict()
             dic[self.name] = self.action()
             yield dic
