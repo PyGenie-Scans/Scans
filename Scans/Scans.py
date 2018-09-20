@@ -16,7 +16,7 @@ from six import add_metaclass
 import six
 from .Monoid import ListOfMonoids, Monoid
 from .Detector import DetectorManager
-from .Fit import Fit
+from .Fit import Fit, ExactFit
 
 try:
     # pylint: disable=import-error
@@ -225,7 +225,7 @@ class Scan(object):
 
         result = self.plot(action=fit.fit_plot_action(), **kwargs)
 
-        if isinstance(result[0], Iterable):
+        if isinstance(result[0], Iterable) and not isinstance(fit, ExactFit):
             result = np.array([x for x in result if x is not None])
             result = np.median(result, axis=0)
 

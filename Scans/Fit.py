@@ -179,6 +179,36 @@ class PolyFit(Fit):
         return self._title + ": $y = " + " + ".join(terms) + "$"
 
 
+class ExactFit(Fit):
+    """
+    A class for pulling the exact data points out of a plot
+    """
+
+    def __init__(self):
+        Fit.__init__(self, np.inf, "Exact Points")
+
+    def fit(self, x, y):
+        return (x, y)
+
+    def get_y(self, _, fit):
+        return fit[1]
+
+    def readable(self, fit):
+        return {"x": fit[0], "y": map(float, fit[1])}
+
+    def title(self, _):
+        return "Exact Points"
+
+    def fit_plot_action(self):
+        def action(x, y, _):
+            """Perform no actual plotting action and simply pass on the data
+ points.
+
+            """
+            return (x, y)
+        return action
+
+
 class PeakFit(Fit):
     """A simple peak-finding fitter.
 
@@ -449,5 +479,7 @@ Erf = ErfFit()
 
 TopHat = TopHatFit()
 
+ExactPoints = ExactFit()
+
 __all__ = ["PolyFit", "Linear", "Gaussian", "DampedOscillator", "PeakFit",
-           "Erf", "TopHat"]
+           "Erf", "TopHat", "ExactPoints"]
