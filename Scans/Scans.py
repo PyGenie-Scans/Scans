@@ -23,7 +23,7 @@ try:
     from genie_python import genie as g
 except ImportError:
     # We must be in a test environment
-    g = None
+    from .Mocks import g
 from .multiplot import NBPlot
 from .Monoid import Average
 
@@ -285,6 +285,7 @@ class SimpleScan(Scan):
     def __iter__(self):
         for i in self.values:
             self.action(i)
+            g.waitfor_move()
             dic = OrderedDict()
             dic[self.name] = self.action()
             yield dic
