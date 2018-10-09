@@ -22,6 +22,7 @@ except ImportError:
 from .Defaults import Defaults
 from .Detector import dae_periods
 from .Monoid import Polarisation, Average, MonoidList
+from .Motion import Motion
 from .Util import make_scan
 
 
@@ -174,5 +175,10 @@ def specific_spectra(spectra):
 
         return MonoidList(pols)
     return inner
+
+detector_trans = Motion(
+    lambda: g.get_pv("IN:LARMOR:MOT:MTR1501"),
+    lambda x: g.set_pv("IN:LARMOR:MOT:MTR1501", x),
+    "DetectorTranslation")
 
 scan = make_scan(Larmor())
